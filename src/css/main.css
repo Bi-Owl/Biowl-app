@@ -1,3 +1,5 @@
+/* Global styles, resets, and variables */
+
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
   --vt-c-white: #ffffff;
@@ -71,48 +73,15 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #f0fdf4;
+  background-image: linear-gradient(to right, #a7f3d0 1px, transparent 1px), linear-gradient(to bottom, #a7f3d0 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: moveGrid 2s linear infinite;
+  padding-top: 120px;
 }
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
   font-weight: normal;
-}
-
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-html {
-    scroll-behavior: smooth;
-}
-
-body {
-    font-family: Vazirmatn, sans-serif;
-    background-color: #f0fdf4;
-    background-image: linear-gradient(to right, #a7f3d0 1px, transparent 1px), linear-gradient(to bottom, #a7f3d0 1px, transparent 1px);
-    background-size: 20px 20px;
-    animation: moveGrid 2s linear infinite;
-    padding-top: 120px;
-}
-
-.hover-scale {
-    transition: transform 0.3s ease;
-}
-
-.hover-scale:hover {
-    transform: scale(1.03);
 }
 
 .gradient-text {
@@ -121,56 +90,6 @@ body {
     background-clip: text;
     color: transparent;
 }
-
-.btn-hover {
-    transition: all 0.3s ease;
-}
-
-.btn-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.glassmorphism {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.dynamic-island {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 600px;
-    border-radius: 50px;
-    padding: 10px 20px;
-    z-index: 1000;
-}
-
-.dynamic-island-stats {
-    width: 90%;
-    max-width: 900px;
-    margin: 0 auto;
-    border-radius: 50px;
-    padding: 20px;
-    background-color: #059669;
-    color: white;
-}
-
-.timeline-item {
-    position: absolute;
-    width: 150px;
-}
-
-.timeline-content {
-    position: relative;
-}
-
 
 @keyframes moveGrid {
     from {
