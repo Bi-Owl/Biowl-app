@@ -110,6 +110,7 @@ onUnmounted(() => {
 </script>
 
 <style>
+/* These styles need to be global because the timeline items are positioned absolutely within a relative container */
 .timeline-item {
     position: absolute;
     width: 150px;

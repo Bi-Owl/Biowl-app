@@ -1,6 +1,9 @@
-import './css/main.css'
-
 import { createApp } from 'vue'
 import App from './App.vue'
 
-createApp(App).mount('#app')
+// Import only the main custom stylesheet
+import './css/main.css'
+
+const app = createApp(App)
+
+app.mount('#app')

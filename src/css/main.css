@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Global styles, resets, and variables */
 
 /* color palette from <https://github.com/vuejs/theme> */
@@ -82,6 +86,11 @@ body {
 
 #app {
   font-weight: normal;
+}
+
+p {
+  overflow-wrap: break-word;
+  word-wrap: break-word; /* Fallback for older browsers */
 }
 
 .gradient-text {

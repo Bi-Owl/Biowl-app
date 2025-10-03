@@ -27,19 +27,19 @@ import TestimonialCard from '../ui/TestimonialCard.vue';
 
 const testimonials = [
     {
-        image: 'http://static.photos/people/200x200/1',
+        image: '/images/testimonial-1.jpg',
         name: 'محمد حسینی',
         role: 'مدال طلا المپیاد جهانی ۱۴۰۱',
         quote: 'دوره‌های بیول کاملاً من را برای المپیاد آماده کرد. منابع آموزشی و راهنمایی‌های مربیان بی‌نظیر بود.'
     },
     {
-        image: 'http://static.photos/people/200x200/2',
+        image: '/images/testimonial-2.jpg',
         name: 'فاطمه محمدی',
         role: 'مدال نقره المپیاد کشوری ۱۴۰۰',
         quote: 'روش تدریس متفاوت و آزمون‌های منظم بیول باعث شد در مدت کوتاهی پیشرفت چشمگیری داشته باشم.'
     },
     {
-        image: 'http://static.photos/people/200x200/3',
+        image: '/images/testimonial-3.jpg',
         name: 'علی رضایی',
         role: 'مدال برنز المپیاد کشوری ۱۴۰۲',
         quote: 'به عنوان کسی که از شهرستان در این دوره‌ها شرکت کردم، باید بگویم کیفیت آموزش آنلاین بیول واقعاً عالی بود.'
