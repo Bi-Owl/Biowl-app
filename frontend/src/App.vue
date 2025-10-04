@@ -1,0 +1,16 @@
+<template>
+  <div id="app-wrapper" class="flex flex-col min-h-screen">
+    <Background />
+    <Header v-if="$route.name !== 'Auth'" />
+    <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" :class="{ 'pt-32': $route.name !== 'Auth' }">
+      <router-view />
+    </main>
+    <Footer v-if="$route.name !== 'Auth'" />
+  </div>
+</template>
+
+<script setup>
+import Background from './components/layout/Background.vue';
+import Header from './components/layout/Header.vue';
+import Footer from './components/layout/Footer.vue';
+</script>
