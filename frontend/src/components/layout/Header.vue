@@ -37,6 +37,11 @@
             >تماس با ما</a
           >
         </div>
+        <div class="hidden md:flex items-center">
+          <router-link to="/auth" class="bg-emerald-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-emerald-600 transition-colors">
+            ورود / ثبت‌نام
+          </router-link>
+        </div>
         <div class="md:hidden flex items-center">
           <button
             type="button"
