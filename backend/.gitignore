@@ -1,5 +1,0 @@
-# SQLite database
-db.sqlite
-
-# Environment variables
-.env
