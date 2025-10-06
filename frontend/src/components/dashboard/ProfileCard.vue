@@ -1,11 +1,11 @@
 <template>
-  <div class="flex items-center p-4 bg-emerald-500 rounded-full mb-8">
-    <div class="w-16 h-16 rounded-full bg-emerald-200 flex-shrink-0">
+  <div class="flex items-center p-3 bg-emerald-500 rounded-full mb-6">
+    <div class="w-12 h-12 rounded-full bg-emerald-200 flex-shrink-0">
       <!-- Placeholder for profile image -->
     </div>
-    <div class="mr-4 text-white">
-      <p class="font-bold text-lg">{{ userFullName }}</p>
-      <p class="text-sm">خوش آمدید</p>
+    <div class="mr-3 text-white">
+      <p class="font-bold text-base">{{ userFullName }}</p>
+      <p class="text-xs">خوش آمدید</p>
     </div>
   </div>
 </template>

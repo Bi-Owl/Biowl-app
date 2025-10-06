@@ -65,17 +65,19 @@
 {
   "id": 1,
   "email": "user@example.com",
+  "firstName": "string",
+  "lastName": "string",
   "token": "your_jwt_token"
 }
 ```
 
 **پاسخ‌های خطا (Error Responses):**
 - **کد:** `400 Bad Request`
-  - **محتوا:** `{ "message": "Please enter all fields" }` (در صورتی که ایمیل یا رمز عبور ارسال نشود)
+  - **محتوا:** `{ "message": "لطفا تمام فیلدها را وارد کنید" }`
 - **کد:** `401 Unauthorized`
-  - **محتوا:** `{ "message": "Invalid credentials" }` (در صورتی که ایمیل یا رمز عبور اشتباه باشد)
+  - **محتوا:** `{ "message": "ایمیل یا رمز عبور اشتباه است" }`
 - **کد:** `500 Internal Server Error`
-  - **محتوا:** `{ "message": "Server error", "error": "error_details" }`
+  - **محتوا:** `{ "message": "خطایی در سرور رخ داده است", "error": "error_details" }`
 
 ---
 

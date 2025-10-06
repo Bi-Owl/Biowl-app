@@ -17,6 +17,8 @@ const login = async (req, res) => {
       res.json({
         id: user.id,
         email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
         token: generateToken(user.id),
       });
     } else {
