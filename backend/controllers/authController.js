@@ -6,7 +6,7 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: 'Please enter all fields' });
+    return res.status(400).json({ message: 'لطفا تمام فیلدها را وارد کنید' });
   }
 
   try {
@@ -20,10 +20,10 @@ const login = async (req, res) => {
         token: generateToken(user.id),
       });
     } else {
-      res.status(401).json({ message: 'Invalid credentials' });
+      res.status(401).json({ message: 'ایمیل یا رمز عبور اشتباه است' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: 'خطایی در سرور رخ داده است', error: error.message });
   }
 };
 
@@ -31,17 +31,17 @@ const login = async (req, res) => {
 // @route   POST /api/auth/register
 // @access  Public
 const register = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, firstName, lastName, phoneNumber, nationalId } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Please enter all fields' });
+  if (!email || !password || !firstName || !lastName || !phoneNumber || !nationalId) {
+    return res.status(400).json({ message: 'لطفا تمام فیلدها را وارد کنید' });
   }
 
   try {
     // Check if user already exists
     const userExists = await User.findOne({ where: { email } });
     if (userExists) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'کاربری با این ایمیل قبلا ثبت‌نام کرده است' });
     }
 
     // Hash password
@@ -52,19 +52,35 @@ const register = async (req, res) => {
     const user = await User.create({
       email,
       password: hashedPassword,
+      firstName,
+      lastName,
+      phoneNumber,
+      nationalId,
     });
 
     if (user) {
       res.status(201).json({
         id: user.id,
         email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
         token: generateToken(user.id),
       });
     } else {
-      res.status(400).json({ message: 'Invalid user data' });
+      res.status(400).json({ message: 'اطلاعات کاربری نامعتبر است' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    // Check for unique constraint errors
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      const field = error.errors[0].path;
+      if (field === 'phoneNumber') {
+        return res.status(400).json({ message: 'کاربری با این شماره تلفن قبلا ثبت‌نام کرده است' });
+      }
+      if (field === 'nationalId') {
+        return res.status(400).json({ message: 'کاربری با این کد ملی قبلا ثبت‌نام کرده است' });
+      }
+    }
+    res.status(500).json({ message: 'خطایی در سرور رخ داده است', error: error.message });
   }
 };
 
@@ -75,7 +91,12 @@ const generateToken = (id) => {
   });
 };
 
+const getMe = async (req, res) => {
+  res.status(200).json(req.user);
+};
+
 module.exports = {
   register,
   login,
+  getMe,
 };

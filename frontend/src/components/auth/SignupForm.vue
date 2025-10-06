@@ -6,6 +6,28 @@
         <p class="text-sm text-center text-emerald-600 mb-8">برای استفاده از امکانات، ثبت‌نام کنید</p>
         
         <form @submit.prevent="handleSubmit" class="space-y-6">
+          
+          <div class="flex space-x-4 space-x-reverse">
+            <div class="w-1/2">
+              <label for="firstName-signup" class="block text-sm font-medium text-emerald-700 mb-1">نام</label>
+              <input v-model="firstName" type="text" id="firstName-signup" class="input-focus bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm sm:text-base rounded-lg focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 block w-full p-2 sm:p-3" placeholder="نام" required>
+            </div>
+            <div class="w-1/2">
+              <label for="lastName-signup" class="block text-sm font-medium text-emerald-700 mb-1">نام خانوادگی</label>
+              <input v-model="lastName" type="text" id="lastName-signup" class="input-focus bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm sm:text-base rounded-lg focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 block w-full p-2 sm:p-3" placeholder="نام خانوادگی" required>
+            </div>
+          </div>
+
+          <div>
+            <label for="phoneNumber-signup" class="block text-sm font-medium text-emerald-700 mb-1">شماره تلفن</label>
+            <input v-model="phoneNumber" type="tel" id="phoneNumber-signup" class="input-focus bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm sm:text-base rounded-lg focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 block w-full p-2 sm:p-3" placeholder="09123456789" required>
+          </div>
+
+          <div>
+            <label for="nationalId-signup" class="block text-sm font-medium text-emerald-700 mb-1">کد ملی</label>
+            <input v-model="nationalId" type="text" id="nationalId-signup" class="input-focus bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm sm:text-base rounded-lg focus:ring-2 focus:ring-emerald-300 focus:border-emerald-300 block w-full p-2 sm:p-3" placeholder="0123456789" required>
+          </div>
+
           <div>
             <label for="email-signup" class="block text-sm font-medium text-emerald-700 mb-1">پست الکترونیکی</label>
             <div class="relative">
@@ -39,15 +61,24 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { AUTH_API } from '@/config/api';
+import { useToast } from 'vue-toastification';
+import { auth } from '@/auth';
 
+const firstName = ref('');
+const lastName = ref('');
+const phoneNumber = ref('');
+const nationalId = ref('');
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
+const toast = useToast();
+const router = useRouter();
 
 const handleSubmit = async () => {
   if (password.value !== confirmPassword.value) {
-    alert("Passwords do not match!");
+    toast.error('رمزهای عبور یکسان نیستند!');
     return;
   }
 
@@ -58,6 +89,10 @@ const handleSubmit = async () => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        firstName: firstName.value,
+        lastName: lastName.value,
+        phoneNumber: phoneNumber.value,
+        nationalId: nationalId.value,
         email: email.value,
         password: password.value,
       }),
@@ -69,12 +104,13 @@ const handleSubmit = async () => {
       throw new Error(data.message || 'Something went wrong');
     }
 
-    console.log('Signup successful:', data);
-    alert('Signup successful!');
-    // TODO: Redirect user or save token
+    auth.login(data);
+    toast.success('ثبت نام با موفقیت انجام شد!');
+    router.push('/dashboard');
+
   } catch (error) {
     console.error('Signup error:', error);
-    alert(`Error: ${error.message}`);
+    toast.error(error.message);
   }
 };
 </script>
@@ -98,5 +134,10 @@ const handleSubmit = async () => {
 .btn-hover:hover {
     background-color: #059669;
     transform: scale(1.03);
+}
+
+#phoneNumber-signup {
+  direction: ltr;
+  text-align: right;
 }
 </style>

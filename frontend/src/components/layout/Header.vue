@@ -39,7 +39,7 @@
         </div>
         <div class="hidden md:flex items-center">
           <router-link to="/auth" class="bg-emerald-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-emerald-600 transition-colors">
-            ورود / ثبت‌نام
+            ورود
           </router-link>
         </div>
         <div class="md:hidden flex items-center">
@@ -73,7 +73,7 @@
   left: 50%;
   transform: translateX(-50%);
   width: 90%;
-  max-width: 600px;
+  max-width: 800px;
   border-radius: 50px;
   padding: 10px 20px;
   z-index: 1000;

@@ -44,10 +44,15 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { AUTH_API } from '@/config/api';
+import { useToast } from 'vue-toastification';
+import { auth } from '@/auth';
 
 const email = ref('');
 const password = ref('');
+const toast = useToast();
+const router = useRouter();
 
 const handleSubmit = async () => {
   try {
@@ -68,12 +73,13 @@ const handleSubmit = async () => {
       throw new Error(data.message || 'Something went wrong');
     }
 
-    console.log('Login successful:', data);
-    alert('Login successful!');
-    // TODO: Redirect user or save token
+    auth.login(data);
+    toast.success('ورود با موفقیت انجام شد!');
+    router.push('/dashboard');
+
   } catch (error) {
     console.error('Login error:', error);
-    alert(`Error: ${error.message}`);
+    toast.error(error.message);
   }
 };
 </script>
