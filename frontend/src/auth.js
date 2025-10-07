@@ -12,9 +12,10 @@ const TOKEN_KEY = 'authToken';
 const EXPIRATION_KEY = 'authTokenExpiration';
 const EXPIRATION_HOURS = 24;
 
-function login(authData) {
+function login(authData, rememberMe = false) {
   const expiration = new Date();
-  expiration.setHours(expiration.getHours() + EXPIRATION_HOURS);
+  const expirationHours = rememberMe ? 30 * 24 : EXPIRATION_HOURS;
+  expiration.setHours(expiration.getHours() + expirationHours);
 
   localStorage.setItem(TOKEN_KEY, authData.token);
   localStorage.setItem(EXPIRATION_KEY, expiration.getTime());
