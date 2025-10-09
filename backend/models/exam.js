@@ -17,16 +17,21 @@ const Exam = sequelize.define('Exam', {
   },
   startTime: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true, // Changed to true for timeless exams
   },
   endTime: {
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true, // Changed to true for timeless exams
   },
   isHidden: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false,
+  },
+  isPurchasable: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true,
   },
   price: {
     type: DataTypes.STRING,

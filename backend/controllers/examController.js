@@ -52,9 +52,9 @@ const purchaseExam = async (req, res) => {
     const { examId } = req.params;
     const userId = req.user.id;
 
-    const exam = await Exam.findOne({ where: { id: examId, isHidden: false } });
+    const exam = await Exam.findOne({ where: { id: examId, isHidden: false, isPurchasable: true } });
     if (!exam) {
-      return res.status(404).json({ message: 'آزمون یافت نشد یا خصوصی است' });
+      return res.status(404).json({ message: 'آزمون یافت نشد یا قابل خریداری نیست' });
     }
 
     const [userExam, created] = await UserExam.findOrCreate({

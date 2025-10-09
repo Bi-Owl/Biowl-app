@@ -175,7 +175,7 @@ This file contains the documentation for all available backend endpoints.
 - **URL:** `/api/exams/:examId/purchase`
 - **Method:** `POST`
 - **Access:** Private (Requires authentication token)
-- **Description:** Allows the authenticated user to purchase an exam.
+- **Description:** Allows the authenticated user to purchase an exam. The exam must be public (`isHidden: false`) and available for purchase (`isPurchasable: true`).
 - **URL Params:**
   - `examId` (integer, required): The ID of the exam to purchase.
 - **Success Response (200 OK):**
@@ -193,7 +193,7 @@ This file contains the documentation for all available backend endpoints.
 - **Error Response (404 Not Found):**
   ```json
   {
-    "message": "آزمون یافت نشد یا خصوصی است"
+    "message": "آزمون یافت نشد یا قابل خریداری نیست"
   }
   ```
 
