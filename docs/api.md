@@ -1,16 +1,16 @@
-# مستندات API بک‌اند
+# Backend API Documentation
 
-این فایل شامل مستندات تمام اندپوینت‌های موجود در بک‌اند است.
+This file contains the documentation for all available backend endpoints.
 
 ---
 
-## احراز هویت (Authentication)
+## Authentication
 
 ### `POST /api/auth/register`
 
-**توضیحات:** این اندپوینت برای ثبت‌نام کاربر جدید در سیستم استفاده می‌شود.
+**Description:** This endpoint is used to register a new user in the system.
 
-**بدنه درخواست (Request Body):**
+**Request Body:**
 ```json
 {
   "firstName": "string",
@@ -22,9 +22,9 @@
 }
 ```
 
-**پاسخ موفق (Success Response):**
-- **کد:** `201 Created`
-- **محتوا:**
+**Success Response:**
+- **Code:** `201 Created`
+- **Content:**
 ```json
 {
   "id": 1,
@@ -35,22 +35,22 @@
 }
 ```
 
-**پاسخ‌های خطا (Error Responses):**
-- **کد:** `400 Bad Request`
-  - **محتوا:** `{ "message": "لطفا تمام فیلدها را وارد کنید" }`
-  - **محتوا:** `{ "message": "کاربری با این ایمیل قبلا ثبت‌نام کرده است" }`
-  - **محتوا:** `{ "message": "کاربری با این شماره تلفن قبلا ثبت‌نام کرده است" }`
-  - **محتوا:** `{ "message": "کاربری با این کد ملی قبلا ثبت‌نام کرده است" }`
-- **کد:** `500 Internal Server Error`
-  - **محتوا:** `{ "message": "خطایی در سرور رخ داده است", "error": "error_details" }`
+**Error Responses:**
+- **Code:** `400 Bad Request`
+  - **Content:** `{ "message": "Please fill in all fields" }`
+  - **Content:** `{ "message": "A user with this email is already registered" }`
+  - **Content:** `{ "message": "A user with this phone number is already registered" }`
+  - **Content:** `{ "message": "A user with this national ID is already registered" }`
+- **Code:** `500 Internal Server Error`
+  - **Content:** `{ "message": "An error occurred on the server", "error": "error_details" }`
 
 ---
 
 ### `POST /api/auth/login`
 
-**توضیحات:** این اندپوینت برای ورود کاربر به سیستم استفاده می‌شود.
+**Description:** This endpoint is used for user login.
 
-**بدنه درخواست (Request Body):**
+**Request Body:**
 ```json
 {
   "email": "user@example.com",
@@ -58,9 +58,9 @@
 }
 ```
 
-**پاسخ موفق (Success Response):**
-- **کد:** `200 OK`
-- **محتوا:**
+**Success Response:**
+- **Code:** `200 OK`
+- **Content:**
 ```json
 {
   "id": 1,
@@ -71,30 +71,30 @@
 }
 ```
 
-**پاسخ‌های خطا (Error Responses):**
-- **کد:** `400 Bad Request`
-  - **محتوا:** `{ "message": "لطفا تمام فیلدها را وارد کنید" }`
-- **کد:** `401 Unauthorized`
-  - **محتوا:** `{ "message": "ایمیل یا رمز عبور اشتباه است" }`
-- **کد:** `500 Internal Server Error`
-  - **محتوا:** `{ "message": "خطایی در سرور رخ داده است", "error": "error_details" }`
+**Error Responses:**
+- **Code:** `400 Bad Request`
+  - **Content:** `{ "message": "Please fill in all fields" }`
+- **Code:** `401 Unauthorized`
+  - **Content:** `{ "message": "Invalid email or password" }`
+- **Code:** `500 Internal Server Error`
+  - **Content:** `{ "message": "An error occurred on the server", "error": "error_details" }`
 
 ---
 
 ### `GET /api/auth/user`
 
-**توضیحات:** اطلاعات کاربر لاگین کرده را بر اساس توکن ارسالی برمی‌گرداند. این اندپوینت برای تایید اعتبار توکن در سمت سرور استفاده می‌شود.
+**Description:** Returns the information of the logged-in user based on the provided token. This endpoint is used for server-side token validation.
 
-**هدرها (Headers):**
+**Headers:**
 ```json
 {
   "Authorization": "Bearer your_jwt_token"
 }
 ```
 
-**پاسخ موفق (Success Response):**
-- **کد:** `200 OK`
-- **محتوا:** (اطلاعات کامل کاربر بدون پسورد)
+**Success Response:**
+- **Code:** `200 OK`
+- **Content:** (Complete user information without the password)
 ```json
 {
   "id": 1,
@@ -108,10 +108,64 @@
 }
 ```
 
-**پاسخ‌های خطا (Error Responses):**
-- **کد:** `401 Unauthorized`
-  - **محتوا:** `{ "message": "Not authorized, no token" }` (اگر توکن ارسال نشود)
-  - **محتوا:** `{ "message": "Not authorized, token failed" }` (اگر توکن نامعتبر باشد)
-  - **محتوا:** `{ "message": "Not authorized, user not found" }` (اگر کاربری با آیدی داخل توکن پیدا نشود)
+**Error Responses:**
+- **Code:** `401 Unauthorized`
+  - **Content:** `{ "message": "Not authorized, no token" }` (if no token is sent)
+  - **Content:** `{ "message": "Not authorized, token failed" }` (if the token is invalid)
+  - **Content:** `{ "message": "Not authorized, user not found" }` (if a user with the ID in the token is not found)
+
+---
+
+## Exams
+
+### `GET /api/exams`
+
+- **URL:** `/api/exams`
+- **Method:** `GET`
+- **Access:** Public
+- **Description:** Retrieves a list of all exams that are not hidden.
+- **Success Response (200 OK):**
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "General Knowledge Exam",
+      "description": "A comprehensive test of general knowledge.",
+      "startTime": "2025-11-01T10:00:00.000Z",
+      "endTime": "2025-11-01T12:00:00.000Z",
+      "price": "15000"
+    },
+    {
+      "id": 2,
+      "name": "Math Basics",
+      "description": "An introductory exam for basic mathematics.",
+      "startTime": "2025-11-05T09:00:00.000Z",
+      "endTime": "2025-11-05T10:00:00.000Z",
+      "price": "free"
+    }
+  ]
+  ```
+
+### `GET /api/exams/:examId/status`
+
+- **URL:** `/api/exams/:examId/status`
+- **Method:** `GET`
+- **Access:** Private (Requires authentication token)
+- **Description:** Checks if the authenticated user has purchased a specific exam.
+- **URL Params:**
+  - `examId` (integer, required): The ID of the exam to check.
+- **Success Response (200 OK):**
+  - If the user has purchased the exam:
+    ```json
+    {
+      "purchased": true
+    }
+    ```
+  - If the user has not purchased the exam:
+    ```json
+    {
+      "purchased": false
+    }
+    ```
 
 ---
