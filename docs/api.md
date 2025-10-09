@@ -37,12 +37,12 @@ This file contains the documentation for all available backend endpoints.
 
 **Error Responses:**
 - **Code:** `400 Bad Request`
-  - **Content:** `{ "message": "Please fill in all fields" }`
-  - **Content:** `{ "message": "A user with this email is already registered" }`
-  - **Content:** `{ "message": "A user with this phone number is already registered" }`
-  - **Content:** `{ "message": "A user with this national ID is already registered" }`
+  - **Content:** `{ "message": "لطفا تمام فیلدها را وارد کنید" }`
+  - **Content:** `{ "message": "کاربری با این ایمیل قبلا ثبت‌نام کرده است" }`
+  - **Content:** `{ "message": "کاربری با این شماره تلفن قبلا ثبت‌نام کرده است" }`
+  - **Content:** `{ "message": "کاربری با این کد ملی قبلا ثبت‌نام کرده است" }`
 - **Code:** `500 Internal Server Error`
-  - **Content:** `{ "message": "An error occurred on the server", "error": "error_details" }`
+  - **Content:** `{ "message": "خطایی در سرور رخ داده است", "error": "error_details" }`
 
 ---
 
@@ -73,11 +73,11 @@ This file contains the documentation for all available backend endpoints.
 
 **Error Responses:**
 - **Code:** `400 Bad Request`
-  - **Content:** `{ "message": "Please fill in all fields" }`
+  - **Content:** `{ "message": "لطفا تمام فیلدها را وارد کنید" }`
 - **Code:** `401 Unauthorized`
-  - **Content:** `{ "message": "Invalid email or password" }`
+  - **Content:** `{ "message": "ایمیل یا رمز عبور اشتباه است" }`
 - **Code:** `500 Internal Server Error`
-  - **Content:** `{ "message": "An error occurred on the server", "error": "error_details" }`
+  - **Content:** `{ "message": "خطایی در سرور رخ داده است", "error": "error_details" }`
 
 ---
 
@@ -110,9 +110,9 @@ This file contains the documentation for all available backend endpoints.
 
 **Error Responses:**
 - **Code:** `401 Unauthorized`
-  - **Content:** `{ "message": "Not authorized, no token" }` (if no token is sent)
-  - **Content:** `{ "message": "Not authorized, token failed" }` (if the token is invalid)
-  - **Content:** `{ "message": "Not authorized, user not found" }` (if a user with the ID in the token is not found)
+  - **Content:** `{ "message": "خطای دسترسی: توکن ارسال نشده است" }`
+  - **Content:** `{ "message": "خطای دسترسی: توکن نامعتبر است" }`
+  - **Content:** `{ "message": "خطای دسترسی: کاربر یافت نشد" }`
 
 ---
 
@@ -167,5 +167,56 @@ This file contains the documentation for all available backend endpoints.
       "purchased": false
     }
     ```
+
+---
+
+### `POST /api/exams/:examId/purchase`
+
+- **URL:** `/api/exams/:examId/purchase`
+- **Method:** `POST`
+- **Access:** Private (Requires authentication token)
+- **Description:** Allows the authenticated user to purchase an exam.
+- **URL Params:**
+  - `examId` (integer, required): The ID of the exam to purchase.
+- **Success Response (200 OK):**
+  ```json
+  {
+    "message": "آزمون با موفقیت خریداری شد"
+  }
+  ```
+  or
+  ```json
+  {
+    "message": "آزمون قبلا خریداری شده است"
+  }
+  ```
+- **Error Response (404 Not Found):**
+  ```json
+  {
+    "message": "آزمون یافت نشد یا خصوصی است"
+  }
+  ```
+
+---
+
+### `GET /api/exams/purchased`
+
+- **URL:** `/api/exams/purchased`
+- **Method:** `GET`
+- **Access:** Private (Requires authentication token)
+- **Description:** Retrieves a list of all exams purchased by the authenticated user.
+- **Success Response (200 OK):**
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "General Knowledge Exam",
+      "description": "A comprehensive test of general knowledge.",
+      "startTime": "2025-11-01T10:00:00.000Z",
+      "endTime": "2025-11-01T12:00:00.000Z",
+      "price": "15000"
+    }
+  ]
+  ```
 
 ---

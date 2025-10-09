@@ -19,18 +19,18 @@ const protect = async (req, res, next) => {
       req.user = await User.findByPk(decoded.id);
 
       if (!req.user) {
-        return res.status(401).json({ message: 'Not authorized, user not found' });
+        return res.status(401).json({ message: 'خطای دسترسی: کاربر یافت نشد' });
       }
 
       next();
     } catch (error) {
       console.error(error);
-      res.status(401).json({ message: 'Not authorized, token failed' });
+      res.status(401).json({ message: 'خطای دسترسی: توکن نامعتبر است' });
     }
   }
 
   if (!token) {
-    res.status(401).json({ message: 'Not authorized, no token' });
+    res.status(401).json({ message: 'خطای دسترسی: توکن ارسال نشده است' });
   }
 };
 
