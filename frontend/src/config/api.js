@@ -6,8 +6,8 @@ export const AUTH_API = {
   GET_USER: `${API_BASE_URL}/auth/user`,
 };
 
-// Example for other API endpoints as the project grows:
-// export const PROFILE_API = {
-//   GET: `${API_BASE_URL}/profile`,
-//   UPDATE: `${API_BASE_URL}/profile`,
-// };
+export const EXAM_API = {
+  GET_ALL: `${API_BASE_URL}/exams`,
+  GET_PURCHASED: `${API_BASE_URL}/exams/purchased`,
+  PURCHASE: (examId) => `${API_BASE_URL}/exams/${examId}/purchase`,
+};
