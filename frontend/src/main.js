@@ -3,11 +3,14 @@ import App from './App.vue';
 import router from './router';
 import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
+import { createVfm } from 'vue-final-modal';
+import 'vue-final-modal/style.css';
 
 // Import only the main custom stylesheet
 import './css/main.css';
 
 const app = createApp(App);
+const vfm = createVfm();
 
 const options = {
   rtl: false,
@@ -29,4 +32,5 @@ const options = {
 
 app.use(Toast, options);
 app.use(router);
+app.use(vfm);
 app.mount('#app');

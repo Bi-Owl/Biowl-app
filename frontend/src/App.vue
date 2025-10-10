@@ -10,6 +10,7 @@
       }"
     >
       <router-view />
+      <ModalsContainer />
     </main>
     <Footer v-if="showLayout" />
   </div>
@@ -18,6 +19,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { ModalsContainer } from 'vue-final-modal';
 import Background from './components/layout/Background.vue';
 import Header from './components/layout/Header.vue';
 import Footer from './components/layout/Footer.vue';

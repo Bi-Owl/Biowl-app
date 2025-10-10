@@ -21,6 +21,7 @@
   "dependencies": {
     "feather-icons": "^4.29.2",
     "vue": "^3.5.22",
+    "vue-final-modal": "^4.5.5",
     "vue-router": "^4.5.1",
     "vue-toastification": "^2.0.0-rc.5"
   },

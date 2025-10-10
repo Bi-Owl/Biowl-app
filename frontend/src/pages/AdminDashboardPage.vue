@@ -10,9 +10,7 @@
     <!-- Main Content Area -->
     <div class="flex-grow p-8 overflow-y-auto">
       <div class="w-full h-full bg-white rounded-lg shadow-md p-8">
-        <div v-if="currentView === 'users'">
-          <!-- Placeholder for users management -->
-        </div>
+        <UsersTable v-if="currentView === 'users'" />
       </div>
     </div>
   </div>
@@ -21,6 +19,7 @@
 <script setup>
 import { ref } from 'vue';
 import AdminSideMenu from '@/components/dashboard/AdminSideMenu.vue';
+import UsersTable from '@/components/dashboard/UsersTable.vue';
 
 const currentView = ref('users'); // Default view
 
