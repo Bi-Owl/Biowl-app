@@ -5,7 +5,7 @@
     <main 
       class="flex-grow w-full" 
       :class="{ 
-        'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8': !isDashboardRoute,
+        'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8': !isFullWidthRoute,
         'pt-32': showLayout 
       }"
     >
@@ -24,5 +24,11 @@ import Footer from './components/layout/Footer.vue';
 
 const route = useRoute();
 const isDashboardRoute = computed(() => route.name === 'Dashboard');
-const showLayout = computed(() => !isDashboardRoute.value && route.name !== 'Auth');
+const isFullWidthRoute = computed(() => {
+  return route.name === 'Dashboard' || route.name === 'AdminDashboard';
+});
+const showLayout = computed(() => {
+  const adminRoutes = ['AdminLogin', 'AdminDashboard'];
+  return !isDashboardRoute.value && route.name !== 'Auth' && !adminRoutes.includes(route.name);
+});
 </script>

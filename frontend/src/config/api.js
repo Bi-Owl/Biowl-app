@@ -4,6 +4,7 @@ export const AUTH_API = {
   REGISTER: `${API_BASE_URL}/auth/register`,
   LOGIN: `${API_BASE_URL}/auth/login`,
   GET_USER: `${API_BASE_URL}/auth/user`,
+  ADMIN_LOGIN: `${API_BASE_URL}/admin/login`,
 };
 
 export const EXAM_API = {
