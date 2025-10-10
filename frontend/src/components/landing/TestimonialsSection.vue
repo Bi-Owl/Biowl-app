@@ -31,7 +31,7 @@
 </template>
 
 <script setup>
-import TestimonialCard from '../ui/TestimonialCard.vue';
+import TestimonialCard from '@/components/ui/TestimonialCard.vue';
 
 const testimonials = [
   {

@@ -49,8 +49,8 @@ import { ref, onMounted } from 'vue';
 import { getUsers, updateUser, deleteUser } from '@/api/admin';
 import { useToast } from 'vue-toastification';
 import { useModal } from 'vue-final-modal';
-import EditUserModal from './EditUserModal.vue';
-import UserDetailsModal from './UserDetailsModal.vue';
+import EditUserModal from '@/components/dashboard/EditUserModal.vue';
+import UserDetailsModal from '@/components/dashboard/UserDetailsModal.vue';
 
 const users = ref([]);
 const toast = useToast();

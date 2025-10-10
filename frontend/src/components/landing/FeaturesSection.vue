@@ -32,7 +32,7 @@
 </template>
 
 <script setup>
-import FeatureCard from '../ui/FeatureCard.vue';
+import FeatureCard from '@/components/ui/FeatureCard.vue';
 
 const features = [
   {

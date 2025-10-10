@@ -12,3 +12,10 @@ export const EXAM_API = {
   GET_PURCHASED: `${API_BASE_URL}/exams/purchased`,
   PURCHASE: (examId) => `${API_BASE_URL}/exams/${examId}/purchase`,
 };
+
+export const ADMIN_API = {
+  GET_USERS: `${API_BASE_URL}/admin/users`,
+  GET_USER_BY_ID: (id) => `${API_BASE_URL}/admin/users/${id}`,
+  UPDATE_USER: (id) => `${API_BASE_URL}/admin/users/${id}`,
+  DELETE_USER: (id) => `${API_BASE_URL}/admin/users/${id}`,
+};

@@ -37,7 +37,7 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import feather from 'feather-icons';
-import ProfileCard from './ProfileCard.vue';
+import ProfileCard from '@/components/dashboard/ProfileCard.vue';
 import { auth } from '@/auth';
 
 defineProps({

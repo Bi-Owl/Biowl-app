@@ -49,7 +49,6 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { AUTH_API } from '@/config/api';
 import { useToast } from 'vue-toastification';
 import { auth } from '@/auth';
 
@@ -65,29 +64,14 @@ const togglePasswordVisibility = () => {
   passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
 };
 
+import { login } from '@/api/auth';
+
 const handleSubmit = async () => {
   try {
-    const response = await fetch(AUTH_API.LOGIN, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: email.value,
-        password: password.value,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Something went wrong');
-    }
-
+    const data = await login(email.value, password.value);
     auth.login(data, rememberMe.value);
     toast.success('ورود با موفقیت انجام شد!');
     router.push('/dashboard');
-
   } catch (error) {
     console.error('Login error:', error);
     toast.error(error.message);

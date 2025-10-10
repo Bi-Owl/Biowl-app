@@ -1,0 +1,10 @@
+auth.js:23  POST http://localhost:3000/api/auth/register 500 (Internal Server Error)
+signup @ auth.js:23
+handleSubmit @ SignupForm.vue:114
+(anonymous) @ chunk-LG6AQRJS.js?v=aa6ca774:12326
+callWithErrorHandling @ chunk-LG6AQRJS.js?v=aa6ca774:2296
+callWithAsyncErrorHandling @ chunk-LG6AQRJS.js?v=aa6ca774:2303
+invoker @ chunk-LG6AQRJS.js?v=aa6ca774:11335
+SignupForm.vue:119 Signup error: Error: خطایی در سرور رخ داده است
+    at handleResponse (auth.js:6:11)
+    at async handleSubmit (SignupForm.vue:114:18)

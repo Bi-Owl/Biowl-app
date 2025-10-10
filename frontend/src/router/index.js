@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import LandingPage from '../pages/LandingPage.vue';
-import AuthPage from '../pages/AuthPage.vue';
-import DashboardPage from '../pages/DashboardPage.vue';
-import AdminLoginPage from '../pages/AdminLoginPage.vue';
-import AdminDashboardPage from '../pages/AdminDashboardPage.vue';
-import { auth } from '../auth';
-import { adminAuth } from '../adminAuth';
+import LandingPage from '@/pages/LandingPage.vue';
+import AuthPage from '@/pages/AuthPage.vue';
+import DashboardPage from '@/pages/DashboardPage.vue';
+import AdminLoginPage from '@/pages/AdminLoginPage.vue';
+import AdminDashboardPage from '@/pages/AdminDashboardPage.vue';
+import { auth } from '@/auth';
+import { adminAuth } from '@/adminAuth';
 
 const routes = [
   {

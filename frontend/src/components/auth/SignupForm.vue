@@ -70,7 +70,6 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { AUTH_API } from '@/config/api';
 import { useToast } from 'vue-toastification';
 import { auth } from '@/auth';
 
@@ -95,6 +94,8 @@ const toggleConfirmPasswordVisibility = () => {
   confirmPasswordFieldType.value = confirmPasswordFieldType.value === 'password' ? 'text' : 'password';
 };
 
+import { signup } from '@/api/auth';
+
 const handleSubmit = async () => {
   if (password.value !== confirmPassword.value) {
     toast.error('رمزهای عبور یکسان نیستند!');
@@ -102,31 +103,18 @@ const handleSubmit = async () => {
   }
 
   try {
-    const response = await fetch(AUTH_API.REGISTER, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        firstName: firstName.value,
-        lastName: lastName.value,
-        phoneNumber: phoneNumber.value,
-        nationalId: nationalId.value,
-        email: email.value,
-        password: password.value,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Something went wrong');
-    }
-
+    const userData = {
+      firstName: firstName.value,
+      lastName: lastName.value,
+      phoneNumber: phoneNumber.value,
+      nationalId: nationalId.value,
+      email: email.value,
+      password: password.value,
+    };
+    const data = await signup(userData);
     auth.login(data);
     toast.success('ثبت نام با موفقیت انجام شد!');
     router.push('/dashboard');
-
   } catch (error) {
     console.error('Signup error:', error);
     toast.error(error.message);

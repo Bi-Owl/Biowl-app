@@ -37,7 +37,6 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { AUTH_API } from '@/config/api';
 import { useToast } from 'vue-toastification';
 import { adminAuth } from '@/adminAuth';
 
@@ -52,29 +51,14 @@ const togglePasswordVisibility = () => {
   passwordFieldType.value = passwordFieldType.value === 'password' ? 'text' : 'password';
 };
 
+import { adminLogin } from '@/api/auth';
+
 const handleSubmit = async () => {
   try {
-    const response = await fetch(AUTH_API.ADMIN_LOGIN, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username: username.value,
-        password: password.value,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Something went wrong');
-    }
-
+    const data = await adminLogin(username.value, password.value);
     adminAuth.login(data);
     toast.success('ورود با موفقیت انجام شد!');
     router.push('/admin-panel');
-
   } catch (error) {
     console.error('Admin login error:', error);
     toast.error(error.message);

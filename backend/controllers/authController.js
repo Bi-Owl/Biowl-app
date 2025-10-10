@@ -72,6 +72,7 @@ const register = async (req, res) => {
       res.status(400).json({ message: 'اطلاعات کاربری نامعتبر است' });
     }
   } catch (error) {
+    console.error(error);
     // Check for unique constraint errors
     if (error.name === 'SequelizeUniqueConstraintError') {
       const field = error.errors[0].path;

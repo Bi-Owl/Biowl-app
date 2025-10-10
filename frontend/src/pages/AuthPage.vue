@@ -27,8 +27,8 @@
 
 <script setup>
 import { ref, shallowRef } from 'vue';
-import LoginForm from '../components/auth/LoginForm.vue';
-import SignupForm from '../components/auth/SignupForm.vue';
+import LoginForm from '@/components/auth/LoginForm.vue';
+import SignupForm from '@/components/auth/SignupForm.vue';
 
 const activeTab = ref('login');
 

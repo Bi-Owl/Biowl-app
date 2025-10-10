@@ -21,7 +21,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { fetchPurchasedExams } from '../../api/exams';
+import { fetchPurchasedExams } from '@/api/exams';
 import ExamCard from './ExamCard.vue';
 
 const exams = ref([]);

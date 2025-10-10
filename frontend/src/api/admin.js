@@ -1,6 +1,5 @@
 import { adminAuth } from '@/adminAuth';
-
-const API_BASE_URL = 'http://localhost:3000/api/admin';
+import { ADMIN_API } from '@/config/api';
 
 const getHeaders = () => {
   const token = adminAuth.state.token;
@@ -11,7 +10,7 @@ const getHeaders = () => {
 };
 
 export const getUsers = async () => {
-  const response = await fetch(`${API_BASE_URL}/users`, {
+  const response = await fetch(ADMIN_API.GET_USERS, {
     headers: getHeaders(),
   });
   if (!response.ok) {
@@ -22,7 +21,7 @@ export const getUsers = async () => {
 };
 
 export const getUserById = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+  const response = await fetch(ADMIN_API.GET_USER_BY_ID(id), {
     headers: getHeaders(),
   });
   if (!response.ok) {
@@ -33,7 +32,7 @@ export const getUserById = async (id) => {
 };
 
 export const updateUser = async (id, userData) => {
-  const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+  const response = await fetch(ADMIN_API.UPDATE_USER(id), {
     method: 'PUT',
     headers: getHeaders(),
     body: JSON.stringify(userData),
@@ -46,7 +45,7 @@ export const updateUser = async (id, userData) => {
 };
 
 export const deleteUser = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+  const response = await fetch(ADMIN_API.DELETE_USER(id), {
     method: 'DELETE',
     headers: getHeaders(),
   });
