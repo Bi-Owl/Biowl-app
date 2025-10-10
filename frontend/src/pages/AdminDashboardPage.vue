@@ -1,15 +1,15 @@
 <template>
-  <div class="flex h-screen">
+  <div class="relative flex min-h-screen">
     <!-- Admin Side Menu -->
     <AdminSideMenu 
-      class="h-full sticky top-0"
+      class="h-screen fixed top-0 right-0"
       :current-view="currentView"
       @navigate="handleNavigation"
     />
 
     <!-- Main Content Area -->
-    <div class="flex-grow p-8 overflow-y-auto">
-      <div class="w-full h-full bg-white rounded-lg shadow-md p-8">
+    <div class="mr-64 flex-grow flex flex-col p-8">
+      <div class="w-full bg-white rounded-lg shadow-md p-8 flex-grow">
         <UsersTable v-if="currentView === 'users'" />
       </div>
     </div>

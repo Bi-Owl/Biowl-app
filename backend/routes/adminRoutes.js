@@ -7,6 +7,7 @@ router.post('/login', adminController.login);
 
 // User management routes
 router.get('/users', adminAuthMiddleware, adminController.getUsers);
+router.get('/users/:id', adminAuthMiddleware, adminController.getUserById);
 router.put('/users/:id', adminAuthMiddleware, adminController.updateUser);
 router.delete('/users/:id', adminAuthMiddleware, adminController.deleteUser);
 

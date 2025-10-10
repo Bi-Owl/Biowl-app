@@ -21,6 +21,17 @@ export const getUsers = async () => {
   return response.json();
 };
 
+export const getUserById = async (id) => {
+  const response = await fetch(`${API_BASE_URL}/users/${id}`, {
+    headers: getHeaders(),
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to fetch user');
+  }
+  return response.json();
+};
+
 export const updateUser = async (id, userData) => {
   const response = await fetch(`${API_BASE_URL}/users/${id}`, {
     method: 'PUT',

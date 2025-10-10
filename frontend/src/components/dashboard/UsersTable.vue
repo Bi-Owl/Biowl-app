@@ -28,7 +28,7 @@
               <div>{{ user.nationalId }}</div>
             </td>
             <td class="py-3 px-6 text-center">
-              <button @click="openDetailsModal(user)" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center mx-auto">
+              <button @click="openEditModal(user)" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center mx-auto">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 ویرایش
               </button>
@@ -59,7 +59,7 @@ const openEditModal = (user) => {
   const { open, close } = useModal({
     component: EditUserModal,
     attrs: {
-      user: user,
+      userId: user.id,
       onConfirm(updatedUser) {
         updateUser(updatedUser.id, updatedUser).then(res => {
           toast.success(res.message);
@@ -71,23 +71,6 @@ const openEditModal = (user) => {
         }).catch(err => {
           toast.error(err.message);
         });
-      },
-      onClose() {
-        close();
-      }
-    },
-  });
-  open();
-};
-
-const openDetailsModal = (user) => {
-  const { open, close } = useModal({
-    component: UserDetailsModal,
-    attrs: {
-      user: user,
-      onOpenEdit(user) {
-        close();
-        openEditModal(user);
       },
       onClose() {
         close();
