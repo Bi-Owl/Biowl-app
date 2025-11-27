@@ -67,6 +67,12 @@
                   <input v-model="editableUser.nationalId" type="text" id="nationalId" class="input-focus bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-lg focus:ring-2 focus:ring-emerald-300 block w-full pl-10 p-2.5" placeholder="1234567890">
                 </div>
               </div>
+              <div class="md:col-span-2">
+                <label class="block mb-2 text-sm font-medium text-emerald-700">وضعیت کاربر</label>
+                <div class="flex items-center">
+                  <BaseToggle v-model="editableUser.isActive" :label="editableUser.isActive ? 'فعال' : 'غیرفعال'" />
+                </div>
+              </div>
             </div>
                       <!-- Modal footer -->
                       <div class="flex items-center justify-between pt-6 space-x-2 border-t border-gray-200 rounded-b mt-6">              <button type="submit" class="btn-hover text-white bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
@@ -87,6 +93,7 @@
 import { ref, watchEffect } from 'vue';
 import { VueFinalModal } from 'vue-final-modal';
 import { getUserById } from '@/api/admin';
+import BaseToggle from '@/components/ui/BaseToggle.vue';
 
 const props = defineProps({
   userId: Number,

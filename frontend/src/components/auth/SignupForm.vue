@@ -112,9 +112,13 @@ const handleSubmit = async () => {
       password: password.value,
     };
     const data = await signup(userData);
-    auth.login(data);
-    toast.success('ثبت نام با موفقیت انجام شد!');
-    router.push('/dashboard');
+    toast.success('اکانت شما با موفقیت ساخته شد!');
+    setTimeout(() => {
+      location.reload(); // Reload the page after a short delay
+    }, 750);
+    // No automatic login or redirect after signup
+    // auth.login(data);
+    // router.push('/dashboard');
   } catch (error) {
     console.error('Signup error:', error);
     toast.error(error.message);

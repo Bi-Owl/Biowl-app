@@ -14,6 +14,11 @@ const login = async (req, res) => {
     const user = await User.scope('withPassword').findOne({ where: { email } });
 
     if (user && (await bcrypt.compare(password, user.password))) {
+      // Check if user is active
+      if (!user.isActive) {
+        return res.status(403).json({ message: 'حساب کاربری شما هنوز فعال نیست. لطفا با پشتیبانی تماس بگیرید.' });
+      }
+
       res.json({
         id: user.id,
         email: user.email,
