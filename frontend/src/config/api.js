@@ -25,4 +25,10 @@ export const ADMIN_API = {
   GET_EXAM_BY_ID: (id) => `${API_BASE_URL}/admin/exams/${id}`,
   UPDATE_EXAM: (id) => `${API_BASE_URL}/admin/exams/${id}`,
   DELETE_EXAM: (id) => `${API_BASE_URL}/admin/exams/${id}`,
+
+  // Question management
+  GET_QUESTIONS_FOR_EXAM: (examId) => `${API_BASE_URL}/admin/exams/${examId}/questions`,
+  CREATE_QUESTION: (examId) => `${API_BASE_URL}/admin/exams/${examId}/questions`,
+  UPDATE_QUESTION: (questionId) => `${API_BASE_URL}/admin/questions/${questionId}`,
+  DELETE_QUESTION: (questionId) => `${API_BASE_URL}/admin/questions/${questionId}`,
 };

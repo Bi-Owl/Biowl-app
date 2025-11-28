@@ -14,6 +14,12 @@
           <i data-feather="book-open" class="ml-3"></i>
           <span>آزمون ها</span>
         </li>
+        <li @click="$emit('navigate', 'questions')"
+            :class="[currentView === 'questions' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600']"
+            class="flex items-center text-lg font-semibold py-3 px-4 rounded-lg hover:bg-emerald-50 hover:text-emerald-700 transition-colors cursor-pointer mt-2">
+          <i data-feather="help-circle" class="ml-3"></i>
+          <span>سوالات</span>
+        </li>
       </ul>
     </nav>
     <!-- Logout Button -->

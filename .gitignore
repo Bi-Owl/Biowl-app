@@ -39,6 +39,9 @@ lerna-debug.log*
 # OS-generated files
 .DS_Store
 
+# Uploaded files
+/backend/uploads/
+
 # Other
 /coverage/
 *.local

@@ -169,23 +169,75 @@ export const updateExam = async (id, examData) => {
 
 
 export const deleteExam = async (id) => {
-
   const response = await fetch(ADMIN_API.DELETE_EXAM(id), {
-
     method: 'DELETE',
-
     headers: getHeaders(),
-
   });
-
   if (!response.ok) {
-
     const data = await response.json();
-
     throw new Error(data.message || 'Failed to delete exam');
-
   }
-
   return response.json();
+};
 
+// --- Question Management ---
+
+const getMultipartHeaders = () => {
+  const token = adminAuth.state.token;
+  if (!token) {
+    throw new Error('Authentication token not found.');
+  }
+  // For multipart/form-data, we let the browser set the Content-Type
+  return {
+    'Authorization': `Bearer ${token}`,
+  };
+};
+
+export const getQuestionsForExam = async (examId) => {
+  const response = await fetch(ADMIN_API.GET_QUESTIONS_FOR_EXAM(examId), {
+    headers: getHeaders(),
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to fetch questions');
+  }
+  return response.json();
+};
+
+export const createQuestion = async (examId, formData) => {
+  const response = await fetch(ADMIN_API.CREATE_QUESTION(examId), {
+    method: 'POST',
+    headers: getMultipartHeaders(),
+    body: formData,
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to create question');
+  }
+  return response.json();
+};
+
+export const updateQuestion = async (questionId, formData) => {
+  const response = await fetch(ADMIN_API.UPDATE_QUESTION(questionId), {
+    method: 'PUT',
+    headers: getMultipartHeaders(),
+    body: formData,
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to update question');
+  }
+  return response.json();
+};
+
+export const deleteQuestion = async (questionId) => {
+  const response = await fetch(ADMIN_API.DELETE_QUESTION(questionId), {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to delete question');
+  }
+  return response.json();
 };

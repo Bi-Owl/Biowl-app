@@ -11,7 +11,23 @@
     <div class="mr-64 flex-grow flex flex-col p-8">
       <div class="w-full bg-white rounded-lg shadow-md p-8 flex-grow">
         <UsersTable v-if="currentView === 'users'" />
-        <ExamsTable v-if="currentView === 'exams'" />
+        
+        <div v-if="currentView === 'exams'">
+          <ExamsTable />
+        </div>
+
+        <div v-if="currentView === 'questions'">
+          <QuestionManager 
+            v-if="selectedExamForQuestions"
+            :exam="selectedExamForQuestions"
+            @back="selectedExamForQuestions = null"
+          />
+          <ExamsTable 
+            v-else 
+            :is-selection-mode="true"
+            @manage-questions="handleManageQuestions"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -22,10 +38,18 @@ import { ref } from 'vue';
 import AdminSideMenu from '@/components/dashboard/AdminSideMenu.vue';
 import UsersTable from '@/components/dashboard/UsersTable.vue';
 import ExamsTable from '@/components/dashboard/ExamsTable.vue';
+import QuestionManager from '@/components/dashboard/QuestionManager.vue';
 
 const currentView = ref('users'); // Default view
+const selectedExamForQuestions = ref(null);
 
 const handleNavigation = (view) => {
   currentView.value = view;
+  // Reset selection when changing main view
+  selectedExamForQuestions.value = null; 
+};
+
+const handleManageQuestions = (exam) => {
+  selectedExamForQuestions.value = exam;
 };
 </script>
