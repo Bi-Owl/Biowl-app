@@ -1,10 +1,53 @@
-auth.js:23  POST http://localhost:3000/api/auth/register 500 (Internal Server Error)
-signup @ auth.js:23
-handleSubmit @ SignupForm.vue:114
-(anonymous) @ chunk-LG6AQRJS.js?v=aa6ca774:12326
-callWithErrorHandling @ chunk-LG6AQRJS.js?v=aa6ca774:2296
-callWithAsyncErrorHandling @ chunk-LG6AQRJS.js?v=aa6ca774:2303
-invoker @ chunk-LG6AQRJS.js?v=aa6ca774:11335
-SignupForm.vue:119 Signup error: Error: خطایی در سرور رخ داده است
-    at handleResponse (auth.js:6:11)
-    at async handleSubmit (SignupForm.vue:114:18)
+(!) Failed to run dependency scan. Skipping dependency pre-bundling. Error:   Failed to scan for dependencies from entries:
+  C:/Users/farda/Desktop/vscode/Biowl-app/frontend/index.html
+
+  X [ERROR] Failed to resolve entry for package "vue3-jalali-date-picker". The package may have incorrect main/module/exports specified in its package.json. [plugin vite:dep-scan]
+
+    node_modules/esbuild/lib/main.js:1217:21:
+      1217 │         let result = await callback({
+           ╵                      ^
+
+    at packageEntryFailure (file:///C:/Users/farda/Desktop/vscode/Biowl-app/frontend/node_modules/vite/dist/node/chunks/dep-Chhhsdoe.js:11921:32) 
+    at resolvePackageEntry (file:///C:/Users/farda/Desktop/vscode/Biowl-app/frontend/node_modules/vite/dist/node/chunks/dep-Chhhsdoe.js:11918:2)  
+    at tryNodeResolve (file:///C:/Users/farda/Desktop/vscode/Biowl-app/frontend/node_modules/vite/dist/node/chunks/dep-Chhhsdoe.js:11820:17)      
+    at ResolveIdContext.handler (file:///C:/Users/farda/Desktop/vscode/Biowl-app/frontend/node_modules/vite/dist/node/chunks/dep-Chhhsdoe.js:11656:16)
+    at EnvironmentPluginContainer.resolveId (file:///C:/Users/farda/Desktop/vscode/Biowl-app/frontend/node_modules/vite/dist/node/chunks/dep-Chhhsdoe.js:30938:56)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async resolve$4 (file:///C:/Users/farda/Desktop/vscode/Biowl-app/frontend/node_modules/vite/dist/node/chunks/dep-Chhhsdoe.js:10540:16)     
+    at async file:///C:/Users/farda/Desktop/vscode/Biowl-app/frontend/node_modules/vite/dist/node/chunks/dep-Chhhsdoe.js:10664:22
+    at async requestCallbacks.on-resolve (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:1217:22)
+    at async handleRequest (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:628:11)
+
+  This error came from the "onResolve" callback registered here:
+
+    node_modules/esbuild/lib/main.js:1141:20:
+      1141 │       let promise = setup({
+           ╵                     ^
+
+    at setup (file:///C:/Users/farda/Desktop/vscode/Biowl-app/frontend/node_modules/vite/dist/node/chunks/dep-Chhhsdoe.js:10661:12)
+    at handlePlugins (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:1141:21)
+    at buildOrContextImpl (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:854:5)
+    at Object.buildOrContext (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:680:5)
+    at C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:2035:68
+    at new Promise (<anonymous>)
+    at Object.context (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:2035:27)
+    at Object.context (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:1877:58)
+    at prepareEsbuildScanner (file:///C:/Users/farda/Desktop/vscode/Biowl-app/frontend/node_modules/vite/dist/node/chunks/dep-Chhhsdoe.js:10489:23)
+
+  The plugin "vite:dep-scan" was triggered by this import
+
+    src/main.js:8:33:
+      8 │ import Vue3JalaliDatePicker from 'vue3-jalali-date-picker';    
+        ╵                                  ~~~~~~~~~~~~~~~~~~~~~~~~~     
+
+
+    at failureErrorWithLog (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:1467:15)
+    at C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:926:25
+    at runOnEndCallbacks (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:1307:45)
+    at buildResponseToResult (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:924:7)
+    at C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:936:9
+    at new Promise (<anonymous>)
+    at requestCallbacks.on-end (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:935:54)
+    at handleRequest (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:628:17)
+    at handleIncomingPacket (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:653:7)
+    at Socket.readFromStdout (C:\Users\farda\Desktop\vscode\Biowl-app\frontend\node_modules\esbuild\lib\main.js:581:7)

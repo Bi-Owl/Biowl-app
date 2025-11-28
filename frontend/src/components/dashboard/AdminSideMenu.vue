@@ -8,6 +8,12 @@
           <i data-feather="users" class="ml-3"></i>
           <span>کاربر ها</span>
         </li>
+        <li @click="$emit('navigate', 'exams')"
+            :class="[currentView === 'exams' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600']"
+            class="flex items-center text-lg font-semibold py-3 px-4 rounded-lg hover:bg-emerald-50 hover:text-emerald-700 transition-colors cursor-pointer mt-2">
+          <i data-feather="book-open" class="ml-3"></i>
+          <span>آزمون ها</span>
+        </li>
       </ul>
     </nav>
     <!-- Logout Button -->

@@ -11,6 +11,7 @@
     <div class="mr-64 flex-grow flex flex-col p-8">
       <div class="w-full bg-white rounded-lg shadow-md p-8 flex-grow">
         <UsersTable v-if="currentView === 'users'" />
+        <ExamsTable v-if="currentView === 'exams'" />
       </div>
     </div>
   </div>
@@ -20,6 +21,7 @@
 import { ref } from 'vue';
 import AdminSideMenu from '@/components/dashboard/AdminSideMenu.vue';
 import UsersTable from '@/components/dashboard/UsersTable.vue';
+import ExamsTable from '@/components/dashboard/ExamsTable.vue';
 
 const currentView = ref('users'); // Default view
 

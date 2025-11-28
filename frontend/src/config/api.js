@@ -18,4 +18,11 @@ export const ADMIN_API = {
   GET_USER_BY_ID: (id) => `${API_BASE_URL}/admin/users/${id}`,
   UPDATE_USER: (id) => `${API_BASE_URL}/admin/users/${id}`,
   DELETE_USER: (id) => `${API_BASE_URL}/admin/users/${id}`,
+
+  // Exam management
+  CREATE_EXAM: `${API_BASE_URL}/admin/exams`,
+  GET_EXAMS: `${API_BASE_URL}/admin/exams`,
+  GET_EXAM_BY_ID: (id) => `${API_BASE_URL}/admin/exams/${id}`,
+  UPDATE_EXAM: (id) => `${API_BASE_URL}/admin/exams/${id}`,
+  DELETE_EXAM: (id) => `${API_BASE_URL}/admin/exams/${id}`,
 };

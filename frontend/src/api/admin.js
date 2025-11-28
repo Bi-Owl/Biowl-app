@@ -45,13 +45,147 @@ export const updateUser = async (id, userData) => {
 };
 
 export const deleteUser = async (id) => {
+
   const response = await fetch(ADMIN_API.DELETE_USER(id), {
+
     method: 'DELETE',
+
     headers: getHeaders(),
+
   });
+
   if (!response.ok) {
+
     const data = await response.json();
+
     throw new Error(data.message || 'Failed to delete user');
+
   }
+
   return response.json();
+
+};
+
+
+
+// --- Exam Management ---
+
+
+
+export const createExam = async (examData) => {
+
+  const response = await fetch(ADMIN_API.CREATE_EXAM, {
+
+    method: 'POST',
+
+    headers: getHeaders(),
+
+    body: JSON.stringify(examData),
+
+  });
+
+  if (!response.ok) {
+
+    const data = await response.json();
+
+    throw new Error(data.message || 'Failed to create exam');
+
+  }
+
+  return response.json();
+
+};
+
+
+
+export const getExams = async () => {
+
+  const response = await fetch(ADMIN_API.GET_EXAMS, {
+
+    headers: getHeaders(),
+
+  });
+
+  if (!response.ok) {
+
+    const data = await response.json();
+
+    throw new Error(data.message || 'Failed to fetch exams');
+
+  }
+
+  return response.json();
+
+};
+
+
+
+export const getExamById = async (id) => {
+
+  const response = await fetch(ADMIN_API.GET_EXAM_BY_ID(id), {
+
+    headers: getHeaders(),
+
+  });
+
+  if (!response.ok) {
+
+    const data = await response.json();
+
+    throw new Error(data.message || 'Failed to fetch exam');
+
+  }
+
+  return response.json();
+
+};
+
+
+
+export const updateExam = async (id, examData) => {
+
+  const response = await fetch(ADMIN_API.UPDATE_EXAM(id), {
+
+    method: 'PUT',
+
+    headers: getHeaders(),
+
+    body: JSON.stringify(examData),
+
+  });
+
+  if (!response.ok) {
+
+    const data = await response.json();
+
+    throw new Error(data.message || 'Failed to update exam');
+
+  }
+
+  return response.json();
+
+};
+
+
+
+export const deleteExam = async (id) => {
+
+  const response = await fetch(ADMIN_API.DELETE_EXAM(id), {
+
+    method: 'DELETE',
+
+    headers: getHeaders(),
+
+  });
+
+  if (!response.ok) {
+
+    const data = await response.json();
+
+    throw new Error(data.message || 'Failed to delete exam');
+
+  }
+
+  return response.json();
+
 };
