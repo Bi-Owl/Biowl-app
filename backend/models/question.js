@@ -27,13 +27,6 @@ const Question = sequelize.define('Question', {
     allowNull: false,
     comment: 'The number of the correct option (e.g., 1, 2, 3, etc.).',
   },
-}, {
-  indexes: [
-    {
-      unique: true,
-      fields: ['ExamId', 'position']
-    }
-  ]
 });
 
 module.exports = Question;

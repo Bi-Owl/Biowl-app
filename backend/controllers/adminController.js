@@ -1,3 +1,4 @@
+const sequelize = require('../config/database');
 const Admin = require('../models/admin');
 const User = require('../models/user');
 const Exam = require('../models/exam');
@@ -107,7 +108,19 @@ exports.createExam = async (req, res) => {
 
 exports.getAllExams = async (req, res) => {
   try {
-    const exams = await Exam.findAll();
+    const exams = await Exam.findAll({
+      attributes: {
+        include: [
+          [sequelize.fn('COUNT', sequelize.col('Questions.id')), 'questionCount']
+        ]
+      },
+      include: [{
+        model: Question,
+        attributes: []
+      }],
+      group: ['Exam.id'],
+      order: [['createdAt', 'DESC']]
+    });
     res.json(exams);
   } catch (error) {
     res.status(500).json({ message: 'خطای سرور' });
@@ -254,3 +267,24 @@ exports.deleteQuestion = async (req, res) => {
         res.status(500).json({ message: 'خطای سرور' });
     }
 };
+
+exports.reorderQuestions = async (req, res) => {
+    const { updates } = req.body;
+
+    if (!updates || !Array.isArray(updates)) {
+        return res.status(400).json({ message: 'اطلاعات آپدیت نامعتبر است' });
+    }
+
+    try {
+        for (const update of updates) {
+            await Question.update(
+                { position: update.position },
+                { where: { id: update.id } }
+            );
+        }
+        res.json({ message: 'ترتیب سوالات با موفقیت به‌روزرسانی شد' });
+    } catch (error) {
+        res.status(500).json({ message: 'خطا در به‌روزرسانی ترتیب سوالات', error: error.message });
+    }
+};
+

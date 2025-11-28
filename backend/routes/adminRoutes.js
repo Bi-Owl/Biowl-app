@@ -20,6 +20,7 @@ router.put('/exams/:id', adminAuthMiddleware, adminController.updateExam);
 router.delete('/exams/:id', adminAuthMiddleware, adminController.deleteExam);
 
 // Question management routes
+router.post('/questions/reorder', adminAuthMiddleware, adminController.reorderQuestions);
 router.get('/exams/:examId/questions', adminAuthMiddleware, adminController.getQuestionsForExam);
 router.post('/exams/:examId/questions', [adminAuthMiddleware, upload], adminController.createQuestion);
 router.put('/questions/:questionId', [adminAuthMiddleware, upload], adminController.updateQuestion);

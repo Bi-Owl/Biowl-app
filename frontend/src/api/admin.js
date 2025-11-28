@@ -241,3 +241,16 @@ export const deleteQuestion = async (questionId) => {
   }
   return response.json();
 };
+
+export const reorderQuestions = async (updates) => {
+  const response = await fetch(ADMIN_API.REORDER_QUESTIONS, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ updates }),
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to reorder questions');
+  }
+  return response.json();
+};

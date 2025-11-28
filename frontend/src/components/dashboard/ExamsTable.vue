@@ -15,39 +15,43 @@
           <tr>
             <th class="py-3 px-6">#</th>
             <th class="py-3 px-6">نام آزمون</th>
-            <th class="py-3 px-6">وضعیت</th>
-            <th class="py-3 px-6">قیمت</th>
+            <th v-if="!isSelectionMode" class="py-3 px-6">وضعیت</th>
+            <th v-if="!isSelectionMode" class="py-3 px-6">قیمت</th>
             <th class="py-3 px-6 text-center">زمان (دقیقه)</th>
+            <th v-if="isSelectionMode" class="py-3 px-6 text-center">تعداد سوال</th>
             <th class="py-3 px-6 text-center">عملیات</th>
           </tr>
         </thead>
         <tbody class="text-gray-600 text-sm font-light">
           <tr v-if="loading" class="border-b border-gray-200">
-            <td colspan="6" class="py-4 px-6 text-center">
+            <td :colspan="isSelectionMode ? 5 : 6" class="py-4 px-6 text-center">
               <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500 mx-auto"></div>
               <p class="mt-2">در حال بارگذاری اطلاعات...</p>
             </td>
           </tr>
           <tr v-else-if="exams.length === 0" class="border-b border-gray-200">
-            <td colspan="6" class="py-4 px-6 text-center text-gray-500">
+            <td :colspan="isSelectionMode ? 5 : 6" class="py-4 px-6 text-center text-gray-500">
               هیچ آزمونی یافت نشد.
             </td>
           </tr>
           <tr v-for="(exam, index) in exams" :key="exam.id" class="border-b border-gray-200 hover:bg-gray-100" :class="{ 'bg-gray-50': index % 2 !== 0 }">
             <td class="py-3 px-6 font-semibold">{{ exam.id }}</td>
             <td class="py-3 px-6">{{ exam.name }}</td>
-            <td class="py-3 px-6">
+            <td v-if="!isSelectionMode" class="py-3 px-6">
               <span :class="exam.isHidden ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'" class="py-1 px-3 rounded-full text-xs">
                 {{ exam.isHidden ? 'پنهان' : 'قابل مشاهده' }}
               </span>
             </td>
-            <td class="py-3 px-6">
+            <td v-if="!isSelectionMode" class="py-3 px-6">
               <span class="font-mono" :class="exam.price === 'free' ? 'text-green-600' : 'text-gray-800'">
                 {{ exam.price === 'free' ? 'رایگان' : `${exam.price} تومان` }}
               </span>
             </td>
             <td class="py-3 px-6 text-center">
               {{ exam.duration || '-' }}
+            </td>
+            <td v-if="isSelectionMode" class="py-3 px-6 text-center">
+              {{ exam.questionCount }}
             </td>
             <td class="py-3 px-6 text-center">
               <!-- Selection Mode Button -->

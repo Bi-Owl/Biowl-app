@@ -31,4 +31,5 @@ export const ADMIN_API = {
   CREATE_QUESTION: (examId) => `${API_BASE_URL}/admin/exams/${examId}/questions`,
   UPDATE_QUESTION: (questionId) => `${API_BASE_URL}/admin/questions/${questionId}`,
   DELETE_QUESTION: (questionId) => `${API_BASE_URL}/admin/questions/${questionId}`,
+  REORDER_QUESTIONS: `${API_BASE_URL}/admin/questions/reorder`,
 };
