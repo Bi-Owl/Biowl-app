@@ -12,6 +12,10 @@
           {{ priceText }}
         </span>
       </div>
+      <div v-if="exam.duration" class="flex justify-between items-center mt-2">
+        <span>مدت زمان:</span>
+        <span>{{ exam.duration }} دقیقه</span>
+      </div>
       <div v-if="exam.startTime" class="flex justify-between items-center mt-2">
         <span>زمان شروع:</span>
         <span>{{ new Date(exam.startTime).toLocaleString('fa-IR') }}</span>

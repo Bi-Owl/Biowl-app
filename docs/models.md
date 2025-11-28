@@ -70,6 +70,7 @@ The `Exam` model represents a test or an assessment that users can take.
 | `description`   | `TEXT`    | Nullable                        | A detailed description of the exam.                                      |
 | `startTime`     | `DATE`    | Nullable                        | The date and time when the exam becomes available. `null` for timeless exams. |
 | `endTime`       | `DATE`    | Nullable                        | The date and time when the exam closes. `null` for timeless exams.        |
+| `duration`      | `INTEGER` | Nullable                        | The duration of the exam in minutes.                                     |
 | `isHidden`      | `BOOLEAN` | Not Null, Default: `false`      | If `true`, the exam is hidden from public lists.                         |
 | `isPurchasable` | `BOOLEAN` | Not Null, Default: `true`       | If `true`, the exam can be purchased by users.                           |
 | `price`         | `STRING`  | Not Null, Default: `'free'`     | The price of the exam. Can be a numeric string or the word 'free'.       |

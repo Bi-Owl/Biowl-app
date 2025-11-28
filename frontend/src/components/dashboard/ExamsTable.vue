@@ -15,18 +15,19 @@
             <th class="py-3 px-6">نام آزمون</th>
             <th class="py-3 px-6">وضعیت</th>
             <th class="py-3 px-6">قیمت</th>
+            <th class="py-3 px-6 text-center">زمان (دقیقه)</th>
             <th class="py-3 px-6 text-center">عملیات</th>
           </tr>
         </thead>
         <tbody class="text-gray-600 text-sm font-light">
           <tr v-if="loading" class="border-b border-gray-200">
-            <td colspan="5" class="py-4 px-6 text-center">
+            <td colspan="6" class="py-4 px-6 text-center">
               <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500 mx-auto"></div>
               <p class="mt-2">در حال بارگذاری اطلاعات...</p>
             </td>
           </tr>
           <tr v-else-if="exams.length === 0" class="border-b border-gray-200">
-            <td colspan="5" class="py-4 px-6 text-center text-gray-500">
+            <td colspan="6" class="py-4 px-6 text-center text-gray-500">
               هیچ آزمونی یافت نشد.
             </td>
           </tr>
@@ -42,6 +43,9 @@
               <span class="font-mono" :class="exam.price === 'free' ? 'text-green-600' : 'text-gray-800'">
                 {{ exam.price === 'free' ? 'رایگان' : `${exam.price} تومان` }}
               </span>
+            </td>
+            <td class="py-3 px-6 text-center">
+              {{ exam.duration || '-' }}
             </td>
             <td class="py-3 px-6 text-center">
               <button @click="openEditModal(exam)" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center mx-auto">

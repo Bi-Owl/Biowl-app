@@ -23,6 +23,11 @@ const Exam = sequelize.define('Exam', {
     type: DataTypes.DATE,
     allowNull: true, // Changed to true for timeless exams
   },
+  duration: {
+    type: DataTypes.INTEGER,
+    allowNull: true, // Duration in minutes
+    comment: 'The duration of the exam in minutes.',
+  },
   isHidden: {
     type: DataTypes.BOOLEAN,
     allowNull: false,

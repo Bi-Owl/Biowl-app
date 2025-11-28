@@ -97,8 +97,8 @@ exports.deleteUser = async (req, res) => {
 
 exports.createExam = async (req, res) => {
   try {
-    const { name, description, startTime, endTime, isHidden, isPurchasable, price } = req.body;
-    const exam = await Exam.create({ name, description, startTime, endTime, isHidden, isPurchasable, price });
+    const { name, description, startTime, endTime, isHidden, isPurchasable, price, duration } = req.body;
+    const exam = await Exam.create({ name, description, startTime, endTime, duration, isHidden, isPurchasable, price });
     res.status(201).json({ message: 'آزمون با موفقیت ایجاد شد', exam });
   } catch (error) {
     res.status(500).json({ message: 'خطای سرور', error: error.message });
@@ -131,8 +131,8 @@ exports.updateExam = async (req, res) => {
   try {
     const exam = await Exam.findByPk(req.params.id);
     if (exam) {
-      const { name, description, startTime, endTime, isHidden, isPurchasable, price } = req.body;
-      await exam.update({ name, description, startTime, endTime, isHidden, isPurchasable, price });
+      const { name, description, startTime, endTime, isHidden, isPurchasable, price, duration } = req.body;
+      await exam.update({ name, description, startTime, endTime, duration, isHidden, isPurchasable, price });
       res.json({ message: 'آزمون با موفقیت به روز شد' });
     } else {
       res.status(404).json({ message: 'آزمون یافت نشد' });

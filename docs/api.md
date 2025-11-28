@@ -213,6 +213,7 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
   "description": "string (optional)",
   "startTime": "ISO 8601 String (optional)",
   "endTime": "ISO 8601 String (optional)",
+  "duration": 120,
   "isHidden": false,
   "isPurchasable": true,
   "price": "free"

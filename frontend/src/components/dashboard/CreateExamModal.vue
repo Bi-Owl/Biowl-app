@@ -72,8 +72,19 @@
               </div>
             </div>
 
+            <!-- Duration -->
+            <div>
+              <label for="duration" class="block mb-2 text-sm font-medium text-emerald-700">زمان آزمون (دقیقه)</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <input v-model.number="exam.duration" type="number" id="duration" class="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-lg focus:ring-2 focus:ring-emerald-300 block w-full pl-10 p-2.5" placeholder="مثلا: 120">
+              </div>
+            </div>
+
             <!-- Toggles -->
-            <div class="flex items-center space-x-6 space-x-reverse pt-6">
+            <div class="md:col-span-2 flex items-center space-x-6 space-x-reverse pt-6">
               <div>
                 <label class="block mb-2 text-sm font-medium text-emerald-700">وضعیت نمایش</label>
                 <BaseToggle v-model="exam.isHidden" :label="exam.isHidden ? 'پنهان' : 'نمایان'" />
@@ -113,6 +124,7 @@ const exam = ref({
   description: '',
   startTime: null,
   endTime: null,
+  duration: null,
   isHidden: false,
   isPurchasable: true,
   price: 'free'
