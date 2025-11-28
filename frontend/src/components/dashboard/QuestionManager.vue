@@ -17,7 +17,7 @@
 </template>
 
 <script setup>
-import QuestionsTable from './QuestionsTable.vue';
+import QuestionsTable from '@/components/dashboard/QuestionsTable.vue';
 
 defineProps({
   exam: {

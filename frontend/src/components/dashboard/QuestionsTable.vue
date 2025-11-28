@@ -66,7 +66,7 @@ import { useToast } from 'vue-toastification';
 import { useModal } from 'vue-final-modal';
 import draggable from 'vuedraggable';
 import { getQuestionsForExam, deleteQuestion, createQuestion, updateQuestion, reorderQuestions } from '@/api/admin';
-import AddEditQuestionModal from './AddEditQuestionModal.vue';
+import AddEditQuestionModal from '@/components/dashboard/AddEditQuestionModal.vue';
 
 const props = defineProps({
   examId: {
