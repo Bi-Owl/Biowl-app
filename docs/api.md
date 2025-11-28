@@ -185,12 +185,21 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
 }
 ```
 - **Success Response (200 OK):** `{ "message": "کاربر با موفقیت به روز شد" }`
+- **Error Responses:**
+  - **404 Not Found:** `{ "message": "کاربر یافت نشد" }`
+  - **409 Conflict:** `{ "message": "خطا: ایمیل یا شماره تلفن وارد شده تکراری است" }`
+  - **400 Bad Request:** `{ "message": "خطای اعتبارسنجی: ..." }`
+  - **500 Internal Server Error:** `{ "message": "خطا در سرور هنگام ویرایش کاربر رخ داد." }`
 
 #### `DELETE /api/admin/users/:id`
 
 - **Description:** Deletes a user.
 - **Access:** Admin
 - **Success Response (200 OK):** `{ "message": "کاربر با موفقیت حذف شد" }`
+- **Error Responses:**
+  - **404 Not Found:** `{ "message": "کاربر یافت نشد" }`
+  - **409 Conflict:** `{ "message": "نمی‌توان کاربری که آزمون خریداری کرده را حذف کرد." }`
+  - **500 Internal Server Error:** `{ "message": "خطا در سرور هنگام حذف کاربر رخ داد." }`
 
 ---
 
@@ -198,28 +207,49 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
 
 #### `GET /api/admin/exams`
 
-- **Description:** Retrieves a list of all exams (both hidden and visible).
+- **Description:** Retrieves a list of all exams, including a count of how many questions each exam has.
 - **Access:** Admin
-- **Success Response (200 OK):** An array of exam objects.
+- **Success Response (200 OK):** An array of exam objects, each including `questionCount`.
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "آزمون زیست",
+      "description": "توضیحات",
+      "startTime": "...",
+      "endTime": "...",
+      "duration": 60,
+      "isHidden": false,
+      "isPurchasable": true,
+      "price": "10000",
+      "createdAt": "...",
+      "updatedAt": "...",
+      "questionCount": 120
+    }
+  ]
+  ```
 
 #### `POST /api/admin/exams`
 
 - **Description:** Creates a new exam.
 - **Access:** Admin
 - **Request Body:**
-```json
-{
-  "name": "string",
-  "description": "string (optional)",
-  "startTime": "ISO 8601 String (optional)",
-  "endTime": "ISO 8601 String (optional)",
-  "duration": 120,
-  "isHidden": false,
-  "isPurchasable": true,
-  "price": "free"
-}
-```
+  ```json
+  {
+    "name": "string (required)",
+    "description": "string (optional)",
+    "startTime": "ISO 8601 String (optional)",
+    "endTime": "ISO 8601 String (optional)",
+    "duration": 120,
+    "isHidden": false,
+    "isPurchasable": true,
+    "price": "free"
+  }
+  ```
 - **Success Response (201 Created):** `{ "message": "آزمون با موفقیت ایجاد شد", "exam": { ... } }`
+- **Error Responses:**
+  - **400 Bad Request:** `{ "message": "نام آزمون اجباری است." }` or `{ "message": "خطای اعتبارسنجی: ..." }`
+  - **500 Internal Server Error:** `{ "message": "خطا در سرور هنگام ایجاد آزمون رخ داد." }`
 
 #### `GET /api/admin/exams/:id`
 
@@ -233,23 +263,49 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
 - **Access:** Admin
 - **Request Body:** (Same as POST /api/admin/exams)
 - **Success Response (200 OK):** `{ "message": "آزمون با موفقیت به روز شد" }`
+- **Error Responses:**
+  - **404 Not Found:** `{ "message": "آزمون یافت نشد" }`
+  - **500 Internal Server Error:** `{ "message": "خطا در سرور هنگام ویرایش آزمون رخ داد." }`
 
 #### `DELETE /api/admin/exams/:id`
 
 - **Description:** Deletes an exam.
 - **Access:** Admin
 - **Success Response (200 OK):** `{ "message": "آزمون با موفقیت حذف شد" }`
+- **Error Responses:**
+  - **404 Not Found:** `{ "message": "آزمون یافت نشد" }`
+  - **409 Conflict:** `{ "message": "نمی‌توان آزمونی که دارای سوال است را حذف کرد. ابتدا سوالات را حذف کنید." }`
+  - **500 Internal Server Error:** `{ "message": "خطا در سرور هنگام حذف آزمون رخ داد." }`
 
 ---
 
 ### Question Management
 
+#### `POST /api/admin/questions/reorder`
+
+- **Description:** Updates the `position` of multiple questions at once.
+- **Access:** Admin
+- **Request Body:**
+  ```json
+  {
+    "updates": [
+      { "id": 15, "position": 1 },
+      { "id": 12, "position": 2 },
+      { "id": 18, "position": 3 }
+    ]
+  }
+  ```
+- **Success Response (200 OK):** `{ "message": "ترتیب سوالات با موفقیت به‌روزرسانی شد." }`
+- **Error Responses:**
+  - **400 Bad Request:** `{ "message": "اطلاعات ارسالی برای آپدیت نامعتبر است." }`
+  - **500 Internal Server Error:** `{ "message": "خطا در سرور هنگام مرتب‌سازی سوالات رخ داد." }`
+
 #### `GET /api/admin/exams/:examId/questions`
 
-- **Description:** Retrieves all questions for a specific exam.
+- **Description:** Retrieves all questions for a specific exam, ordered by position.
 - **Access:** Admin
 - **URL Params:** `examId` (integer, required)
-- **Success Response (200 OK):** An array of question objects for the given exam.
+- **Success Response (200 OK):** An array of question objects.
 
 #### `POST /api/admin/exams/:examId/questions`
 
@@ -263,6 +319,11 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
   - `numberOfOptions` (integer, required): The total number of options.
   - `correctOption` (integer, required): The number of the correct option.
 - **Success Response (201 Created):** `{ "message": "سوال با موفقیت ایجاد شد", "question": { ... } }`
+- **Error Responses:**
+  - **400 Bad Request:** `{ "message": "داده‌های ارسالی برای سوال ناقص است." }` or `{ "message": "لطفا یک تصویر برای سوال آپلود کنید." }`
+  - **409 Conflict:** `{ "message": "خطا: ترتیب سوال نمی‌تواند تکراری باشد." }`
+  - **500 Internal Server Error:** `{ "message": "خطا در سرور هنگام ایجاد سوال رخ داد." }`
+
 
 #### `PUT /api/admin/questions/:questionId`
 
@@ -276,6 +337,10 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
   - `numberOfOptions` (integer, required): The total number of options.
   - `correctOption` (integer, required): The number of the correct option.
 - **Success Response (200 OK):** `{ "message": "سوال با موفقیت به روز شد" }`
+- **Error Responses:**
+  - **404 Not Found:** `{ "message": "سوال یافت نشد" }`
+  - **409 Conflict:** `{ "message": "خطا: ترتیب سوال نمی‌تواند تکراری باشد." }`
+  - **500 Internal Server Error:** `{ "message": "خطا در سرور هنگام ویرایش سوال رخ داد." }`
 
 #### `DELETE /api/admin/questions/:questionId`
 
@@ -283,6 +348,9 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
 - **Access:** Admin
 - **URL Params:** `questionId` (integer, required)
 - **Success Response (200 OK):** `{ "message": "سوال با موفقیت حذف شد" }`
+- **Error Responses:**
+  - **404 Not Found:** `{ "message": "سوال یافت نشد" }`
+  - **500 Internal Server Error:** `{ "message": "خطا در سرور هنگام حذف سوال رخ داد." }`
 
 ---
 
