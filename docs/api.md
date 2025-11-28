@@ -31,6 +31,7 @@ This file contains the documentation for all available backend endpoints.
   "email": "user@example.com",
   "firstName": "string",
   "lastName": "string",
+  "wallet": 0,
   "token": "your_jwt_token"
 }
 ```
@@ -67,6 +68,7 @@ This file contains the documentation for all available backend endpoints.
   "email": "user@example.com",
   "firstName": "string",
   "lastName": "string",
+  "wallet": 15000,
   "token": "your_jwt_token"
 }
 ```
@@ -105,6 +107,8 @@ This file contains the documentation for all available backend endpoints.
   "phoneNumber": "09123456789",
   "nationalId": "0123456789",
   "email": "user@example.com",
+  "isActive": true,
+  "wallet": 15000,
   "createdAt": "2023-10-27T10:00:00.000Z",
   "updatedAt": "2023-10-27T10:00:00.000Z"
 }
@@ -176,7 +180,8 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
   "email": "user@example.com",
   "phoneNumber": "09123456789",
   "nationalId": "0123456789",
-  "isActive": true
+  "isActive": true,
+  "wallet": 50000
 }
 ```
 - **Success Response (200 OK):** `{ "message": "کاربر با موفقیت به روز شد" }`
@@ -295,27 +300,22 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
 - **URL:** `/api/exams/:examId/purchase`
 - **Method:** `POST`
 - **Access:** Private (Requires authentication token)
-- **Description:** Allows the authenticated user to purchase an exam. The exam must be public (`isHidden: false`) and available for purchase (`isPurchasable: true`).
+- **Description:** Allows the authenticated user to purchase an exam. Deducts the cost from the user's wallet if the price is not 'free'. The exam must be public (`isHidden: false`) and available for purchase (`isPurchasable: true`).
 - **URL Params:**
   - `examId` (integer, required): The ID of the exam to purchase.
 - **Success Response (200 OK):**
   ```json
   {
-    "message": "آزمون با موفقیت خریداری شد"
+    "message": "آزمون با موفقیت خریداری شد",
+    "newBalance": 45000
   }
   ```
-  or
-  ```json
-  {
-    "message": "آزمون قبلا خریداری شده است"
-  }
-  ```
-- **Error Response (404 Not Found):**
-  ```json
-  {
-    "message": "آزمون یافت نشد یا قابل خریداری نیست"
-  }
-  ```
+- **Error Responses:**
+  - **`400 Bad Request`**: 
+    - `{ "message": "آزمون قبلا خریداری شده است" }`
+    - `{ "message": "موجودی کیف پول شما کافی نیست" }`
+  - **`404 Not Found`**:
+    - `{ "message": "آزمون یافت نشد یا قابل خریداری نیست" }`
 
 ---
 

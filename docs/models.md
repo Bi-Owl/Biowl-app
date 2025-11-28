@@ -22,6 +22,7 @@ The `User` model represents an individual user account in the system.
 | `email`       | `STRING`        | Not Null, Unique, Valid email format      |
 | `password`    | `STRING`        | Not Null                                  |
 | `isActive`    | `BOOLEAN`       | Not Null, Default: `false`                |
+| `wallet`      | `FLOAT`         | Not Null, Default: `0`                    |
 
 ### Scopes
 
