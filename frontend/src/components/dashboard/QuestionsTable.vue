@@ -84,7 +84,6 @@ const fetchQuestions = async () => {
     loading.value = true;
     try {
         const data = await getQuestionsForExam(props.examId);
-        console.log('Fetched questions:', data);
         questions.value = data;
     } catch (error) {
         toast.error('خطا در دریافت سوالات.');
