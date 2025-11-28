@@ -22,7 +22,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { fetchPurchasedExams } from '@/api/exams';
-import ExamCard from './ExamCard.vue';
+import ExamCard from '@/components/dashboard/ExamCard.vue';
 
 const exams = ref([]);
 const loading = ref(true);

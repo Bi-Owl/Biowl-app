@@ -26,7 +26,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useToast } from 'vue-toastification';
 import { fetchPublicExams, purchaseExam } from '@/api/exams';
-import ExamCard from './ExamCard.vue';
+import ExamCard from '@/components/dashboard/ExamCard.vue';
 
 const toast = useToast();
 const exams = ref([]);

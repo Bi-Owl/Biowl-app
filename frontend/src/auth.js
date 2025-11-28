@@ -1,5 +1,5 @@
 import { reactive, readonly } from 'vue';
-import { AUTH_API } from './config/api';
+import { AUTH_API } from '@/config/api';
 
 const state = reactive({
   user: null,

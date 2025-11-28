@@ -65,8 +65,8 @@ import { ref, onMounted } from 'vue';
 import { getExams, createExam, updateExam, deleteExam } from '@/api/admin';
 import { useToast } from 'vue-toastification';
 import { useModal } from 'vue-final-modal';
-import CreateExamModal from './CreateExamModal.vue';
-import EditExamModal from './EditExamModal.vue';
+import CreateExamModal from '@/components/dashboard/CreateExamModal.vue';
+import EditExamModal from '@/components/dashboard/EditExamModal.vue';
 
 const exams = ref([]);
 const loading = ref(true);

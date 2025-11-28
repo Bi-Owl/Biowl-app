@@ -1,5 +1,5 @@
-import { auth } from '../auth';
-import { EXAM_API } from '../config/api';
+import { auth } from '@/auth';
+import { EXAM_API } from '@/config/api';
 
 const getAuthHeaders = () => {
   const token = auth.getToken();
