@@ -4,9 +4,9 @@
     content-class="relative flex flex-col max-h-full mx-auto p-4 bg-transparent border-none w-full max-w-lg"
     content-transition="slide-down"
   >
-    <div class="relative bg-white rounded-xl shadow-lg border border-emerald-100 w-full">
+    <div class="relative bg-white rounded-xl shadow-lg border border-emerald-100 w-full flex flex-col flex-grow overflow-y-auto">
       <!-- Modal header -->
-      <div class="flex justify-between items-center p-5 border-b rounded-t">
+      <div class="flex justify-between items-center p-5 border-b rounded-t sticky top-0 bg-white z-10">
         <h3 class="text-xl font-semibold text-emerald-800">
           ویرایش اطلاعات کاربر
         </h3>
@@ -15,13 +15,13 @@
         </button>
       </div>
       <!-- Modal body -->
-      <div class="p-6 space-y-6 relative min-h-[400px]">
+      <div class="p-6 space-y-6 relative flex-grow">
         <div v-if="loading" class="absolute inset-0 bg-white bg-opacity-80 flex justify-center items-center z-10 rounded-b-xl">
           <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-emerald-500"></div>
         </div>
-        <form @submit.prevent="confirm">
-          <fieldset :disabled="loading">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form @submit.prevent="confirm" class="flex flex-col flex-grow h-full">
+          <fieldset :disabled="loading" class="flex flex-col flex-grow">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
               <div>
                 <label for="firstName" class="block mb-2 text-sm font-medium text-emerald-700">نام</label>
                 <div class="relative">
@@ -86,7 +86,7 @@
               </div>
             </div>
                       <!-- Modal footer -->
-                      <div class="flex items-center justify-between pt-6 space-x-2 border-t border-gray-200 rounded-b mt-6">              <button type="submit" class="btn-hover text-white bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                      <div class="flex items-center justify-between pt-6 space-x-2 border-t border-gray-200 rounded-b mt-auto">              <button type="submit" class="btn-hover text-white bg-emerald-600 hover:bg-emerald-700 focus:ring-4 focus:ring-emerald-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                 ذخیره تغییرات
               </button>
               <button @click="close" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">

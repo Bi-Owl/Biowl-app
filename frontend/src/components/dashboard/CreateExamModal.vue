@@ -4,7 +4,7 @@
     content-class="relative flex flex-col max-h-full mx-auto p-4 bg-transparent border-none w-full max-w-2xl"
     content-transition="slide-down"
   >
-    <div class="relative bg-white rounded-xl shadow-lg border border-emerald-100 w-full">
+    <div class="relative bg-white rounded-xl shadow-lg border border-emerald-100 w-full flex flex-col flex-grow overflow-y-auto">
       <!-- Modal header -->
       <div class="flex justify-between items-center p-5 border-b rounded-t">
         <h3 class="text-xl font-semibold text-emerald-800">

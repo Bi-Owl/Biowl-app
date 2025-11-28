@@ -4,9 +4,9 @@
     content-class="relative flex flex-col max-h-full mx-auto p-4 bg-transparent border-none w-full max-w-2xl"
     content-transition="slide-down"
   >
-    <div class="relative bg-white rounded-xl shadow-lg border border-emerald-100 w-full">
+    <div class="relative bg-white rounded-xl shadow-lg border border-emerald-100 w-full flex flex-col flex-grow overflow-y-auto">
       <!-- Modal header -->
-      <div class="flex justify-between items-center p-5 border-b rounded-t">
+      <div class="flex justify-between items-center p-5 border-b rounded-t sticky top-0 bg-white z-10">
         <h3 class="text-xl font-semibold text-emerald-800">
           {{ formTitle }}
         </h3>
@@ -15,9 +15,9 @@
         </button>
       </div>
       <!-- Modal body -->
-      <form @submit.prevent="submit" class="p-6 space-y-6">
-        <fieldset :disabled="loading">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <form @submit.prevent="submit" class="p-6 space-y-6 flex-grow">
+        <fieldset :disabled="loading" class="flex flex-col h-full">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
             
             <div>
               <label for="numberOfOptions" class="block mb-2 text-sm font-medium text-emerald-700">تعداد گزینه‌ها</label>
@@ -32,10 +32,12 @@
             <div class="md:col-span-2">
               <label class="block mb-2 text-sm font-medium text-emerald-700">گزینه صحیح</label>
               <div class="flex items-center flex-wrap gap-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg">
-                <label v-for="i in Number(questionData.numberOfOptions || 0)" :key="i" class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-emerald-100 transition-colors">
-                  <input type="radio" :value="i" v-model.number="questionData.correctOption" name="correctOption" class="w-5 h-5 text-emerald-600 focus:ring-emerald-500 focus:ring-2 border-gray-300">
-                  <span class="ml-2 text-sm font-medium text-gray-700">{{ i }}</span>
-                </label>
+                <div class="flex items-center flex-wrap gap-4">
+                  <label v-for="i in Number(questionData.numberOfOptions || 0)" :key="i" class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-emerald-100 transition-colors">
+                    <input type="radio" :value="i" v-model.number="questionData.correctOption" name="correctOption" class="w-5 h-5 text-emerald-600 focus:ring-emerald-500 focus:ring-2 border-gray-300">
+                    <span class="ml-2 text-sm font-medium text-gray-700">{{ i }}</span>
+                  </label>
+                </div>
               </div>
             </div>
 

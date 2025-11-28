@@ -4,9 +4,9 @@
     content-class="relative flex flex-col max-h-full mx-auto p-4 bg-transparent border-none w-full max-w-2xl"
     content-transition="slide-down"
   >
-    <div class="relative bg-white rounded-xl shadow-lg border border-emerald-100 w-full">
+    <div class="relative bg-white rounded-xl shadow-lg border border-emerald-100 w-full flex flex-col flex-grow overflow-y-auto">
       <!-- Modal header -->
-      <div class="flex justify-between items-center p-5 border-b rounded-t">
+      <div class="flex justify-between items-center p-5 border-b rounded-t sticky top-0 bg-white z-10">
         <h3 class="text-xl font-semibold text-emerald-800">
           ویرایش آزمون
         </h3>
@@ -15,13 +15,13 @@
         </button>
       </div>
       <!-- Modal body -->
-      <div class="p-6 space-y-6 relative min-h-[400px]">
+      <div class="p-6 space-y-6 relative flex-grow">
         <div v-if="loading" class="absolute inset-0 bg-white bg-opacity-80 flex justify-center items-center z-10 rounded-b-xl">
           <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-emerald-500"></div>
         </div>
-        <form @submit.prevent="confirm" v-if="!loading">
-          <fieldset>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form @submit.prevent="confirm" v-if="!loading" class="flex flex-col flex-grow h-full">
+          <fieldset class="flex flex-col flex-grow">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
               <!-- Exam Name -->
               <div class="md:col-span-2">
                 <label for="examName-edit" class="block mb-2 text-sm font-medium text-emerald-700">نام آزمون</label>
