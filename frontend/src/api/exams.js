@@ -2,9 +2,11 @@ import { auth } from '@/auth';
 import { EXAM_API } from '@/config/api';
 
 const getAuthHeaders = () => {
-  const token = auth.getToken();
+  const token = auth.state.token;
   if (!token) {
-    throw new Error('Authentication token not found.');
+    // This is not necessarily an error, as some endpoints can be public
+    // The caller should handle cases where auth is required but no token is present.
+    return { 'Content-Type': 'application/json' };
   }
   return {
     'Content-Type': 'application/json',

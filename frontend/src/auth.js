@@ -26,6 +26,7 @@ function login(authData, rememberMe = false) {
     email: authData.email,
     firstName: authData.firstName,
     lastName: authData.lastName,
+    wallet: authData.wallet,
   };
 }
 
@@ -34,6 +35,12 @@ function logout() {
   localStorage.removeItem(EXPIRATION_KEY);
   state.token = null;
   state.user = null;
+}
+
+function updateWallet(newBalance) {
+  if (state.user) {
+    state.user.wallet = newBalance;
+  }
 }
 
 async function checkAuth() {
@@ -79,6 +86,7 @@ export const auth = {
   state: readonly(state),
   login,
   logout,
+  updateWallet,
   isAuthenticated: () => !!state.token,
   checkAuth,
 };

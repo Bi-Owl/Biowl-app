@@ -1,6 +1,7 @@
 const Exam = require('../models/exam');
 const UserExam = require('../models/userExam');
 const User = require('../models/user');
+const sequelize = require('../config/database');
 
 // @desc    Get all public exams
 // @route   GET /api/exams
@@ -33,8 +34,8 @@ const getExamStatusForUser = async (req, res) => {
       },
     });
 
-    if (userExam) {
-      res.json({ purchased: userExam.purchased });
+    if (userExam && userExam.purchased) {
+      res.json({ purchased: true });
     } else {
       res.json({ purchased: false });
     }
@@ -48,28 +49,60 @@ const getExamStatusForUser = async (req, res) => {
 // @route   POST /api/exams/:examId/purchase
 // @access  Private
 const purchaseExam = async (req, res) => {
+  const t = await sequelize.transaction();
   try {
     const { examId } = req.params;
     const userId = req.user.id;
 
-    const exam = await Exam.findOne({ where: { id: examId, isHidden: false, isPurchasable: true } });
+    // Get user and exam within the transaction
+    const user = await User.findByPk(userId, { transaction: t });
+    const exam = await Exam.findOne({ 
+      where: { id: examId, isHidden: false, isPurchasable: true },
+      transaction: t 
+    });
+
     if (!exam) {
+      await t.rollback();
       return res.status(404).json({ message: 'آزمون یافت نشد یا قابل خریداری نیست' });
     }
 
     const [userExam, created] = await UserExam.findOrCreate({
       where: { UserId: userId, ExamId: examId },
+      transaction: t
     });
 
     if (userExam.purchased) {
-      return res.status(200).json({ message: 'آزمون قبلا خریداری شده است' });
+      await t.rollback();
+      return res.status(400).json({ message: 'آزمون قبلا خریداری شده است' });
     }
 
-    userExam.purchased = true;
-    await userExam.save();
+    // Handle payment if the exam is not free
+    if (exam.price !== 'free') {
+      const price = parseFloat(exam.price);
+      if (isNaN(price)) {
+        await t.rollback();
+        return res.status(500).json({ message: 'قیمت آزمون نامعتبر است' });
+      }
 
-    res.status(200).json({ message: 'آزمون با موفقیت خریداری شد' });
+      if (user.wallet < price) {
+        await t.rollback();
+        return res.status(400).json({ message: 'موجودی کیف پول شما کافی نیست' });
+      }
+
+      // Deduct from wallet
+      user.wallet -= price;
+      await user.save({ transaction: t });
+    }
+
+    // Mark as purchased
+    userExam.purchased = true;
+    await userExam.save({ transaction: t });
+
+    await t.commit();
+    res.status(200).json({ message: 'آزمون با موفقیت خریداری شد', newBalance: user.wallet });
+
   } catch (err) {
+    await t.rollback();
     console.error(err.message);
     res.status(500).send('خطای سرور');
   }
