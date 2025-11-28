@@ -241,6 +241,48 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
 
 ---
 
+### Question Management
+
+#### `GET /api/admin/exams/:examId/questions`
+
+- **Description:** Retrieves all questions for a specific exam.
+- **Access:** Admin
+- **URL Params:** `examId` (integer, required)
+- **Success Response (200 OK):** An array of question objects for the given exam.
+
+#### `POST /api/admin/exams/:examId/questions`
+
+- **Description:** Creates a new question for an exam and uploads an image.
+- **Access:** Admin
+- **Content-Type:** `multipart/form-data`
+- **URL Params:** `examId` (integer, required)
+- **Form Data:**
+  - `questionImage` (file, required): The image file for the question.
+  - `numberOfOptions` (integer, required): The total number of options.
+  - `correctOption` (integer, required): The number of the correct option.
+- **Success Response (201 Created):** `{ "message": "سوال با موفقیت ایجاد شد", "question": { ... } }`
+
+#### `PUT /api/admin/questions/:questionId`
+
+- **Description:** Updates an existing question. Can optionally include a new image to replace the old one.
+- **Access:** Admin
+- **Content-Type:** `multipart/form-data`
+- **URL Params:** `questionId` (integer, required)
+- **Form Data:**
+  - `questionImage` (file, optional): A new image file to replace the existing one.
+  - `numberOfOptions` (integer, required): The total number of options.
+  - `correctOption` (integer, required): The number of the correct option.
+- **Success Response (200 OK):** `{ "message": "سوال با موفقیت به روز شد" }`
+
+#### `DELETE /api/admin/questions/:questionId`
+
+- **Description:** Deletes a question and its associated image file.
+- **Access:** Admin
+- **URL Params:** `questionId` (integer, required)
+- **Success Response (200 OK):** `{ "message": "سوال با موفقیت حذف شد" }`
+
+---
+
 ## Exams
 
 ### `GET /api/exams`

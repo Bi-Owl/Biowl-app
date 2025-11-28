@@ -77,6 +77,7 @@ The `Exam` model represents a test or an assessment that users can take.
 ### Relationships
 
 - **Has many-to-many with `User`**: An exam can be associated with multiple users. This relationship is managed through the `UserExam` model.
+- **Has many `Questions`**: Each exam is composed of multiple questions.
 
 ---
 
@@ -101,3 +102,25 @@ This model is a **join table** that connects the `User` and `Exam` models, repre
 
 - **Belongs to `User`**: Each `UserExam` record is linked to one user.
 - **Belongs to `Exam`**: Each `UserExam` record is linked to one exam.
+
+---
+
+## 5. Question
+
+The `Question` model represents a single question within an exam.
+
+**File:** `backend/models/question.js`
+
+### Fields
+
+| Field             | Type      | Constraints                 | Description                                                          |
+|-------------------|-----------|-----------------------------|----------------------------------------------------------------------|
+| `id`              | `INTEGER` | Primary Key, Auto-increment | The unique identifier for the question.                              |
+| `imageUrl`        | `STRING`  | Not Null                    | URL to the image containing the question text and all options.       |
+| `numberOfOptions` | `INTEGER` | Not Null                    | The total number of options for this question (e.g., 4).             |
+| `correctOption`   | `INTEGER` | Not Null                    | The number of the correct option (e.g., 1, 2, 3, etc.).              |
+| `ExamId`          | `INTEGER` | Foreign Key                 | References the `id` of the associated exam in the `Exams` table.     |
+
+### Relationships
+
+- **Belongs to `Exam`**: Each question is part of one exam.

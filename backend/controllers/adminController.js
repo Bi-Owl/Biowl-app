@@ -1,7 +1,10 @@
 const Admin = require('../models/admin');
 const User = require('../models/user');
 const Exam = require('../models/exam');
+const Question = require('../models/question');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 
 exports.login = async (req, res) => {
   const { username, password } = req.body;
@@ -151,4 +154,98 @@ exports.deleteExam = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'خطای سرور' });
   }
+};
+
+// --- Question Management ---
+
+exports.createQuestion = async (req, res) => {
+    try {
+        const { examId } = req.params;
+        const { numberOfOptions, correctOption } = req.body;
+
+        if (!req.file) {
+            return res.status(400).json({ message: 'لطفا یک تصویر برای سوال آپلود کنید' });
+        }
+
+        const imageUrl = `/uploads/${req.file.filename}`;
+
+        const question = await Question.create({
+            imageUrl,
+            numberOfOptions,
+            correctOption,
+            ExamId: examId,
+        });
+
+        res.status(201).json({ message: 'سوال با موفقیت ایجاد شد', question });
+    } catch (error) {
+        res.status(500).json({ message: 'خطای سرور', error: error.message });
+    }
+};
+
+exports.getQuestionsForExam = async (req, res) => {
+    try {
+        const { examId } = req.params;
+        const questions = await Question.findAll({ where: { ExamId: examId } });
+        res.json(questions);
+    } catch (error) {
+        res.status(500).json({ message: 'خطای سرور' });
+    }
+};
+
+exports.updateQuestion = async (req, res) => {
+    try {
+        const { questionId } = req.params;
+        const { numberOfOptions, correctOption } = req.body;
+        
+        const question = await Question.findByPk(questionId);
+        if (!question) {
+            return res.status(404).json({ message: 'سوال یافت نشد' });
+        }
+
+        let imageUrl = question.imageUrl;
+        // If a new image is uploaded, delete the old one
+        if (req.file) {
+            // Delete old image
+            if (question.imageUrl) {
+                const oldImagePath = path.join(__dirname, '..', question.imageUrl);
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
+                }
+            }
+            imageUrl = `/uploads/${req.file.filename}`;
+        }
+        
+        await question.update({
+            numberOfOptions,
+            correctOption,
+            imageUrl,
+        });
+
+        res.json({ message: 'سوال با موفقیت به روز شد' });
+    } catch (error) {
+        res.status(500).json({ message: 'خطای سرور', error: error.message });
+    }
+};
+
+exports.deleteQuestion = async (req, res) => {
+    try {
+        const { questionId } = req.params;
+        const question = await Question.findByPk(questionId);
+
+        if (question) {
+            // Delete the associated image file
+            if (question.imageUrl) {
+                const imagePath = path.join(__dirname, '..', question.imageUrl);
+                if (fs.existsSync(imagePath)) {
+                    fs.unlinkSync(imagePath);
+                }
+            }
+            await question.destroy();
+            res.json({ message: 'سوال با موفقیت حذف شد' });
+        } else {
+            res.status(404).json({ message: 'سوال یافت نشد' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'خطای سرور' });
+    }
 };

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
 const adminAuthMiddleware = require('../middleware/adminAuthMiddleware');
+const upload = require('../middleware/uploadMiddleware');
 
 router.post('/login', adminController.login);
 
@@ -17,5 +18,11 @@ router.get('/exams', adminAuthMiddleware, adminController.getAllExams);
 router.get('/exams/:id', adminAuthMiddleware, adminController.getExamById);
 router.put('/exams/:id', adminAuthMiddleware, adminController.updateExam);
 router.delete('/exams/:id', adminAuthMiddleware, adminController.deleteExam);
+
+// Question management routes
+router.get('/exams/:examId/questions', adminAuthMiddleware, adminController.getQuestionsForExam);
+router.post('/exams/:examId/questions', [adminAuthMiddleware, upload], adminController.createQuestion);
+router.put('/questions/:questionId', [adminAuthMiddleware, upload], adminController.updateQuestion);
+router.delete('/questions/:questionId', adminAuthMiddleware, adminController.deleteQuestion);
 
 module.exports = router;

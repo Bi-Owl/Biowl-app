@@ -5,9 +5,11 @@ const User = require('./models/user');
 const Exam = require('./models/exam');
 const UserExam = require('./models/userExam');
 const Admin = require('./models/admin'); // Import the Admin model
+const Question = require('./models/question');
 const examRoutes = require('./routes/examRoutes');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes'); // Import the admin routes
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,10 +17,13 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Define relationships
 User.belongsToMany(Exam, { through: UserExam });
 Exam.belongsToMany(User, { through: UserExam });
+Exam.hasMany(Question);
+Question.belongsTo(Exam);
 
 // Routes
 app.use('/api/auth', authRoutes);
