@@ -76,6 +76,8 @@ This file contains the documentation for all available backend endpoints.
   - **Content:** `{ "message": "لطفا تمام فیلدها را وارد کنید" }`
 - **Code:** `401 Unauthorized`
   - **Content:** `{ "message": "ایمیل یا رمز عبور اشتباه است" }`
+- **Code:** `403 Forbidden`
+  - **Content:** `{ "message": "حساب کاربری شما فعال نیست. لطفا با پشتیبانی تماس بگیرید." }`
 - **Code:** `500 Internal Server Error`
   - **Content:** `{ "message": "خطایی در سرور رخ داده است", "error": "error_details" }`
 
@@ -113,6 +115,124 @@ This file contains the documentation for all available backend endpoints.
   - **Content:** `{ "message": "خطای دسترسی: توکن ارسال نشده است" }`
   - **Content:** `{ "message": "خطای دسترسی: توکن نامعتبر است" }`
   - **Content:** `{ "message": "خطای دسترسی: کاربر یافت نشد" }`
+
+---
+<br>
+
+## Admin
+
+All admin routes are prefixed with `/api/admin`. Access to these routes (except for login) requires an admin authentication token.
+
+### `POST /api/admin/login`
+
+**Description:** Authenticates an administrator.
+
+**Request Body:**
+```json
+{
+  "username": "admin_user",
+  "password": "admin_password"
+}
+```
+
+**Success Response:**
+- **Code:** `200 OK`
+- **Content:**
+```json
+{
+  "token": "your_admin_jwt_token"
+}
+```
+
+**Error Responses:**
+- **Code:** `401 Unauthorized`
+  - **Content:** `{ "message": "نام کاربری یا رمز عبور اشتباه است" }`
+
+---
+
+### User Management
+
+#### `GET /api/admin/users`
+
+- **Description:** Retrieves a list of all users.
+- **Access:** Admin
+- **Success Response (200 OK):** An array of user objects.
+
+#### `GET /api/admin/users/:id`
+
+- **Description:** Retrieves a single user by their ID.
+- **Access:** Admin
+- **Success Response (200 OK):** A single user object.
+
+#### `PUT /api/admin/users/:id`
+
+- **Description:** Updates a user's information.
+- **Access:** Admin
+- **Request Body:**
+```json
+{
+  "firstName": "string",
+  "lastName": "string",
+  "email": "user@example.com",
+  "phoneNumber": "09123456789",
+  "nationalId": "0123456789",
+  "isActive": true
+}
+```
+- **Success Response (200 OK):** `{ "message": "کاربر با موفقیت به روز شد" }`
+
+#### `DELETE /api/admin/users/:id`
+
+- **Description:** Deletes a user.
+- **Access:** Admin
+- **Success Response (200 OK):** `{ "message": "کاربر با موفقیت حذف شد" }`
+
+---
+
+### Exam Management
+
+#### `GET /api/admin/exams`
+
+- **Description:** Retrieves a list of all exams (both hidden and visible).
+- **Access:** Admin
+- **Success Response (200 OK):** An array of exam objects.
+
+#### `POST /api/admin/exams`
+
+- **Description:** Creates a new exam.
+- **Access:** Admin
+- **Request Body:**
+```json
+{
+  "name": "string",
+  "description": "string (optional)",
+  "startTime": "ISO 8601 String (optional)",
+  "endTime": "ISO 8601 String (optional)",
+  "isHidden": false,
+  "isPurchasable": true,
+  "price": "free"
+}
+```
+- **Success Response (201 Created):** `{ "message": "آزمون با موفقیت ایجاد شد", "exam": { ... } }`
+
+#### `GET /api/admin/exams/:id`
+
+- **Description:** Retrieves a single exam by its ID.
+- **Access:** Admin
+- **Success Response (200 OK):** A single exam object.
+
+#### `PUT /api/admin/exams/:id`
+
+- **Description:** Updates an existing exam.
+- **Access:** Admin
+- **Request Body:** (Same as POST /api/admin/exams)
+- **Success Response (200 OK):** `{ "message": "آزمون با موفقیت به روز شد" }`
+
+#### `DELETE /api/admin/exams/:id`
+
+- **Description:** Deletes an exam.
+- **Access:** Admin
+- **Success Response (200 OK):** `{ "message": "آزمون با موفقیت حذف شد" }`
 
 ---
 

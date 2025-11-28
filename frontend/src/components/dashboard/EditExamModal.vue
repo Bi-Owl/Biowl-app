@@ -105,7 +105,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { VueFinalModal } from 'vue-final-modal';
 import { getExamById } from '@/api/admin';
 import BaseToggle from '@/components/ui/BaseToggle.vue';
@@ -119,13 +119,18 @@ const emit = defineEmits(['confirm', 'close']);
 const loading = ref(true);
 const editableExam = ref({});
 
-// Helper function to format date for datetime-local input
+// Helper function to format UTC date from DB for datetime-local input
 const formatDateForInput = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  // Subtract timezone offset to display local time correctly
-  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-  return date.toISOString().slice(0, 16);
+  // By creating a new date from the UTC string, JS automatically uses the browser's timezone.
+  // We then format it to the required `YYYY-MM-DDTHH:mm` format.
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
 const formattedStartTime = ref('');
@@ -137,6 +142,7 @@ watch(() => props.examId, async (newId) => {
     try {
       const examData = await getExamById(newId);
       editableExam.value = examData;
+      // Use the helper to format dates for the input
       formattedStartTime.value = formatDateForInput(examData.startTime);
       formattedEndTime.value = formatDateForInput(examData.endTime);
     } catch (error) {
@@ -148,15 +154,26 @@ watch(() => props.examId, async (newId) => {
 }, { immediate: true });
 
 const confirm = () => {
-  // Update editableExam with values from the formatted inputs
-  editableExam.value.startTime = formattedStartTime.value || null;
-  editableExam.value.endTime = formattedEndTime.value || null;
-  
-  if (!editableExam.value.price || editableExam.value.price.trim() === '' || editableExam.value.price.trim().toLowerCase() === 'free') {
-    editableExam.value.price = 'free';
+  const dataToEmit = { ...editableExam.value };
+
+  // Handle 'free' price
+  if (!dataToEmit.price || dataToEmit.price.trim() === '' || dataToEmit.price.trim().toLowerCase() === 'free') {
+    dataToEmit.price = 'free';
   }
 
-  emit('confirm', editableExam.value);
+  // Handle dates and append timezone from the formatted refs
+  if (formattedStartTime.value) {
+    dataToEmit.startTime = `${formattedStartTime.value}:00+03:30`;
+  } else {
+    dataToEmit.startTime = null;
+  }
+  if (formattedEndTime.value) {
+    dataToEmit.endTime = `${formattedEndTime.value}:00+03:30`;
+  } else {
+    dataToEmit.endTime = null;
+  }
+  
+  emit('confirm', dataToEmit);
 };
 
 const close = () => {

@@ -119,14 +119,27 @@ const exam = ref({
 });
 
 const confirm = () => {
+  const dataToEmit = { ...exam.value };
+
   // Handle 'free' price
-  if (!exam.value.price || exam.value.price.trim() === '' || exam.value.price.trim().toLowerCase() === 'free') {
-    exam.value.price = 'free';
+  if (!dataToEmit.price || dataToEmit.price.trim() === '' || dataToEmit.price.trim().toLowerCase() === 'free') {
+    dataToEmit.price = 'free';
   }
-  // Handle empty dates
-  if (exam.value.startTime === '') exam.value.startTime = null;
-  if (exam.value.endTime === '') exam.value.endTime = null;
-  emit('confirm', exam.value);
+
+  // Handle dates and append timezone
+  // The input gives a string like "2023-11-28T10:00"
+  if (dataToEmit.startTime) {
+    dataToEmit.startTime = `${dataToEmit.startTime}:00+03:30`;
+  } else {
+    dataToEmit.startTime = null;
+  }
+  if (dataToEmit.endTime) {
+    dataToEmit.endTime = `${dataToEmit.endTime}:00+03:30`;
+  } else {
+    dataToEmit.endTime = null;
+  }
+  
+  emit('confirm', dataToEmit);
 };
 
 const close = () => {

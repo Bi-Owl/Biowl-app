@@ -21,6 +21,7 @@ The `User` model represents an individual user account in the system.
 | `nationalId`  | `STRING`        | Not Null, Unique                          |
 | `email`       | `STRING`        | Not Null, Unique, Valid email format      |
 | `password`    | `STRING`        | Not Null                                  |
+| `isActive`    | `BOOLEAN`       | Not Null, Default: `false`                |
 
 ### Scopes
 
@@ -33,7 +34,27 @@ The `User` model represents an individual user account in the system.
 
 ---
 
-## 2. Exam
+## 2. Admin
+
+The `Admin` model represents an administrator account with elevated privileges.
+
+**File:** `backend/models/admin.js`
+
+### Fields
+
+| Field       | Type      | Constraints               | Description                               |
+|-------------|-----------|---------------------------|-------------------------------------------|
+| `username`  | `STRING`  | Not Null, Unique          | The unique username for the admin.        |
+| `password`  | `STRING`  | Not Null                  | The admin's hashed password.              |
+
+### Hooks and Methods
+
+- **`beforeCreate` Hook**: Automatically hashes the admin's password before a new admin record is created.
+- **`isValidPassword(password)`**: An instance method that compares a plaintext password against the stored hash to validate login attempts. Returns a boolean.
+
+---
+
+## 3. Exam
 
 The `Exam` model represents a test or an assessment that users can take.
 
@@ -58,7 +79,7 @@ The `Exam` model represents a test or an assessment that users can take.
 
 ---
 
-## 3. UserExam
+## 4. UserExam
 
 This model is a **join table** that connects the `User` and `Exam` models, representing the status of an exam for a specific user (e.g., whether it has been purchased).
 
