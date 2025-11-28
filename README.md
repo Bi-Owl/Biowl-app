@@ -1,38 +1,95 @@
-# vue-project
+# Biowl-app: Exam Management Platform
 
-This template should help get you started developing with Vue 3 in Vite.
+Biowl-app is a full-stack web platform for creating, managing, and taking online exams. The system features separate panels for users and administrators, providing functionalities such as exam purchasing via an internal wallet, comprehensive question and exam management, and secure authentication.
 
-## Recommended IDE Setup
+---
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## ✨ Features
 
-## Recommended Browser Setup
+### User Panel
+- **Secure Registration & Login:** JWT-based authentication system.
+- **Exam Store:** Browse and view a list of purchasable exams.
+- **Internal Wallet:** Ability to charge the wallet and purchase exams.
+- **Personal Dashboard:** View purchased exams and their status.
+- **Exam Start System:** Countdown for timed exams and the ability to start an assessment.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) 
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+### Admin Panel
+- **Management Dashboard:** Centralized access to various management sections.
+- **Full User Management (CRUD):** View, edit user information, activate/deactivate accounts, and manage user wallet balances.
+- **Full Exam Management (CRUD):**
+  - Create exams with details like name, description, start/end times, duration, and price.
+  - Hide or show exams in the store.
+  - Set the purchasable status for each exam.
+- **Full Question Management (CRUD):**
+  - Add questions to a specific exam with image uploads.
+  - Define the number of options and the correct option.
+  - **Drag-and-Drop Reordering:** Easily reorder questions by dragging and dropping them.
+- **Security:** All admin APIs are protected by `adminAuthMiddleware`.
 
-## Customize configuration
+---
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+## 🛠️ Tech Stack
 
-## Project Setup
+### Backend
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **Database:** Sequelize ORM with SQLite (for development)
+- **Authentication:** JSON Web Tokens (JWT)
+- **File Uploads:** Multer
+- **Hashing:** bcryptjs
+- **Environment Variables:** Dotenv
 
-```sh
+### Frontend
+- **Framework:** Vue.js 3 (with Composition API)
+- **Build Tool:** Vite
+- **Styling:** Tailwind CSS
+- **Routing:** Vue Router
+- **Drag-and-Drop:** vuedraggable.next
+- **Notifications:** `vue-toastification`
+- **Modals:** `vue-final-modal`
+
+---
+
+## 🚀 Setup and Installation
+
+To run the project locally, follow the steps below for both the `frontend` and `backend` directories.
+
+### 1. Backend Setup
+
+```bash
+# Navigate to the backend directory
+cd backend
+
+# Install dependencies
 npm install
+
+# Create a .env file from the example. No changes are needed for SQLite development.
+cp .env.example .env
+
+# Run the server
+npm start
 ```
+The backend server will run on port `3000` by default.
 
-### Compile and Hot-Reload for Development
+### 2. Frontend Setup
 
-```sh
+```bash
+# Navigate to the frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Run the development server
 npm run dev
 ```
+The frontend application will be available on port `5173` by default.
 
-### Compile and Minify for Production
+---
 
-```sh
-npm run build
-```
+## 📄 Documentation
+
+For more information about the database models and API endpoints, please refer to the documentation files:
+
+- **[Database Model Documentation](./docs/models.md)**
+- **[API Documentation](./docs/api.md)**
