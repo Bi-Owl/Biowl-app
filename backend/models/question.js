@@ -7,6 +7,11 @@ const Question = sequelize.define('Question', {
     autoIncrement: true,
     primaryKey: true,
   },
+  position: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    comment: 'The order of the question within the exam.',
+  },
   imageUrl: {
     type: DataTypes.STRING,
     allowNull: false,

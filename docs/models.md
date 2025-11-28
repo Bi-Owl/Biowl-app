@@ -116,6 +116,7 @@ The `Question` model represents a single question within an exam.
 | Field             | Type      | Constraints                 | Description                                                          |
 |-------------------|-----------|-----------------------------|----------------------------------------------------------------------|
 | `id`              | `INTEGER` | Primary Key, Auto-increment | The unique identifier for the question.                              |
+| `position`        | `INTEGER` | Not Null                    | The order of the question within the exam.                           |
 | `imageUrl`        | `STRING`  | Not Null                    | URL to the image containing the question text and all options.       |
 | `numberOfOptions` | `INTEGER` | Not Null                    | The total number of options for this question (e.g., 4).             |
 | `correctOption`   | `INTEGER` | Not Null                    | The number of the correct option (e.g., 1, 2, 3, etc.).              |

@@ -161,7 +161,7 @@ exports.deleteExam = async (req, res) => {
 exports.createQuestion = async (req, res) => {
     try {
         const { examId } = req.params;
-        const { numberOfOptions, correctOption } = req.body;
+        const { numberOfOptions, correctOption, position } = req.body;
 
         if (!req.file) {
             return res.status(400).json({ message: 'لطفا یک تصویر برای سوال آپلود کنید' });
@@ -170,6 +170,7 @@ exports.createQuestion = async (req, res) => {
         const imageUrl = `/uploads/${req.file.filename}`;
 
         const question = await Question.create({
+            position,
             imageUrl,
             numberOfOptions,
             correctOption,
@@ -185,7 +186,10 @@ exports.createQuestion = async (req, res) => {
 exports.getQuestionsForExam = async (req, res) => {
     try {
         const { examId } = req.params;
-        const questions = await Question.findAll({ where: { ExamId: examId } });
+        const questions = await Question.findAll({ 
+            where: { ExamId: examId },
+            order: [['position', 'ASC']]
+        });
         res.json(questions);
     } catch (error) {
         res.status(500).json({ message: 'خطای سرور' });
@@ -195,7 +199,7 @@ exports.getQuestionsForExam = async (req, res) => {
 exports.updateQuestion = async (req, res) => {
     try {
         const { questionId } = req.params;
-        const { numberOfOptions, correctOption } = req.body;
+        const { numberOfOptions, correctOption, position } = req.body;
         
         const question = await Question.findByPk(questionId);
         if (!question) {
@@ -216,6 +220,7 @@ exports.updateQuestion = async (req, res) => {
         }
         
         await question.update({
+            position,
             numberOfOptions,
             correctOption,
             imageUrl,

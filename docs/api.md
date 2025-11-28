@@ -258,6 +258,7 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
 - **URL Params:** `examId` (integer, required)
 - **Form Data:**
   - `questionImage` (file, required): The image file for the question.
+  - `position` (integer, required): The order of the question in the exam.
   - `numberOfOptions` (integer, required): The total number of options.
   - `correctOption` (integer, required): The number of the correct option.
 - **Success Response (201 Created):** `{ "message": "سوال با موفقیت ایجاد شد", "question": { ... } }`
@@ -270,6 +271,7 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
 - **URL Params:** `questionId` (integer, required)
 - **Form Data:**
   - `questionImage` (file, optional): A new image file to replace the existing one.
+  - `position` (integer, required): The order of the question in the exam.
   - `numberOfOptions` (integer, required): The total number of options.
   - `correctOption` (integer, required): The number of the correct option.
 - **Success Response (200 OK):** `{ "message": "سوال با موفقیت به روز شد" }`
