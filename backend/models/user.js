@@ -42,6 +42,11 @@ const User = sequelize.define('User', {
     allowNull: false,
     defaultValue: false,
   },
+  wallet: {
+    type: DataTypes.FLOAT,
+    allowNull: false,
+    defaultValue: 0,
+  },
 }, {
   defaultScope: {
     attributes: { exclude: ['password'] },

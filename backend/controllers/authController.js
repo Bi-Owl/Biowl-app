@@ -24,6 +24,7 @@ const login = async (req, res) => {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        wallet: user.wallet,
         token: generateToken(user.id),
       });
     } else {
@@ -71,6 +72,7 @@ const register = async (req, res) => {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        wallet: user.wallet,
         token: generateToken(user.id),
       });
     } else {

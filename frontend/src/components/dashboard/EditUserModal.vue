@@ -67,10 +67,21 @@
                   <input v-model="editableUser.nationalId" type="text" id="nationalId" class="input-focus bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-lg focus:ring-2 focus:ring-emerald-300 block w-full pl-10 p-2.5" placeholder="1234567890">
                 </div>
               </div>
-              <div class="md:col-span-2">
-                <label class="block mb-2 text-sm font-medium text-emerald-700">وضعیت کاربر</label>
-                <div class="flex items-center">
-                  <BaseToggle v-model="editableUser.isActive" :label="editableUser.isActive ? 'فعال' : 'غیرفعال'" />
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                <div>
+                  <label class="block mb-2 text-sm font-medium text-emerald-700">وضعیت کاربر</label>
+                  <div class="flex items-center">
+                    <BaseToggle v-model="editableUser.isActive" :label="editableUser.isActive ? 'فعال' : 'غیرفعال'" />
+                  </div>
+                </div>
+                <div>
+                  <label for="wallet" class="block mb-2 text-sm font-medium text-emerald-700">موجودی کیف پول (تومان)</label>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                      <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                    </div>
+                    <input v-model.number="editableUser.wallet" type="number" id="wallet" class="input-focus bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-lg focus:ring-2 focus:ring-emerald-300 block w-full pl-10 p-2.5" placeholder="0">
+                  </div>
                 </div>
               </div>
             </div>

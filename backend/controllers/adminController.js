@@ -56,7 +56,7 @@ exports.updateUser = async (req, res) => {
   try {
     const user = await User.findByPk(req.params.id);
     if (user) {
-      const { firstName, lastName, email, phoneNumber, nationalId, isActive } = req.body;
+      const { firstName, lastName, email, phoneNumber, nationalId, isActive, wallet } = req.body;
       await user.update({
         firstName,
         lastName,
@@ -64,6 +64,7 @@ exports.updateUser = async (req, res) => {
         phoneNumber,
         nationalId,
         isActive,
+        wallet,
       });
       res.json({ message: 'کاربر با موفقیت به روز شد' });
     } else {

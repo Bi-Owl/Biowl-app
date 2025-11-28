@@ -8,6 +8,7 @@
             <th class="py-3 px-6">مشخصات کاربر</th>
             <th class="py-3 px-6">اطلاعات تماس</th>
             <th class="py-3 px-6">کد ملی</th>
+            <th class="py-3 px-6 text-center">موجودی کیف پول</th>
             <th class="py-3 px-6 text-center">وضعیت</th>
             <th class="py-3 px-6 text-center">عملیات</th>
           </tr>
@@ -27,6 +28,9 @@
             </td>
             <td class="py-3 px-6">
               <div>{{ user.nationalId }}</div>
+            </td>
+            <td class="py-3 px-6 text-center font-mono">
+                {{ new Intl.NumberFormat('fa-IR').format(user.wallet) }} <span class="text-xs">تومان</span>
             </td>
             <td class="py-3 px-6 text-center">
               <span :class="user.isActive ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'" class="py-1 px-3 rounded-full text-xs">
