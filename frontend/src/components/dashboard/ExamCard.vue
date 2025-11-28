@@ -141,9 +141,10 @@ const countdownText = computed(() => {
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-  let result = 'شروع تا: ';
-  if (days > 0) result += `${days} روز و `;
-  result += `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  return result;
+  if (days > 0) {
+    return `شروع تا ${days} روز دیگر`;
+  }
+  
+  return `شروع تا: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 });
 </script>
