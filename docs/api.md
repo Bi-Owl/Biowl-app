@@ -449,7 +449,130 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
       "endTime": "2025-11-01T12:00:00.000Z",
       "price": "15000"
     }
-  ]
-  ```
+## Exam Attempts
 
+This section covers endpoints related to the process of taking an exam.
+
+---
+
+### `POST /api/exams/:examId/start`
+
+- **URL:** `/api/exams/:examId/start`
+- **Method:** `POST`
+- **Access:** Private (Requires a standard authentication token)
+- **Description:** Starts or resumes an exam attempt for the authenticated user. It performs several checks:
+  1. Verifies the user has purchased the exam.
+  2. Checks if the exam is currently active (within its `startTime` and `endTime`).
+  3. Finds an existing `in_progress` attempt or creates a new one.
+  4. Calculates the remaining time for the user.
+  5. Returns a special short-lived **exam token** that must be used for all subsequent actions within this attempt.
+- **URL Params:**
+  - `examId` (integer, required): The ID of the exam to start.
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer your_standard_jwt_token"
+  }
+  ```
+- **Success Response (200 OK):**
+  ```json
+  {
+    "message": "Exam started successfully.",
+    "attempt": {
+      "id": 1,
+      "startedAt": "2025-11-29T10:00:00.000Z",
+      "status": "in_progress",
+      "answers": {
+        "15": "2" // Example of a previously saved answer
+      }
+    },
+    "questions": [ // Array of question objects without the correctOption field
+      {
+        "id": 15,
+        "position": 1,
+        "imageUrl": "/uploads/image.png",
+        "numberOfOptions": 4
+      }
+    ],
+    "remainingTime": 3540000, // Remaining time in milliseconds
+    "examToken": "your_short_lived_exam_jwt_token"
+  }
+  ```
+- **Error Responses:**
+  - **`403 Forbidden`**: 
+    - `{ "message": "You have not purchased this exam." }`
+    - `{ "message": "This exam is not currently active." }`
+    - `{ "message": "You have already completed this exam." }`
+    - `{ "message": "Your time for this exam has expired." }`
+  - **`404 Not Found`**: `{ "message": "Exam not found." }`
+
+---
+
+### `PUT /api/attempts/:attemptId/answer`
+
+- **URL:** `/api/attempts/:attemptId/answer`
+- **Method:** `PUT`
+- **Access:** Private (Requires the special **exam token** obtained from the start endpoint)
+- **Description:** Submits or updates a user's answer for a single question within a specific exam attempt.
+- **URL Params:**
+  - `attemptId` (integer, required): The ID of the exam attempt.
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer your_short_lived_exam_jwt_token"
+  }
+  ```
+- **Request Body:**
+  ```json
+  {
+    "questionId": "15",
+    "answer": "3" // The selected option index (or null/empty to clear)
+  }
+  ```
+- **Success Response (200 OK):**
+  ```json
+  {
+    "message": "Answer saved successfully.",
+    "answers": {
+      "15": "3"
+    }
+  }
+  ```
+- **Error Responses:**
+  - **`401 Unauthorized`**: 
+    - `{ "message": "Not authorized, no exam token." }`
+    - `{ "message": "Exam time has expired." }`
+  - **`403 Forbidden`**: `{ "message": "This exam has already been completed." }`
+  - **`404 Not Found`**: `{ "message": "Exam attempt not found." }`
+
+---
+
+### `POST /api/attempts/:attemptId/finish`
+
+- **URL:** `/api/attempts/:attemptId/finish`
+- **Method:** `POST`
+- **Access:** Private (Requires the special **exam token**)
+- **Description:** Manually finishes an exam attempt. This action is final and marks the attempt as 'completed', preventing any further answers from being submitted.
+- **URL Params:**
+  - `attemptId` (integer, required): The ID of the exam attempt to finish.
+- **Headers:**
+  ```json
+  {
+    "Authorization": "Bearer your_short_lived_exam_jwt_token"
+  }
+  ```
+- **Success Response (200 OK):**
+  ```json
+  {
+    "message": "Exam attempt finished successfully.",
+    "attempt": {
+      "id": 1,
+      "status": "completed",
+      "finishedAt": "2025-11-29T10:30:00.000Z"
+    }
+  }
+  ```
+- **Error Responses:**
+  - **`400 Bad Request`**: `{ "message": "This exam has already been marked as completed." }`
+  - **`401 Unauthorized`**: If the exam token is invalid or expired.
 ---

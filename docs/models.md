@@ -126,3 +126,28 @@ The `Question` model represents a single question within an exam.
 ### Relationships
 
 - **Belongs to `Exam`**: Each question is part of one exam.
+
+---
+
+## 6. UserExamAttempt
+
+This model represents a user's single attempt to take an exam. It is created when a user starts an exam for the first time and stores their answers and progress.
+
+**File:** `backend/models/userExamAttempt.js`
+
+### Fields
+
+| Field        | Type                          | Constraints                  | Description                                                              |
+|--------------|-------------------------------|------------------------------|--------------------------------------------------------------------------|
+| `id`         | `INTEGER`                     | Primary Key, Auto-increment  | The unique identifier for this specific attempt.                         |
+| `startedAt`  | `DATE`                        | Not Null                     | The exact timestamp when the user started the exam attempt.              |
+| `finishedAt` | `DATE`                        | Nullable                     | The timestamp when the attempt was completed (either manually or by timeout). |
+| `status`     | `ENUM('in_progress', 'completed')` | Not Null, Default: `in_progress` | The current status of the exam attempt.                                  |
+| `answers`    | `JSON`                        | Not Null, Default: `{}`      | A JSON object storing the user's answers, with `questionId` as the key.  |
+| `UserId`     | `INTEGER`                     | Foreign Key                  | References the `id` of the user taking the exam.                         |
+| `ExamId`     | `INTEGER`                     | Foreign Key                  | References the `id` of the exam being attempted.                         |
+
+### Relationships
+
+- **Belongs to `User`**: Each attempt is made by one user.
+- **Belongs to `Exam`**: Each attempt is for one exam.

@@ -6,9 +6,12 @@ const Exam = require('./models/exam');
 const UserExam = require('./models/userExam');
 const Admin = require('./models/admin'); // Import the Admin model
 const Question = require('./models/question');
+const UserExamAttempt = require('./models/userExamAttempt');
+
 const examRoutes = require('./routes/examRoutes');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes'); // Import the admin routes
+const examAttemptRoutes = require('./routes/examAttemptRoutes');
 const path = require('path');
 
 const app = express();
@@ -24,11 +27,16 @@ User.belongsToMany(Exam, { through: UserExam });
 Exam.belongsToMany(User, { through: UserExam });
 Exam.hasMany(Question);
 Question.belongsTo(Exam);
+UserExamAttempt.belongsTo(User);
+User.hasMany(UserExamAttempt);
+UserExamAttempt.belongsTo(Exam);
+Exam.hasMany(UserExamAttempt);
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/admin', adminRoutes); // Add the admin routes
+app.use('/api/attempts', examAttemptRoutes);
 
 // Test route
 app.get('/', (req, res) => {
