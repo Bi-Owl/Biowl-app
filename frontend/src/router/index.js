@@ -35,6 +35,12 @@ const routes = [
     component: AdminDashboardPage,
     meta: { requiresAdminAuth: true },
   },
+  {
+    path: '/exam/:examId/attempt',
+    name: 'ExamAttempt',
+    component: () => import('../pages/ExamTakingPage.vue'),
+    meta: { requiresAuth: true, hideLayout: true },
+  },
 ];
 
 const router = createRouter({

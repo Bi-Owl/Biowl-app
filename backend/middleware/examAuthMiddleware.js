@@ -14,20 +14,20 @@ const examAuthMiddleware = async (req, res, next) => {
 
             // Check if the decoded token has the attemptId
             if (!decoded.attemptId) {
-                return res.status(401).json({ message: 'Not authorized, invalid exam token.' });
+                return res.status(401).json({ message: 'عدم دسترسی: توکن آزمون نامعتبر است.' });
             }
 
             // Get attempt from the token
             const attempt = await UserExamAttempt.findByPk(decoded.attemptId);
 
             if (!attempt) {
-                return res.status(404).json({ message: 'Exam attempt not found.' });
+                return res.status(404).json({ message: 'تلاش آزمون یافت نشد.' });
             }
 
             // Check if the user ID in the token matches the user associated with the attempt
             // This also uses the user ID from the general 'protect' middleware that should run before this.
             if (attempt.UserId !== req.user.id) {
-                return res.status(401).json({ message: 'Not authorized to access this attempt.' });
+                return res.status(401).json({ message: 'عدم دسترسی به این تلاش.' });
             }
             
             // Attach the attempt object to the request for use in the controller
@@ -52,14 +52,14 @@ const examAuthMiddleware = async (req, res, next) => {
                 } catch (saveError) {
                     console.error('Error updating attempt status on token expiration:', saveError);
                 }
-                return res.status(401).json({ message: 'Exam time has expired.' });
+                return res.status(401).json({ message: 'زمان آزمون به پایان رسیده است.' });
             }
-            res.status(401).json({ message: 'Not authorized, token failed.' });
+            res.status(401).json({ message: 'عدم دسترسی: توکن نامعتبر است.' });
         }
     }
 
     if (!token) {
-        res.status(401).json({ message: 'Not authorized, no exam token.' });
+        res.status(401).json({ message: 'عدم دسترسی: توکن ارسال نشده است.' });
     }
 };
 

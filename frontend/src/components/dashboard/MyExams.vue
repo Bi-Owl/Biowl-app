@@ -17,22 +17,42 @@
         @start="handleStartExam"
       />
     </div>
+
+    <!-- Start Exam Confirmation Modal -->
+    <StartConfirmModal
+      v-if="showStartModal && selectedExam"
+      v-model="showStartModal"
+      :exam="selectedExam"
+      :question-count="selectedExam.questionCount || 0" 
+      :loading="startLoading"
+      @confirm="confirmStartExam"
+      @close="showStartModal = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
-import { fetchPurchasedExams } from '@/api/exams';
+import { fetchPurchasedExams, startExamAttempt } from '@/api/exams';
 import ExamCard from '@/components/dashboard/ExamCard.vue';
+import StartConfirmModal from '@/components/exam/StartConfirmModal.vue';
 
 const toast = useToast();
+const router = useRouter();
 const exams = ref([]);
 const loading = ref(true);
+
+const showStartModal = ref(false);
+const selectedExam = ref(null);
+const startLoading = ref(false);
 
 onMounted(async () => {
   loading.value = true;
   try {
+    // Ideally, the backend should provide the question count with the purchased exams list.
+    // We are assuming it might exist, or it will be gracefully handled as 0.
     exams.value = await fetchPurchasedExams();
   } catch (error) {
     toast.error('خطا در دریافت آزمون‌های خریداری شده.');
@@ -42,7 +62,32 @@ onMounted(async () => {
 });
 
 const handleStartExam = (exam) => {
-  toast.info(`شروع آزمون "${exam.name}" به زودی پیاده‌سازی خواهد شد.`);
-  // Logic to start the exam will be implemented here
+  selectedExam.value = exam;
+  showStartModal.value = true;
+};
+
+const confirmStartExam = async () => {
+  if (!selectedExam.value) return;
+  startLoading.value = true;
+  try {
+    const data = await startExamAttempt(selectedExam.value.id);
+    
+    // Save the entire payload to sessionStorage to be picked up by the exam page
+    sessionStorage.setItem('examAttemptData', JSON.stringify(data));
+
+    toast.success(`آزمون "${selectedExam.value.name}" با موفقیت شروع شد!`);
+    
+    // Navigate to the exam taking page
+    router.push({
+      name: 'ExamAttempt',
+      params: { examId: selectedExam.value.id }
+    });
+
+  } catch (error) {
+    toast.error(error.message);
+    showStartModal.value = false;
+  } finally {
+    startLoading.value = false;
+  }
 };
 </script>

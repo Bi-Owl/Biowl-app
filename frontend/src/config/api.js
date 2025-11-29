@@ -11,6 +11,9 @@ export const EXAM_API = {
   GET_ALL: `${API_BASE_URL}/exams`,
   GET_PURCHASED: `${API_BASE_URL}/exams/purchased`,
   PURCHASE: (examId) => `${API_BASE_URL}/exams/${examId}/purchase`,
+  START_ATTEMPT: (examId) => `${API_BASE_URL}/exams/${examId}/start`,
+  UPDATE_ANSWER: (attemptId) => `${API_BASE_URL}/attempts/${attemptId}/answer`,
+  FINISH_ATTEMPT: (attemptId) => `${API_BASE_URL}/attempts/${attemptId}/finish`,
 };
 
 export const ADMIN_API = {

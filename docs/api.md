@@ -371,7 +371,8 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
       "description": "A comprehensive test of general knowledge.",
       "startTime": "2025-11-01T10:00:00.000Z",
       "endTime": "2025-11-01T12:00:00.000Z",
-      "price": "15000"
+      "price": "15000",
+      "isPurchasable": true
     },
     {
       "id": 2,
@@ -379,7 +380,8 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
       "description": "An introductory exam for basic mathematics.",
       "startTime": "2025-11-05T09:00:00.000Z",
       "endTime": "2025-11-05T10:00:00.000Z",
-      "price": "free"
+      "price": "free",
+      "isPurchasable": true
     }
   ]
   ```
@@ -447,8 +449,12 @@ All admin routes are prefixed with `/api/admin`. Access to these routes (except 
       "description": "A comprehensive test of general knowledge.",
       "startTime": "2025-11-01T10:00:00.000Z",
       "endTime": "2025-11-01T12:00:00.000Z",
-      "price": "15000"
+      "price": "15000",
+      "duration": 90,
+      "questionCount": 50
     }
+  ]
+  ```
 ## Exam Attempts
 
 This section covers endpoints related to the process of taking an exam.
@@ -500,11 +506,11 @@ This section covers endpoints related to the process of taking an exam.
   ```
 - **Error Responses:**
   - **`403 Forbidden`**: 
-    - `{ "message": "You have not purchased this exam." }`
-    - `{ "message": "This exam is not currently active." }`
-    - `{ "message": "You have already completed this exam." }`
-    - `{ "message": "Your time for this exam has expired." }`
-  - **`404 Not Found`**: `{ "message": "Exam not found." }`
+    - `{ "message": "شما این آزمون را خریداری نکرده‌اید." }`
+    - `{ "message": "این آزمون در حال حاضر فعال نیست." }`
+    - `{ "message": "شما قبلاً این آزمون را به پایان رسانده‌اید." }`
+    - `{ "message": "زمان شما برای این آزمون به پایان رسیده است." }`
+  - **`404 Not Found`**: `{ "message": "آزمون یافت نشد." }`
 
 ---
 
@@ -532,7 +538,7 @@ This section covers endpoints related to the process of taking an exam.
 - **Success Response (200 OK):**
   ```json
   {
-    "message": "Answer saved successfully.",
+    "message": "پاسخ شما ذخیره شد.",
     "answers": {
       "15": "3"
     }
@@ -540,10 +546,10 @@ This section covers endpoints related to the process of taking an exam.
   ```
 - **Error Responses:**
   - **`401 Unauthorized`**: 
-    - `{ "message": "Not authorized, no exam token." }`
-    - `{ "message": "Exam time has expired." }`
-  - **`403 Forbidden`**: `{ "message": "This exam has already been completed." }`
-  - **`404 Not Found`**: `{ "message": "Exam attempt not found." }`
+    - `{ "message": "عدم دسترسی: توکن ارسال نشده است." }`
+    - `{ "message": "زمان آزمون به پایان رسیده است." }`
+  - **`403 Forbidden`**: `{ "message": "این آزمون قبلاً تکمیل شده است." }`
+  - **`404 Not Found`**: `{ "message": "تلاش آزمون یافت نشد." }`
 
 ---
 
@@ -564,7 +570,7 @@ This section covers endpoints related to the process of taking an exam.
 - **Success Response (200 OK):**
   ```json
   {
-    "message": "Exam attempt finished successfully.",
+    "message": "آزمون شما با موفقیت ثبت شد.",
     "attempt": {
       "id": 1,
       "status": "completed",
@@ -573,6 +579,6 @@ This section covers endpoints related to the process of taking an exam.
   }
   ```
 - **Error Responses:**
-  - **`400 Bad Request`**: `{ "message": "This exam has already been marked as completed." }`
+  - **`400 Bad Request`**: `{ "message": "این آزمون قبلاً به عنوان تکمیل شده علامت‌گذاری شده است." }`
   - **`401 Unauthorized`**: If the exam token is invalid or expired.
 ---

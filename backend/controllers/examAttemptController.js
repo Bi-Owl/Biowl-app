@@ -15,19 +15,19 @@ const startAttempt = async (req, res) => {
     // 1. Check if user has purchased the exam
     const userExam = await UserExam.findOne({ where: { UserId: userId, ExamId: examId } });
     if (!userExam) {
-      return res.status(403).json({ message: 'You have not purchased this exam.' });
+      return res.status(403).json({ message: 'شما این آزمون را خریداری نکرده‌اید.' });
     }
 
     // 2. Get Exam details
     const exam = await Exam.findByPk(examId);
     if (!exam) {
-      return res.status(404).json({ message: 'Exam not found.' });
+      return res.status(404).json({ message: 'آزمون یافت نشد.' });
     }
 
     // 3. Check if exam is within the available time window
     const now = new Date();
     if (now < new Date(exam.startTime) || now > new Date(exam.endTime)) {
-      return res.status(403).json({ message: 'This exam is not currently active.' });
+      return res.status(403).json({ message: 'این آزمون در حال حاضر فعال نیست.' });
     }
 
     // 4. Find or create an attempt
@@ -36,7 +36,7 @@ const startAttempt = async (req, res) => {
     if (attempt) {
       // If attempt is already completed, deny access
       if (attempt.status === 'completed') {
-        return res.status(403).json({ message: 'You have already completed this exam.' });
+        return res.status(403).json({ message: 'شما قبلاً این آزمون را به پایان رسانده‌اید.' });
       }
     } else {
       // If no attempt exists, create one
@@ -57,12 +57,12 @@ const startAttempt = async (req, res) => {
       attempt.status = 'completed';
       attempt.finishedAt = new Date();
       await attempt.save();
-      return res.status(403).json({ message: 'Your time for this exam has expired.' });
+      return res.status(403).json({ message: 'زمان شما برای این آزمون به پایان رسیده است.' });
     }
     
     // 6. Generate a short-lived JWT for this specific attempt
     const examToken = jwt.sign(
-      { attemptId: attempt.id, userId: userId },
+      { id: userId, attemptId: attempt.id }, // Use 'id' to be compatible with 'protect' middleware
       process.env.JWT_SECRET,
       { expiresIn: Math.ceil(remainingTime / 1000) } // expiresIn is in seconds
     );
@@ -74,7 +74,7 @@ const startAttempt = async (req, res) => {
     });
 
     res.json({
-      message: 'Exam started successfully.',
+      message: 'آزمون با موفقیت شروع شد.',
       attempt: {
         id: attempt.id,
         startedAt: attempt.startedAt,
@@ -88,7 +88,7 @@ const startAttempt = async (req, res) => {
 
   } catch (error) {
     console.error('Error starting exam attempt:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'خطای سرور' });
   }
 };
 
@@ -106,7 +106,7 @@ const updateAnswer = async (req, res) => {
 
         // 1. Double-check if the attempt is still in progress
         if (attempt.status === 'completed') {
-            return res.status(403).json({ message: 'This exam has already been completed.' });
+            return res.status(403).json({ message: 'این آزمون قبلاً تکمیل شده است.' });
         }
 
         // 2. Validate questionId and answer if necessary (e.g., ensure question belongs to the exam)
@@ -125,13 +125,13 @@ const updateAnswer = async (req, res) => {
         await attempt.save();
 
         res.json({
-            message: 'Answer saved successfully.',
+            message: 'پاسخ شما ذخیره شد.',
             answers: attempt.answers,
         });
 
     } catch (error) {
         console.error('Error updating answer:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'خطای سرور' });
     }
 };
 
@@ -145,7 +145,7 @@ const finishAttempt = async (req, res) => {
 
         // 1. Check if the attempt is already completed
         if (attempt.status === 'completed') {
-            return res.status(400).json({ message: 'This exam has already been marked as completed.' });
+            return res.status(400).json({ message: 'این آزمون قبلاً به عنوان تکمیل شده علامت‌گذاری شده است.' });
         }
 
         // 2. Mark the attempt as completed
@@ -156,7 +156,7 @@ const finishAttempt = async (req, res) => {
         await attempt.save();
 
         res.json({
-            message: 'Exam attempt finished successfully.',
+            message: 'آزمون شما با موفقیت ثبت شد.',
             attempt: {
                 id: attempt.id,
                 status: attempt.status,
@@ -166,7 +166,7 @@ const finishAttempt = async (req, res) => {
 
     } catch (error) {
         console.error('Error finishing attempt:', error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'خطای سرور' });
     }
 };
 

@@ -1,6 +1,7 @@
 const Exam = require('../models/exam');
 const UserExam = require('../models/userExam');
 const User = require('../models/user');
+const Question = require('../models/question');
 const sequelize = require('../config/database');
 
 // @desc    Get all public exams
@@ -10,7 +11,7 @@ const getPublicExams = async (req, res) => {
   try {
     const exams = await Exam.findAll({
       where: { isHidden: false },
-      attributes: ['id', 'name', 'description', 'startTime', 'endTime', 'price'],
+      attributes: ['id', 'name', 'description', 'startTime', 'endTime', 'price', 'isPurchasable'],
     });
     res.json(exams);
   } catch (err) {
@@ -117,7 +118,7 @@ const getPurchasedExams = async (req, res) => {
     const user = await User.findByPk(userId, {
       include: [{
         model: Exam,
-        attributes: ['id', 'name', 'description', 'startTime', 'endTime', 'price'],
+        attributes: ['id', 'name', 'description', 'startTime', 'endTime', 'price', 'duration'],
         through: {
           where: { purchased: true },
           attributes: []
@@ -129,7 +130,16 @@ const getPurchasedExams = async (req, res) => {
         return res.status(404).json({ message: "کاربر یافت نشد" });
     }
 
-    res.json(user.Exams);
+    // Manually fetch question counts for each exam
+    const examsWithCounts = await Promise.all(user.Exams.map(async (exam) => {
+      const questionCount = await Question.count({ where: { ExamId: exam.id } });
+      // Important: get a plain object from the Sequelize instance
+      const examPlain = exam.get({ plain: true }); 
+      examPlain.questionCount = questionCount;
+      return examPlain;
+    }));
+
+    res.json(examsWithCounts);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('خطای سرور');

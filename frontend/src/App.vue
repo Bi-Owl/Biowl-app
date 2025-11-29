@@ -31,6 +31,6 @@ const isFullWidthRoute = computed(() => {
 });
 const showLayout = computed(() => {
   const adminRoutes = ['AdminLogin', 'AdminDashboard'];
-  return !isDashboardRoute.value && route.name !== 'Auth' && !adminRoutes.includes(route.name);
+  return !route.meta.hideLayout && !isDashboardRoute.value && route.name !== 'Auth' && !adminRoutes.includes(route.name);
 });
 </script>

@@ -109,7 +109,12 @@ exports.deleteUser = async (req, res) => {
 
 exports.createExam = async (req, res) => {
   try {
-    const { name, description, startTime, endTime, isHidden, isPurchasable, price, duration } = req.body;
+    let { name, description, startTime, endTime, isHidden, isPurchasable, price, duration } = req.body;
+    
+    // Coerce to boolean for robustness
+    isPurchasable = isPurchasable === true || isPurchasable === 'true';
+    isHidden = isHidden === true || isHidden === 'true';
+
     if (!name) {
       return res.status(400).json({ message: 'نام آزمون اجباری است.' });
     }
@@ -162,7 +167,12 @@ exports.updateExam = async (req, res) => {
   try {
     const exam = await Exam.findByPk(req.params.id);
     if (exam) {
-      const { name, description, startTime, endTime, isHidden, isPurchasable, price, duration } = req.body;
+      let { name, description, startTime, endTime, isHidden, isPurchasable, price, duration } = req.body;
+      
+      // Coerce to boolean for robustness
+      isPurchasable = isPurchasable === true || isPurchasable === 'true';
+      isHidden = isHidden === true || isHidden === 'true';
+
       await exam.update({ name, description, startTime, endTime, duration, isHidden, isPurchasable, price });
       res.json({ message: 'آزمون با موفقیت به روز شد' });
     } else {
