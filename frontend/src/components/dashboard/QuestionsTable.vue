@@ -29,7 +29,7 @@
             <tr :key="element.id" class="border-b border-gray-200 hover:bg-gray-100">
               <td class="py-3 px-6 font-semibold drag-handle cursor-move">{{ element.position }}</td>
               <td class="py-3 px-6">
-                  <img :src="`${apiBaseUrl}${element.imageUrl}`" alt="Question Image" class="w-24 h-auto rounded-md object-cover cursor-pointer" @click="showImage(element.imageUrl)" />
+                  <img :src="`${STATIC_BASE_URL}${element.imageUrl}`" alt="Question Image" class="w-24 h-auto rounded-md object-cover cursor-pointer" @click="showImage(element.imageUrl)" />
               </td>
               <td class="py-3 px-6">{{ element.numberOfOptions }}</td>
               <td class="py-3 px-6">{{ element.correctOption }}</td>
@@ -66,6 +66,7 @@ import { useToast } from 'vue-toastification';
 import { useModal } from 'vue-final-modal';
 import draggable from 'vuedraggable';
 import { getQuestionsForExam, deleteQuestion, createQuestion, updateQuestion, reorderQuestions } from '@/api/admin';
+import { STATIC_BASE_URL } from '@/config/api';
 import AddEditQuestionModal from '@/components/dashboard/AddEditQuestionModal.vue';
 
 const props = defineProps({
@@ -78,7 +79,6 @@ const props = defineProps({
 const questions = ref([]);
 const loading = ref(true);
 const toast = useToast();
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 const fetchQuestions = async () => {
     loading.value = true;
@@ -168,7 +168,7 @@ const confirmDelete = async (id) => {
 };
 
 const showImage = (url) => {
-    window.open(`${apiBaseUrl}${url}`, '_blank');
+    window.open(`${STATIC_BASE_URL}${url}`, '_blank');
 }
 </script>
 

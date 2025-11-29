@@ -24,9 +24,8 @@
 </template>
 
 <script setup>
+import { STATIC_BASE_URL } from '@/config/api';
 import AnswerOption from './AnswerOption.vue';
-
-const STATIC_BASE_URL = 'http://localhost:3000';
 
 const props = defineProps({
   question: {
