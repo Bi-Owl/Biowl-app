@@ -25,7 +25,7 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign({ id: admin.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token });
+    res.json({ message: 'شما با موفقیت به پنل مدیریت وارد شدید.', token });
 
   } catch (error) {
     res.status(500).json({ message: 'خطای سرور' });

@@ -57,7 +57,7 @@ const handleSubmit = async () => {
   try {
     const data = await adminLogin(username.value, password.value);
     adminAuth.login(data);
-    toast.success('ورود با موفقیت انجام شد!');
+    toast.success(data.message);
     router.push('/admin-panel');
   } catch (error) {
     console.error('Admin login error:', error);

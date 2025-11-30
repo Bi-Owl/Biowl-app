@@ -20,6 +20,7 @@ const login = async (req, res) => {
       }
 
       res.json({
+        message: 'شما با موفقیت وارد شدید.',
         id: user.id,
         email: user.email,
         firstName: user.firstName,
@@ -68,6 +69,7 @@ const register = async (req, res) => {
 
     if (user) {
       res.status(201).json({
+        message: 'ثبت‌نام شما با موفقیت انجام شد.',
         id: user.id,
         email: user.email,
         firstName: user.firstName,

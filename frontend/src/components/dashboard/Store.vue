@@ -46,7 +46,7 @@ onMounted(async () => {
     purchasedExamIds.value = new Set(purchased.map(e => e.id));
 
   } catch (error) {
-    toast.error('خطا در دریافت اطلاعات آزمون‌ها.');
+    toast.error(error.message);
   } finally {
     loading.value = false;
   }
@@ -72,7 +72,7 @@ const handlePurchase = async (exam) => {
     }
 
   } catch (error) {
-    toast.error(error.message || 'خرید آزمون با خطا مواجه شد.');
+    toast.error(error.message);
   } finally {
     isPurchasing.value[exam.id] = false;
   }

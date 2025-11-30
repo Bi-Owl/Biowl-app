@@ -104,7 +104,7 @@ const fetchExams = async () => {
   try {
     exams.value = await getExams();
   } catch (error) {
-    toast.error('خطا در دریافت لیست آزمون‌ها');
+    toast.error(error.message);
     console.error(error);
   } finally {
     loading.value = false;
@@ -160,11 +160,11 @@ const openEditModal = (exam) => {
 const confirmDelete = async (id) => {
   if (confirm('آیا از حذف این آزمون اطمینان دارید؟')) {
     try {
-      await deleteExam(id);
-      toast.success('آزمون با موفقیت حذف شد.');
+      const res = await deleteExam(id);
+      toast.success(res.message);
       fetchExams(); // Refresh the list
     } catch (error) {
-      toast.error('خطا در حذف آزمون.');
+      toast.error(error.message);
       console.error(error);
     }
   }

@@ -112,7 +112,7 @@ const handleSubmit = async () => {
       password: password.value,
     };
     const data = await signup(userData);
-    toast.success('اکانت شما با موفقیت ساخته شد!');
+    toast.success(data.message);
     setTimeout(() => {
       location.reload(); // Reload the page after a short delay
     }, 750);

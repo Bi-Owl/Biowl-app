@@ -70,7 +70,7 @@ const handleSubmit = async () => {
   try {
     const data = await login(email.value, password.value);
     auth.login(data, rememberMe.value);
-    toast.success('ورود با موفقیت انجام شد!');
+    toast.success(data.message);
     router.push('/dashboard');
   } catch (error) {
     console.error('Login error:', error);

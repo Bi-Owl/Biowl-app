@@ -1,0 +1,29 @@
+server {
+    listen 80;
+    server_name biowl.ir;
+
+    # Root directory for the frontend build files
+    root /var/www/biowl-app/frontend/dist;
+    index index.html;
+
+    # Serve static assets and handle SPA routing
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Proxy API requests to the backend server
+    location /api/ {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Serve uploaded files
+    location /uploads/ {
+        alias /var/www/biowl-app/backend/uploads/;
+        try_files $uri =404;
+    }
+}

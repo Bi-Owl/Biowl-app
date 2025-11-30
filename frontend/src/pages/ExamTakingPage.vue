@@ -74,13 +74,13 @@ const handleFinishExam = async (options = {}) => {
   try {
     const data = await finishExamAttempt(attemptId.value, examToken.value);
     if (!silent) {
-      toast.success(data.message || 'آزمون شما با موفقیت ثبت شد.');
+      toast.success(data.message);
     }
   } catch (error) {
     if (!silent) {
       // Avoid showing error if it's just a 'already completed' message
       if (error.message && !error.message.includes('قبلاً')) {
-        toast.error(error.message || 'خطا در ثبت نهایی آزمون.');
+        toast.error(error.message);
       }
     }
   } finally {
@@ -162,7 +162,7 @@ const handleUpdateAnswer = async (payload) => {
     // Success toast for this is optional and can be noisy. Let's keep it off.
 
   } catch (error) {
-    toast.error(error.message || 'خطا در ذخیره پاسخ.');
+    toast.error(error.message);
   }
 };
 
