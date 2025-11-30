@@ -2,6 +2,7 @@ const Exam = require('../models/exam');
 const UserExam = require('../models/userExam');
 const User = require('../models/user');
 const Question = require('../models/question');
+const UserExamAttempt = require('../models/userExamAttempt');
 const sequelize = require('../config/database');
 
 // @desc    Get all public exams
@@ -122,12 +123,7 @@ const getPurchasedExams = async (req, res) => {
         through: {
           where: { purchased: true },
           attributes: []
-        },
-        include: [{
-          model: UserExamAttempt,
-          attributes: ['id', 'status'],
-          required: false // LEFT JOIN
-        }]
+        }
       }]
     });
 
@@ -135,23 +131,28 @@ const getPurchasedExams = async (req, res) => {
         return res.status(404).json({ message: "کاربر یافت نشد" });
     }
 
-    const examsWithData = await Promise.all(user.Exams.map(async (exam) => {
-      const questionCount = await Question.count({ where: { ExamId: exam.id } });
-      const examPlain = exam.get({ plain: true });
-      examPlain.questionCount = questionCount;
-      
-      // The attempt is nested, let's flatten it for easier frontend access
-      if (examPlain.UserExamAttempts && examPlain.UserExamAttempts.length > 0) {
-        examPlain.attempt = examPlain.UserExamAttempts[0];
-      } else {
-        examPlain.attempt = null;
-      }
-      delete examPlain.UserExamAttempts; // Clean up the raw array
+    // Manually fetch attempts and question counts for each exam to avoid complex join issues
+    const examsWithDetails = await Promise.all(user.Exams.map(async (exam) => {
+      const plainExam = exam.get({ plain: true });
 
-      return examPlain;
+      const attempt = await UserExamAttempt.findOne({
+        where: {
+          UserId: userId,
+          ExamId: plainExam.id
+        },
+        attributes: ['id', 'status'],
+        order: [['createdAt', 'DESC']] // Get the latest attempt if there are multiple
+      });
+
+      const questionCount = await Question.count({ where: { ExamId: plainExam.id } });
+
+      plainExam.attempt = attempt;
+      plainExam.questionCount = questionCount;
+      
+      return plainExam;
     }));
 
-    res.json(examsWithData);
+    res.json(examsWithDetails);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('خطای سرور');
