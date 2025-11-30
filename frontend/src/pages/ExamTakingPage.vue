@@ -1,22 +1,20 @@
 <template>
   <div class="bg-gray-50 min-h-screen">
+    <!-- Floating Countdown Timer -->
+    <CountdownTimer 
+      v-if="examData"
+      :initial-time="remainingTime" 
+      @finished="autoFinishExam" 
+      class="fixed top-4 left-1/2 -translate-x-1/2 z-50" 
+    />
+
     <div v-if="!examData" class="flex items-center justify-center h-screen">
       <p class="text-xl text-gray-500">در حال بارگذاری اطلاعات آزمون...</p>
     </div>
     <div v-else>
-      <!-- Header -->
-      <header class="bg-white shadow-md sticky top-0 z-10 p-3">
-        <div class="container mx-auto">
-          <div class="relative w-full h-full">
-            <CountdownTimer :initial-time="remainingTime" @finished="autoFinishExam" class="absolute top-0 left-0 z-20" />
-            <h1 class="text-2xl font-bold text-center text-emerald-700 py-2">آزمون در حال برگزاری</h1>
-          </div>
-        </div>
-      </header>
-
       <!-- Main Content -->
-      <main class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto">
+      <main class="container mx-auto px-4 py-20"> <!-- Increased py to avoid overlap with timer -->
+        <div class="max-w-4xl mx-auto space-y-6"> <!-- Added space-y-6 for spacing between questions -->
           <QuestionCard
             v-for="question in questions"
             :key="question.id"

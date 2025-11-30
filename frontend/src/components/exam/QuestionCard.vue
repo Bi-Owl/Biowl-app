@@ -1,7 +1,8 @@
 <template>
-  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mb-8 transition-shadow hover:shadow-xl">
-    <h3 class="text-xl font-bold text-emerald-800 mb-4">
-      سوال {{ question.position }}
+  <div class="bg-white rounded-3xl shadow-lg border border-gray-100/80 p-6 transition-all duration-300 ease-in-out hover:shadow-2xl hover:border-gray-200">
+    <h3 class="flex items-center text-lg font-bold text-emerald-800 mb-6">
+      <span class="bg-emerald-100 text-emerald-700 rounded-full w-8 h-8 flex items-center justify-center me-3 font-mono">{{ question.position }}</span>
+      سوال
     </h3>
     <div class="mb-6">
       <img

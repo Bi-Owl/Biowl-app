@@ -1,25 +1,15 @@
 <template>
-  <div class="text-center p-2">
-    <p class="text-sm font-medium text-gray-700 mb-1">زمان باقی‌مانده</p>
-    <div class="grid grid-flow-col gap-x-2 text-emerald-600">
-      <div class="p-1">
-        <div class="text-xl font-bold">{{ String(hours).padStart(2, '0') }}</div>
-        <div class="text-xs text-emerald-500">ساعت</div>
-      </div>
-      <div class="p-1">
-        <div class="text-xl font-bold">{{ String(minutes).padStart(2, '0') }}</div>
-        <div class="text-xs text-emerald-500">دقیقه</div>
-      </div>
-      <div class="p-1">
-        <div class="text-xl font-bold">{{ String(seconds).padStart(2, '0') }}</div>
-        <div class="text-xs text-emerald-500">ثانیه</div>
-      </div>
+  <div class="flex items-center gap-4 px-4 py-2 bg-gray-900/90 backdrop-blur-sm text-white rounded-full shadow-lg border border-white/10">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+    
+    <div class="font-mono text-lg font-bold tracking-widest" :class="isLowTime ? 'text-red-400' : 'text-emerald-400'">
+      <span>{{ String(hours).padStart(2, '0') }}</span>:<span>{{ String(minutes).padStart(2, '0') }}</span>:<span>{{ String(seconds).padStart(2, '0') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 
 const props = defineProps({
   initialTime: {
@@ -37,6 +27,8 @@ const minutes = ref(0);
 const seconds = ref(0);
 
 let timerInterval = null;
+
+const isLowTime = computed(() => remainingTime.value < 5 * 60 * 1000); // Less than 5 minutes
 
 const updateTimer = () => {
   if (remainingTime.value > 0) {
