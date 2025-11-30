@@ -8,7 +8,6 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: ['biowl.ir'],
-    hmr: false,
   },
   plugins: [vue()],
   resolve: {

@@ -1,5 +1,5 @@
-const API_BASE_URL = 'http://85.208.254.204:3000/api';
-export const STATIC_BASE_URL = 'http://85.208.254.204:3000';
+const API_BASE_URL = '/api';
+export const STATIC_BASE_URL = '';
 
 export const AUTH_API = {
   REGISTER: `${API_BASE_URL}/auth/register`,
