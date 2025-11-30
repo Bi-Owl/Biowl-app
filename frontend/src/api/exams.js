@@ -124,3 +124,18 @@ export const finishExamAttempt = async (attemptId, examToken) => {
     throw error;
   }
 };
+
+export const reviewAttempt = async (attemptId) => {
+  try {
+    const headers = getAuthHeaders(); // Uses standard login token
+    const response = await fetch(EXAM_API.REVIEW_ATTEMPT(attemptId), { headers });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'خطایی در دریافت اطلاعات آزمون رخ داد.');
+    }
+    return data;
+  } catch (error) {
+    console.error('API Error reviewing attempt:', error);
+    throw error;
+  }
+};

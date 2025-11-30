@@ -175,9 +175,48 @@ const finishAttempt = async (req, res) => {
     }
 };
 
+// @desc    Get a completed attempt for review
+// @route   GET /api/attempts/:attemptId/review
+// @access  Private
+const reviewAttempt = async (req, res) => {
+  try {
+    const { attemptId } = req.params;
+    const userId = req.user.id;
+
+    const attempt = await UserExamAttempt.findByPk(attemptId);
+
+    if (!attempt) {
+      return res.status(404).json({ message: 'نتیجه آزمون یافت نشد.' });
+    }
+
+    if (attempt.UserId !== userId) {
+      return res.status(403).json({ message: 'شما اجازه دسترسی به این نتیجه را ندارید.' });
+    }
+
+    if (attempt.status !== 'completed') {
+      return res.status(403).json({ message: 'این آزمون هنوز به پایان نرسیده است.' });
+    }
+
+    const questions = await Question.findAll({ 
+        where: { ExamId: attempt.ExamId },
+        attributes: { exclude: ['correctOption'] }
+    });
+
+    res.json({
+      attempt,
+      questions,
+    });
+
+  } catch (error) {
+    console.error('Error reviewing exam attempt:', error);
+    res.status(500).json({ message: 'خطای سرور' });
+  }
+};
+
 
 module.exports = {
   startAttempt,
   updateAnswer,
   finishAttempt,
+  reviewAttempt,
 };

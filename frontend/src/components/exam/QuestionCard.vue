@@ -18,6 +18,7 @@
         :key="optionNum"
         :option-number="optionNum"
         :is-selected="selectedAnswer === optionNum"
+        :is-readonly="isReadonly"
         @select="onSelectAnswer"
       />
     </div>
@@ -32,17 +33,22 @@ const props = defineProps({
   question: {
     type: Object,
     required: true,
-    // validator: (q) => q.id && q.position && q.imageUrl && q.numberOfOptions
   },
   selectedAnswer: {
     type: [Number, String, null],
     default: null
+  },
+  isReadonly: {
+    type: Boolean,
+    default: false
   }
 });
 
 const emit = defineEmits(['update-answer']);
 
 const onSelectAnswer = (optionNumber) => {
+  if (props.isReadonly) return;
+
   // If the user clicks the same answer again, we de-select it.
   const newAnswer = props.selectedAnswer === optionNumber ? null : optionNumber;
   emit('update-answer', {

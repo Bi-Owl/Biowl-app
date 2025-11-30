@@ -16,11 +16,11 @@
         <span>مدت زمان:</span>
         <span>{{ exam.duration }} دقیقه</span>
       </div>
-      <div v-if="exam.startTime" class="flex justify-between items-center mt-2">
+      <div v-if="exam.startTime && !isTimeless" class="flex justify-between items-center mt-2">
         <span>زمان شروع:</span>
         <span>{{ new Date(exam.startTime).toLocaleString('fa-IR') }}</span>
       </div>
-      <div v-if="exam.endTime" class="flex justify-between items-center mt-1">
+      <div v-if="exam.endTime && !isTimeless" class="flex justify-between items-center mt-1">
         <span>زمان پایان:</span>
         <span>{{ new Date(exam.endTime).toLocaleString('fa-IR') }}</span>
       </div>
@@ -48,27 +48,19 @@
           {{ isPurchasing ? 'در حال خرید...' : 'خرید' }}
         </button>
       </div>
-      <!-- Start Action -->
+      <!-- Start/Continue/Review Action -->
       <div v-if="actionType === 'start'">
-        <!-- Timeless Exam -->
-        <button v-if="isTimeless" @click="$emit('start', exam)" class="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 transition-colors">
-          شروع آزمون
-        </button>
-        <!-- Timed Exam -->
-        <div v-else>
-          <div v-if="isBeforeStart" class="text-center">
-            <div class="text-sm text-amber-700 font-semibold">{{ countdownText }}</div>
-            <button disabled class="w-full mt-2 bg-gray-400 text-white py-2 rounded-md cursor-not-allowed">
-              شروع آزمون
-            </button>
-          </div>
-          <button v-else-if="isDuringExam" @click="$emit('start', exam)" class="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 transition-colors">
-            شروع آزمون
-          </button>
-          <button v-else-if="isAfterEnd" disabled class="w-full bg-red-500 text-white py-2 rounded-md cursor-not-allowed">
-            زمان آزمون تمام شده است
-          </button>
+        <div v-if="isBeforeStart && exam.attempt?.status !== 'completed'" class="text-center mb-2">
+          <div class="text-sm text-amber-700 font-semibold">{{ countdownText }}</div>
         </div>
+        <button 
+          @click="$emit('handle-action', exam)" 
+          :disabled="startActionState.disabled"
+          class="w-full text-white py-2 rounded-md transition-colors"
+          :class="[startActionState.class, { 'cursor-not-allowed': startActionState.disabled }]"
+        >
+          {{ startActionState.text }}
+        </button>
       </div>
     </div>
   </div>
@@ -96,7 +88,7 @@ const props = defineProps({
   }
 });
 
-defineEmits(['purchase', 'start']);
+defineEmits(['purchase', 'handle-action']);
 
 const now = ref(new Date());
 let timer = null;
@@ -129,11 +121,30 @@ const endTime = computed(() => props.exam.endTime ? new Date(props.exam.endTime)
 
 const isBeforeStart = computed(() => startTime.value && now.value < startTime.value);
 const isAfterEnd = computed(() => endTime.value && now.value > endTime.value);
-const isDuringExam = computed(() => {
-  if (isTimeless.value) return true;
-  const afterStart = startTime.value ? now.value >= startTime.value : true;
-  const beforeEnd = endTime.value ? now.value < endTime.value : true;
-  return afterStart && beforeEnd;
+
+const startActionState = computed(() => {
+  const status = props.exam.attempt?.status;
+
+  if (status === 'completed') {
+    return { text: 'مشاهده پاسخنامه', disabled: false, class: 'bg-sky-600 hover:bg-sky-700' };
+  }
+
+  // This logic is for exams that have a specific start/end time
+  if (!isTimeless.value) {
+    if (isAfterEnd.value) {
+      return { text: 'زمان آزمون تمام شده', disabled: true, class: 'bg-red-500' };
+    }
+    if (isBeforeStart.value) {
+      return { text: 'شروع آزمون', disabled: true, class: 'bg-gray-400' };
+    }
+  }
+
+  if (status === 'in_progress') {
+    return { text: 'ادامه آزمون', disabled: false, class: 'bg-yellow-500 hover:bg-yellow-600' };
+  }
+  
+  // Default is 'start' for timeless exams or timed exams that are currently active
+  return { text: 'شروع آزمون', disabled: false, class: 'bg-emerald-600 hover:bg-emerald-700' };
 });
 
 const countdownText = computed(() => {

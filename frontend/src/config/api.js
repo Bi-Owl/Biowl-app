@@ -15,6 +15,7 @@ export const EXAM_API = {
   START_ATTEMPT: (examId) => `${API_BASE_URL}/exams/${examId}/start`,
   UPDATE_ANSWER: (attemptId) => `${API_BASE_URL}/attempts/${attemptId}/answer`,
   FINISH_ATTEMPT: (attemptId) => `${API_BASE_URL}/attempts/${attemptId}/finish`,
+  REVIEW_ATTEMPT: (attemptId) => `${API_BASE_URL}/attempts/${attemptId}/review`,
 };
 
 export const ADMIN_API = {

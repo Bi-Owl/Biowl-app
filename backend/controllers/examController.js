@@ -122,7 +122,13 @@ const getPurchasedExams = async (req, res) => {
         through: {
           where: { purchased: true },
           attributes: []
-        }
+        },
+        include: [{
+          model: UserExamAttempt,
+          where: { UserId: userId },
+          attributes: ['id', 'status'],
+          required: false // LEFT JOIN
+        }]
       }]
     });
 
@@ -130,16 +136,23 @@ const getPurchasedExams = async (req, res) => {
         return res.status(404).json({ message: "کاربر یافت نشد" });
     }
 
-    // Manually fetch question counts for each exam
-    const examsWithCounts = await Promise.all(user.Exams.map(async (exam) => {
+    const examsWithData = await Promise.all(user.Exams.map(async (exam) => {
       const questionCount = await Question.count({ where: { ExamId: exam.id } });
-      // Important: get a plain object from the Sequelize instance
-      const examPlain = exam.get({ plain: true }); 
+      const examPlain = exam.get({ plain: true });
       examPlain.questionCount = questionCount;
+      
+      // The attempt is nested, let's flatten it for easier frontend access
+      if (examPlain.UserExamAttempts && examPlain.UserExamAttempts.length > 0) {
+        examPlain.attempt = examPlain.UserExamAttempts[0];
+      } else {
+        examPlain.attempt = null;
+      }
+      delete examPlain.UserExamAttempts; // Clean up the raw array
+
       return examPlain;
     }));
 
-    res.json(examsWithCounts);
+    res.json(examsWithData);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('خطای سرور');
