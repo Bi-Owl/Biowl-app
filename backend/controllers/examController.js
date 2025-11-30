@@ -131,22 +131,32 @@ const getPurchasedExams = async (req, res) => {
         return res.status(404).json({ message: "کاربر یافت نشد" });
     }
 
-    // Manually fetch attempts and question counts for each exam to avoid complex join issues
+    // Manually fetch and process details for each exam
     const examsWithDetails = await Promise.all(user.Exams.map(async (exam) => {
       const plainExam = exam.get({ plain: true });
 
-      const attempt = await UserExamAttempt.findOne({
+      let attempt = await UserExamAttempt.findOne({
         where: {
           UserId: userId,
           ExamId: plainExam.id
         },
-        attributes: ['id', 'status'],
-        order: [['createdAt', 'DESC']] // Get the latest attempt if there are multiple
+        order: [['createdAt', 'DESC']]
       });
+
+      // --- Auto-complete logic ---
+      if (attempt && attempt.status === 'in_progress' && plainExam.duration) {
+        const endTime = new Date(attempt.startedAt).getTime() + plainExam.duration * 60 * 1000;
+        if (new Date().getTime() > endTime) {
+          attempt.status = 'completed';
+          attempt.finishedAt = new Date(endTime); // Set finishedAt to the calculated end time
+          await attempt.save();
+        }
+      }
+      // --- End of auto-complete logic ---
 
       const questionCount = await Question.count({ where: { ExamId: plainExam.id } });
 
-      plainExam.attempt = attempt;
+      plainExam.attempt = attempt ? { id: attempt.id, status: attempt.status } : null;
       plainExam.questionCount = questionCount;
       
       return plainExam;
