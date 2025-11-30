@@ -38,13 +38,13 @@ import BaseButton from '@/components/ui/BaseButton.vue';
             </div>
             <div class="mt-8 grid grid-cols-2 gap-6">
               <div class="bg-emerald-50 p-4 rounded-lg">
-                <div class="text-emerald-600 font-bold text-xl">۱۵۰+</div>
+                <div class="text-emerald-600 font-bold text-xl">۳۵۰+</div>
                 <div class="text-sm text-gray-600">عضو فعال</div>
               </div>
-              <div class="bg-emerald-50 p-4 rounded-lg">
+              <!-- <div class="bg-emerald-50 p-4 rounded-lg">
                 <div class="text-emerald-600 font-bold text-xl">۵۰+</div>
                 <div class="text-sm text-gray-600">مطلب آموزشی</div>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>

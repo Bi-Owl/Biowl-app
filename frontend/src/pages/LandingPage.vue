@@ -11,7 +11,7 @@ import feather from 'feather-icons';
 import HeroSection from '@/components/landing/HeroSection.vue';
 import FeaturesSection from '@/components/landing/FeaturesSection.vue';
 import TelegramCta from '@/components/landing/TelegramCta.vue';
-import TimelineSection from '@/components/landing/TimelineSection.vue';
+// import TimelineSection from '@/components/landing/TimelineSection.vue';
 
 onMounted(() => {
   AOS.init({
