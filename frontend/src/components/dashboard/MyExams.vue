@@ -40,13 +40,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import { fetchPurchasedExams, startExamAttempt } from '@/api/exams';
 import ExamCard from '@/components/dashboard/ExamCard.vue';
 import StartConfirmModal from '@/components/exam/StartConfirmModal.vue';
 import AnswerSheetViewer from '@/components/dashboard/AnswerSheetViewer.vue';
+
+const props = defineProps({
+  currentView: String,
+});
 
 const toast = useToast();
 const router = useRouter();
@@ -70,7 +74,13 @@ const fetchExams = async () => {
   }
 };
 
-onMounted(fetchExams);
+watch(() => props.currentView, (newView) => {
+  if (newView === 'my-exams') {
+    // When the view becomes active, reset selections and fetch fresh data
+    selectedAttemptForReview.value = null;
+    fetchExams();
+  }
+}, { immediate: true });
 
 const handleExamAction = (exam) => {
   const status = exam.attempt?.status;
