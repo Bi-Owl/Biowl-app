@@ -14,10 +14,10 @@
   >
     <div
       :class="[
-        'w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg transition-colors duration-200',
+        'w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg font-mono transition-colors duration-200',
         isSelected && !isPending
           ? 'bg-emerald-500 text-white'
-          : 'bg-gray-200 text-gray-600',
+          : 'bg-emerald-100 text-emerald-800',
         { 'bg-yellow-400 text-white': isPending }
       ]"
     >
@@ -27,7 +27,7 @@
       </svg>
       <span v-else>{{ optionNumber }}</span>
     </div>
-    <div class="mr-4">
+    <div class="mr-4 text-gray-800">
       <slot>گزینه {{ optionNumber }}</slot> <!-- Fallback content -->
     </div>
   </div>
