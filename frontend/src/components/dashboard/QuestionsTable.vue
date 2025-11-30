@@ -86,7 +86,7 @@ const fetchQuestions = async () => {
         const data = await getQuestionsForExam(props.examId);
         questions.value = data;
     } catch (error) {
-        toast.error('خطا در دریافت سوالات.');
+        toast.error(error.message);
     } finally {
         loading.value = false;
     }
@@ -106,10 +106,10 @@ const handleReorder = async () => {
   });
 
   try {
-    await reorderQuestions(updates);
-    toast.success('ترتیب سوالات با موفقیت به‌روزرسانی شد.');
+    const res = await reorderQuestions(updates);
+    toast.success(res.message);
   } catch (error) {
-    toast.error('خطا در به‌روزرسانی ترتیب سوالات. بازنشانی ترتیب...');
+    toast.error(error.message);
     // Re-fetch to revert to the old order on failure
     fetchQuestions();
   }
@@ -121,8 +121,8 @@ const openAddModal = () => {
     attrs: {
       nextPosition: questions.value.length + 1,
       onConfirm(formData) {
-        createQuestion(props.examId, formData).then(() => {
-          toast.success('سوال با موفقیت ایجاد شد.');
+        createQuestion(props.examId, formData).then((res) => {
+          toast.success(res.message);
           fetchQuestions();
           close();
         }).catch(err => toast.error(err.message));
@@ -141,8 +141,8 @@ const openEditModal = (question) => {
     attrs: {
       question: question,
       onConfirm(formData) {
-        updateQuestion(question.id, formData).then(() => {
-          toast.success('سوال با موفقیت ویرایش شد.');
+        updateQuestion(question.id, formData).then((res) => {
+          toast.success(res.message);
           fetchQuestions();
           close();
         }).catch(err => toast.error(err.message));
@@ -158,11 +158,11 @@ const openEditModal = (question) => {
 const confirmDelete = async (id) => {
   if (confirm('آیا از حذف این سوال اطمینان دارید؟')) {
     try {
-        await deleteQuestion(id);
-        toast.success('سوال با موفقیت حذف شد.');
+        const res = await deleteQuestion(id);
+        toast.success(res.message);
         fetchQuestions();
     } catch (error) {
-        toast.error('حذف سوال با خطا مواجه شد.');
+        toast.error(error.message);
     }
   }
 };
