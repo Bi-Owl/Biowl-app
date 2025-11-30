@@ -57,14 +57,6 @@ watch(() => props.initialTime, (newTime) => {
   }
 }, { immediate: true });
 
-
-onMounted(() => {
-  if (props.initialTime > 0) {
-    updateTimer();
-    timerInterval = setInterval(updateTimer, 1000);
-  }
-});
-
 onUnmounted(() => {
   clearInterval(timerInterval);
 });
