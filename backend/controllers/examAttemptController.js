@@ -75,6 +75,11 @@ const startAttempt = async (req, res) => {
 
     res.json({
       message: 'آزمون با موفقیت شروع شد.',
+      exam: {
+        id: exam.id,
+        name: exam.name,
+        duration: exam.duration,
+      },
       attempt: {
         id: attempt.id,
         startedAt: attempt.startedAt,

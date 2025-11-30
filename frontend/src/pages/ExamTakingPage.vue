@@ -44,27 +44,57 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
-import { auth } from '@/auth';
 import CountdownTimer from '@/components/exam/CountdownTimer.vue';
 import QuestionCard from '@/components/exam/QuestionCard.vue';
 import FinishConfirmModal from '@/components/exam/FinishConfirmModal.vue';
 import { updateAnswer, finishExamAttempt } from '@/api/exams';
 
+// Initialize router and toast
+const router = useRouter();
+const toast = useToast();
+
 // Reactive state
-const examData = ref(null);
+const examData = ref(null); // Will hold the full data from sessionStorage
 const questions = ref([]);
 const userAnswers = ref({});
-const remainingTime = ref(0);
+const remainingTime = ref(0); // This will now be correctly calculated
 const examToken = ref(null);
 const attemptId = ref(null);
 
 const showFinishModal = ref(false);
 const isFinishing = ref(false);
 
-// No longer needed: const user = computed(() => auth.state.user);
+const handleFinishExam = async (options = {}) => {
+  const { silent = false } = options;
+  isFinishing.value = true;
+  
+  try {
+    const data = await finishExamAttempt(attemptId.value, examToken.value);
+    if (!silent) {
+      toast.success(data.message || 'آزمون شما با موفقیت ثبت شد.');
+    }
+  } catch (error) {
+    if (!silent) {
+      // Avoid showing error if it's just a 'already completed' message
+      if (error.message && !error.message.includes('قبلاً')) {
+        toast.error(error.message || 'خطا در ثبت نهایی آزمون.');
+      }
+    }
+  } finally {
+    isFinishing.value = false;
+    showFinishModal.value = false;
+    sessionStorage.removeItem('examAttemptData');
+    router.push('/dashboard');
+  }
+};
+
+const autoFinishExam = async () => {
+  toast.warning('زمان آزمون به پایان رسید! در حال ثبت نهایی پاسخنامه...');
+  await handleFinishExam({ silent: true });
+};
 
 onMounted(() => {
   const dataFromStorage = sessionStorage.getItem('examAttemptData');
@@ -76,66 +106,64 @@ onMounted(() => {
 
   const data = JSON.parse(dataFromStorage);
 
-  // Redirect if the attempt is already completed
-  if (data.attempt.status === 'completed') {
-    toast.info('شما این آزمون را قبلاً به پایان رسانده‌اید.');
+  // --- Robust Timer and Status Calculation ---
+  const attempt = data.attempt;
+  const exam = data.exam;
+  
+  if (!attempt || !exam || !attempt.startedAt || !exam.duration) {
+    toast.error('اطلاعات آزمون ناقص است. بازگشت به داشبورد...');
+    sessionStorage.removeItem('examAttemptData');
     router.push('/dashboard');
     return;
   }
-  
+
+  const endTime = new Date(attempt.startedAt).getTime() + exam.duration * 60 * 1000;
+  const now = new Date().getTime();
+  const calculatedRemainingTime = endTime - now;
+
+  // --- Guard against finished or expired exams ---
+  if (attempt.status === 'completed' || calculatedRemainingTime <= 0) {
+    if (attempt.status !== 'completed') {
+      // If time expired but status isn't 'completed', it's a cleanup case
+      toast.info('زمان این آزمون به پایان رسیده است. در حال ثبت نهایی...');
+      // We need token and attemptId to make the call
+      examToken.value = data.examToken;
+      attemptId.value = attempt.id;
+      handleFinishExam({ silent: true });
+    } else {
+      toast.info('شما این آزمون را قبلاً به پایان رسانده‌اید.');
+      sessionStorage.removeItem('examAttemptData');
+      router.push('/dashboard');
+    }
+    return;
+  }
+
+  // --- If everything is OK, set the component state ---
   examData.value = data;
   questions.value = data.questions;
-  userAnswers.value = data.attempt.answers || {};
-  remainingTime.value = data.remainingTime;
+  userAnswers.value = attempt.answers || {};
+  remainingTime.value = calculatedRemainingTime;
   examToken.value = data.examToken;
-  attemptId.value = data.attempt.id;
-
-  if (remainingTime.value <= 0) {
-    autoFinishExam();
-  }
+  attemptId.value = attempt.id;
 });
 
 const handleUpdateAnswer = async (payload) => {
   try {
-    // Optimistic UI update
     userAnswers.value[payload.questionId] = payload.answer;
     
-    // Update sessionStorage to persist across reloads
-    const updatedData = { ...examData.value };
-    updatedData.attempt.answers = userAnswers.value;
-    sessionStorage.setItem('examAttemptData', JSON.stringify(updatedData));
+    // Also update the data in sessionStorage for persistence across reloads
+    const currentData = JSON.parse(sessionStorage.getItem('examAttemptData')) || examData.value;
+    if (currentData) {
+      currentData.attempt.answers = userAnswers.value;
+      sessionStorage.setItem('examAttemptData', JSON.stringify(currentData));
+    }
 
-    // Call API in the background
-    const data = await updateAnswer(attemptId.value, payload.questionId, payload.answer, examToken.value);
-    toast.success(data.message);
-
-  } catch (error) {
-    toast.error(error.message);
-    // Revert optimistic update if API call fails (optional)
-  }
-};
-
-const handleFinishExam = async () => {
-  isFinishing.value = true;
-  try {
-    const data = await finishExamAttempt(attemptId.value, examToken.value);
-    toast.success(data.message);
-    
-    // Cleanup and redirect
-    sessionStorage.removeItem('examAttemptData');
-    router.push('/dashboard');
+    await updateAnswer(attemptId.value, payload.questionId, payload.answer, examToken.value);
+    // Success toast for this is optional and can be noisy. Let's keep it off.
 
   } catch (error) {
-    toast.error(error.message);
-  } finally {
-    isFinishing.value = false;
-    showFinishModal.value = false;
+    toast.error(error.message || 'خطا در ذخیره پاسخ.');
   }
-};
-
-const autoFinishExam = async () => {
-  toast.warning('زمان آزمون به پایان رسید! در حال ثبت نهایی پاسخنامه...');
-  await handleFinishExam();
 };
 
 </script>
