@@ -1,5 +1,5 @@
 <template>
-  <div class="border rounded-lg p-4 shadow-sm bg-white flex flex-col h-full">
+  <div class="border rounded-lg p-4 shadow-sm flex flex-col h-full" :class="isPurchased ? 'bg-green-50' : 'bg-white'">
     <div class="flex-grow">
       <h3 class="text-lg font-semibold mb-2 text-gray-800">{{ exam.name }}</h3>
       <p class="text-gray-600 text-sm mb-4 whitespace-pre-wrap">{{ exam.description }}</p>
