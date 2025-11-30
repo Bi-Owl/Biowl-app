@@ -11,7 +11,7 @@ router.get('/:attemptId/review', protect, examAttemptController.reviewAttempt);
 router.put('/:attemptId/answer', protect, examAuthMiddleware, examAttemptController.updateAnswer);
 
 // Route to manually finish an exam attempt
-router.post('/:attemptId/finish', protect, examAuthMiddleware, examAttemptController.finishAttempt);
+router.post('/:attemptId/finish', protect, examAttemptController.finishAttempt);
 
 module.exports = router;
 

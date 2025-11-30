@@ -142,11 +142,22 @@ const updateAnswer = async (req, res) => {
 
 // @desc    Finish an exam attempt
 // @route   POST /api/attempts/:attemptId/finish
-// @access  Private (with exam token)
+// @access  Private
 const finishAttempt = async (req, res) => {
     try {
-        // The examAuthMiddleware will validate the token and attach the attempt to the request.
-        const attempt = req.attempt;
+        const { attemptId } = req.params;
+        const userId = req.user.id;
+        
+        const attempt = await UserExamAttempt.findByPk(attemptId);
+
+        if (!attempt) {
+          return res.status(404).json({ message: 'آزمون یافت نشد.' });
+        }
+    
+        // Verify ownership if the user is not calling via the specific exam token
+        if (attempt.UserId !== userId) {
+          return res.status(403).json({ message: 'شما اجازه دسترسی به این عملیات را ندارید.' });
+        }
 
         // 1. Check if the attempt is already completed
         if (attempt.status === 'completed') {

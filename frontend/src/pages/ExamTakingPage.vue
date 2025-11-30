@@ -72,7 +72,7 @@ const handleFinishExam = async (options = {}) => {
   isFinishing.value = true;
   
   try {
-    const data = await finishExamAttempt(attemptId.value, examToken.value);
+    const data = await finishExamAttempt(attemptId.value);
     if (!silent) {
       toast.success(data.message);
     }

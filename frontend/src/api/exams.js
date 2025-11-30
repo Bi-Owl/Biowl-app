@@ -107,9 +107,9 @@ export const updateAnswer = async (attemptId, questionId, answer, examToken) => 
   }
 };
 
-export const finishExamAttempt = async (attemptId, examToken) => {
+export const finishExamAttempt = async (attemptId) => {
   try {
-    const headers = getExamAuthHeaders(examToken);
+    const headers = getAuthHeaders(); // Use standard auth
     const response = await fetch(EXAM_API.FINISH_ATTEMPT(attemptId), {
       method: 'POST',
       headers,

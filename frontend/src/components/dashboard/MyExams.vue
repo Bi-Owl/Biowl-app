@@ -44,7 +44,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
-import { fetchPurchasedExams, startExamAttempt } from '@/api/exams';
+import { fetchPurchasedExams, startExamAttempt, finishExamAttempt } from '@/api/exams';
 import ExamCard from '@/components/dashboard/ExamCard.vue';
 import StartConfirmModal from '@/components/exam/StartConfirmModal.vue';
 import AnswerSheetViewer from '@/components/dashboard/AnswerSheetViewer.vue';
@@ -100,10 +100,18 @@ const handleExamAction = (exam) => {
   }
 };
 
-const handleAttemptExpired = (examId) => {
+const handleAttemptExpired = async (examId) => {
   const exam = exams.value.find(e => e.id === examId);
-  if (exam && exam.attempt) {
-    exam.attempt.status = 'completed';
+  if (exam && exam.attempt && exam.attempt.status !== 'completed') {
+    try {
+      // Call the API to mark as completed on the backend
+      await finishExamAttempt(exam.attempt.id);
+      // Update the local state to 'completed' to instantly refresh the UI
+      exam.attempt.status = 'completed';
+      toast.info(`زمان آزمون "${exam.name}" به پایان رسید و پاسخنامه ثبت شد.`);
+    } catch (error) {
+      toast.error(error.message || 'خطا در ثبت خودکار آزمون.');
+    }
   }
 };
 
