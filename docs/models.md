@@ -1,153 +1,135 @@
-# Database Model Documentation
+# Model Documentation
 
-This document provides an overview of the database models used in the application, defined using Sequelize.
-
----
-
-## 1. User
-
-The `User` model represents an individual user account in the system.
-
-**File:** `backend/models/user.js`
-
-### Fields
-
-| Field         | Type            | Constraints                               |
-|---------------|-----------------|-------------------------------------------|
-| `id`          | `INTEGER`       | Primary Key, Auto-increment               |
-| `firstName`   | `STRING`        | Not Null                                  |
-| `lastName`    | `STRING`        | Not Null                                  |
-| `phoneNumber` | `STRING`        | Not Null, Unique                          |
-| `nationalId`  | `STRING`        | Not Null, Unique                          |
-| `email`       | `STRING`        | Not Null, Unique, Valid email format      |
-| `password`    | `STRING`        | Not Null                                  |
-| `isActive`    | `BOOLEAN`       | Not Null, Default: `false`                |
-| `wallet`      | `FLOAT`         | Not Null, Default: `0`                    |
-
-### Scopes
-
-- **`defaultScope`**: By default, queries for users will exclude the `password` field for security.
-- **`withPassword`**: This scope can be explicitly used to include the `password` field in a query, which is necessary for login validation.
-
-### Relationships
-
-- **Has many-to-many with `Exam`**: A user can be associated with multiple exams, and an exam can have multiple users. This relationship is managed through the `UserExam` model.
+This document describes the Sequelize models used in the backend of the Biowl-app.
 
 ---
 
-## 2. Admin
+## 1. Admin Model
 
-The `Admin` model represents an administrator account with elevated privileges.
+Represents administrative users with access to the admin panel.
 
 **File:** `backend/models/admin.js`
 
-### Fields
+| Field    | Type            | Description                                  | Constraints       |
+| :------- | :-------------- | :------------------------------------------- | :---------------- |
+| `id`     | `INTEGER`       | Primary Key, Auto-increment                  | `PRIMARY KEY`     |
+| `username` | `STRING`        | Unique username for the admin                | `NOT NULL`, `UNIQUE` |
+| `password` | `STRING`        | Hashed password of the admin                 | `NOT NULL`        |
 
-| Field       | Type      | Constraints               | Description                               |
-|-------------|-----------|---------------------------|-------------------------------------------|
-| `username`  | `STRING`  | Not Null, Unique          | The unique username for the admin.        |
-| `password`  | `STRING`  | Not Null                  | The admin's hashed password.              |
+**Hooks:**
+- `beforeCreate`: Hashes the password using `bcryptjs` before creating a new admin.
 
-### Hooks and Methods
-
-- **`beforeCreate` Hook**: Automatically hashes the admin's password before a new admin record is created.
-- **`isValidPassword(password)`**: An instance method that compares a plaintext password against the stored hash to validate login attempts. Returns a boolean.
+**Instance Methods:**
+- `isValidPassword(password)`: Compares a given password with the stored hashed password.
 
 ---
 
-## 3. Exam
+## 2. User Model
 
-The `Exam` model represents a test or an assessment that users can take.
+Represents a standard user of the application.
+
+**File:** `backend/models/user.js`
+
+| Field          | Type        | Description                                  | Constraints           |
+| :------------- | :---------- | :------------------------------------------- | :-------------------- |
+| `id`           | `INTEGER`   | Primary Key, Auto-increment                  | `PRIMARY KEY`         |
+| `firstName`    | `STRING`    | User's first name                            | `NOT NULL`            |
+| `lastName`     | `STRING`    | User's last name                             | `NOT NULL`            |
+| `phoneNumber`  | `STRING`    | User's phone number                          | `NOT NULL`, `UNIQUE`  |
+| `nationalId`   | `STRING`    | User's national ID                           | `NOT NULL`, `UNIQUE`  |
+| `email`        | `STRING`    | User's email address                         | `NOT NULL`, `UNIQUE`, `IS EMAIL` |
+| `password`     | `STRING`    | Hashed password of the user                  | `NOT NULL`            |
+| `isActive`     | `BOOLEAN`   | Whether the user account is active           | `NOT NULL`, `DEFAULT: false` |
+| `wallet`       | `FLOAT`     | User's wallet balance                        | `NOT NULL`, `DEFAULT: 0` |
+
+**Scopes:**
+- `defaultScope`: Excludes the `password` field by default when querying `User` objects.
+- `withPassword`: Includes the `password` field (used for authentication).
+
+**Relationships:**
+- `hasMany(UserExam)`: A user can purchase many exams.
+- `hasMany(UserExamAttempt)`: A user can have many exam attempts.
+
+---
+
+## 3. Exam Model
+
+Represents an exam available in the system.
 
 **File:** `backend/models/exam.js`
 
-### Fields
+| Field           | Type        | Description                                  | Constraints       |
+| :-------------- | :---------- | :------------------------------------------- | :---------------- |
+| `id`            | `INTEGER`   | Primary Key, Auto-increment                  | `PRIMARY KEY`     |
+| `name`          | `STRING`    | Name of the exam                             | `NOT NULL`        |
+| `description`   | `TEXT`      | Detailed description of the exam             | `ALLOW NULL`      |
+| `startTime`     | `DATE`      | Start time of the exam (for timed exams)     | `ALLOW NULL`      |
+| `endTime`       | `DATE`      | End time of the exam (for timed exams)       | `ALLOW NULL`      |
+| `duration`      | `INTEGER`   | Duration of the exam in minutes              | `ALLOW NULL`      |
+| `isHidden`      | `BOOLEAN`   | Whether the exam is hidden from public view  | `NOT NULL`, `DEFAULT: false` |
+| `isPurchasable` | `BOOLEAN`   | Whether the exam can be purchased            | `NOT NULL`, `DEFAULT: true` |
+| `price`         | `STRING`    | Price of the exam (e.g., "free" or a number) | `NOT NULL`, `DEFAULT: 'free'` |
 
-| Field           | Type      | Constraints                     | Description                                                              |
-|-----------------|-----------|---------------------------------|--------------------------------------------------------------------------|
-| `id`            | `INTEGER` | Primary Key, Auto-increment     | The unique identifier for the exam.                                      |
-| `name`          | `STRING`  | Not Null                        | The name or title of the exam.                                           |
-| `description`   | `TEXT`    | Nullable                        | A detailed description of the exam.                                      |
-| `startTime`     | `DATE`    | Nullable                        | The date and time when the exam becomes available. `null` for timeless exams. |
-| `endTime`       | `DATE`    | Nullable                        | The date and time when the exam closes. `null` for timeless exams.        |
-| `duration`      | `INTEGER` | Nullable                        | The duration of the exam in minutes.                                     |
-| `isHidden`      | `BOOLEAN` | Not Null, Default: `false`      | If `true`, the exam is hidden from public lists.                         |
-| `isPurchasable` | `BOOLEAN` | Not Null, Default: `true`       | If `true`, the exam can be purchased by users.                           |
-| `price`         | `STRING`  | Not Null, Default: `'free'`     | The price of the exam. Can be a numeric string or the word 'free'.       |
-
-### Relationships
-
-- **Has many-to-many with `User`**: An exam can be associated with multiple users. This relationship is managed through the `UserExam` model.
-- **Has many `Questions`**: Each exam is composed of multiple questions.
+**Relationships:**
+- `belongsToMany(User, { through: UserExam })`: An exam can be purchased by many users (via `UserExam` join table).
+- `hasMany(Question)`: An exam can have many questions.
+- `hasMany(UserExamAttempt)`: An exam can have many attempts from users.
 
 ---
 
-## 4. UserExam
+## 4. Question Model
 
-This model is a **join table** that connects the `User` and `Exam` models, representing the status of an exam for a specific user (e.g., whether it has been purchased).
-
-**File:** `backend/models/userExam.js`
-
-### Fields
-
-| Field       | Type      | Constraints                     | Description                                                              |
-|-------------|-----------|---------------------------------|--------------------------------------------------------------------------|
-| `id`        | `INTEGER` | Primary Key, Auto-increment     | The unique identifier for this association record.                       |
-| `purchased` | `BOOLEAN` | Not Null, Default: `false`      | If `true`, indicates that the user has purchased the associated exam.    |
-| `UserId`    | `INTEGER` | Foreign Key                     | References the `id` of the associated user in the `Users` table.         |
-| `ExamId`    | `INTEGER` | Foreign Key                     | References the `id` of the associated exam in the `Exams` table.         |
-
-*Note: `UserId` and `ExamId` are automatically generated by Sequelize based on the `belongsToMany` association defined in `server.js`.*
-
-### Relationships
-
-- **Belongs to `User`**: Each `UserExam` record is linked to one user.
-- **Belongs to `Exam`**: Each `UserExam` record is linked to one exam.
-
----
-
-## 5. Question
-
-The `Question` model represents a single question within an exam.
+Represents a question within an exam. Each question is associated with an image.
 
 **File:** `backend/models/question.js`
 
-### Fields
+| Field         | Type        | Description                                  | Constraints       |
+| :------------ | :---------- | :------------------------------------------- | :---------------- |
+| `id`          | `INTEGER`   | Primary Key, Auto-increment                  | `PRIMARY KEY`     |
+| `position`    | `INTEGER`   | Order of the question within the exam        | `NOT NULL`        |
+| `imageUrl`    | `STRING`    | URL to the image containing the question and options | `NOT NULL`        |
+| `numberOfOptions` | `INTEGER` | Total number of options for the question     | `NOT NULL`        |
+| `correctOption` | `INTEGER` | The number of the correct option (e.g., 1, 2, 3) | `NOT NULL`        |
+| `ExamId`      | `INTEGER`   | Foreign Key to the Exam model                | `NOT NULL`        |
 
-| Field             | Type      | Constraints                 | Description                                                          |
-|-------------------|-----------|-----------------------------|----------------------------------------------------------------------|
-| `id`              | `INTEGER` | Primary Key, Auto-increment | The unique identifier for the question.                              |
-| `position`        | `INTEGER` | Not Null                    | The order of the question within the exam.                           |
-| `imageUrl`        | `STRING`  | Not Null                    | URL to the image containing the question text and all options.       |
-| `numberOfOptions` | `INTEGER` | Not Null                    | The total number of options for this question (e.g., 4).             |
-| `correctOption`   | `INTEGER` | Not Null                    | The number of the correct option (e.g., 1, 2, 3, etc.).              |
-| `ExamId`          | `INTEGER` | Foreign Key                 | References the `id` of the associated exam in the `Exams` table.     |
-
-### Relationships
-
-- **Belongs to `Exam`**: Each question is part of one exam.
+**Relationships:**
+- `belongsTo(Exam)`: A question belongs to an exam.
 
 ---
 
-## 6. UserExamAttempt
+## 5. UserExam Model (Join Table)
 
-This model represents a user's single attempt to take an exam. It is created when a user starts an exam for the first time and stores their answers and progress.
+Represents the many-to-many relationship between `User` and `Exam` models, indicating which user has purchased which exam.
+
+**File:** `backend/models/userExam.js`
+
+| Field     | Type        | Description                                  | Constraints       |
+| :-------- | :---------- | :------------------------------------------- | :---------------- |
+| `id`      | `INTEGER`   | Primary Key, Auto-increment                  | `PRIMARY KEY`     |
+| `purchased` | `BOOLEAN`   | Whether the exam is purchased by the user    | `NOT NULL`, `DEFAULT: false` |
+| `UserId`  | `INTEGER`   | Foreign Key to the User model                | `NOT NULL`        |
+| `ExamId`  | `INTEGER`   | Foreign Key to the Exam model                | `NOT NULL`        |
+
+**Relationships:**
+- `belongsTo(User)`: Implicitly defined through `User.belongsToMany(Exam, { through: UserExam })`.
+- `belongsTo(Exam)`: Implicitly defined through `Exam.belongsToMany(User, { through: UserExam })`.
+
+---
+
+## 6. UserExamAttempt Model
+
+Records a user's attempt at an exam, including their answers and status.
 
 **File:** `backend/models/userExamAttempt.js`
 
-### Fields
+| Field        | Type                          | Description                                  | Constraints           |
+| :----------- | :---------------------------- | :------------------------------------------- | :-------------------- |
+| `id`         | `INTEGER`                     | Primary Key, Auto-increment                  | `PRIMARY KEY`         |
+| `startedAt`  | `DATE`                        | Timestamp when the attempt started           | `NOT NULL`            |
+| `finishedAt` | `DATE`                        | Timestamp when the attempt finished          | `ALLOW NULL`          |
+| `status`     | `ENUM('in_progress', 'completed')` | Current status of the attempt                | `NOT NULL`, `DEFAULT: 'in_progress'` |
+| `answers`    | `JSON`                        | Stores user's answers `{ questionId: answerOption }` | `NOT NULL`, `DEFAULT: {}` |
+| `UserId`     | `INTEGER`                     | Foreign Key to the User model                | `NOT NULL`            |
+| `ExamId`     | `INTEGER`                     | Foreign Key to the Exam model                | `NOT NULL`            |
 
-| Field        | Type                          | Constraints                  | Description                                                              |
-|--------------|-------------------------------|------------------------------|--------------------------------------------------------------------------|
-| `id`         | `INTEGER`                     | Primary Key, Auto-increment  | The unique identifier for this specific attempt.                         |
-| `startedAt`  | `DATE`                        | Not Null                     | The exact timestamp when the user started the exam attempt.              |
-| `finishedAt` | `DATE`                        | Nullable                     | The timestamp when the attempt was completed (either manually or by timeout). |
-| `status`     | `ENUM('in_progress', 'completed')` | Not Null, Default: `in_progress` | The current status of the exam attempt.                                  |
-| `answers`    | `JSON`                        | Not Null, Default: `{}`      | A JSON object storing the user's answers, with `questionId` as the key.  |
-| `UserId`     | `INTEGER`                     | Foreign Key                  | References the `id` of the user taking the exam.                         |
-| `ExamId`     | `INTEGER`                     | Foreign Key                  | References the `id` of the exam being attempted.                         |
-
-### Relationships
-
-- **Belongs to `User`**: Each attempt is made by one user.
-- **Belongs to `Exam`**: Each attempt is for one exam.
+---
