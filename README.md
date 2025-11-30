@@ -89,7 +89,8 @@ The frontend application will be available on port `5173` by default.
 
 ## 📄 Documentation
 
-For more information about the database models and API endpoints, please refer to the documentation files:
+For more information about the database models, API endpoints, and deployment, please refer to the documentation files:
 
 - **[Database Model Documentation](./docs/models.md)**
 - **[API Documentation](./docs/api.md)**
+- **[Server Deployment Guide](./docs/DEPLOYMENT.md)**
