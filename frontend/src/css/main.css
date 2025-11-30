@@ -95,4 +95,14 @@ p {
     color: transparent;
 }
 
-
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: #fbbf24; /* yellow-400 */
+  }
+  50% {
+    border-color: #f59e0b; /* amber-500 */
+  }
+}
+.animate-pulse-border {
+  animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
