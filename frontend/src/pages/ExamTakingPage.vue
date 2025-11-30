@@ -77,6 +77,13 @@ onMounted(() => {
   }
 
   const data = JSON.parse(dataFromStorage);
+
+  // Redirect if the attempt is already completed
+  if (data.attempt.status === 'completed') {
+    toast.info('شما این آزمون را قبلاً به پایان رسانده‌اید.');
+    router.push('/dashboard');
+    return;
+  }
   
   examData.value = data;
   questions.value = data.questions;
