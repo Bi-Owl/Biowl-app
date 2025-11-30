@@ -50,8 +50,13 @@
       </div>
       <!-- Start/Continue/Review Action -->
       <div v-if="actionType === 'start'">
-        <div v-if="isBeforeStart && exam.attempt?.status !== 'completed'" class="text-center mb-2">
-          <div class="text-sm text-amber-700 font-semibold">{{ countdownText }}</div>
+        <div class="text-center mb-2 space-y-1">
+          <div v-if="isBeforeStart && exam.attempt?.status !== 'completed'" class="text-sm text-amber-700 font-semibold">
+            {{ countdownText }}
+          </div>
+          <div v-if="inProgressCountdown" class="text-sm text-yellow-600 font-semibold">
+            زمان باقی‌مانده: {{ inProgressCountdown }}
+          </div>
         </div>
         <button 
           @click="$emit('handle-action', exam)" 
@@ -67,7 +72,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 
 const props = defineProps({
   exam: {
@@ -88,11 +93,15 @@ const props = defineProps({
   }
 });
 
-defineEmits(['purchase', 'handle-action']);
+const emit = defineEmits(['purchase', 'handle-action', 'attempt-expired']);
 
 const now = ref(new Date());
 let timer = null;
+let inProgressTimer = null;
 
+const remainingTime = ref(0);
+
+// --- General Timer for 'now' ---
 onMounted(() => {
   timer = setInterval(() => {
     now.value = new Date();
@@ -100,21 +109,59 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  if (timer) {
-    clearInterval(timer);
-  }
+  if (timer) clearInterval(timer);
+  if (inProgressTimer) clearInterval(inProgressTimer);
 });
 
+// --- In-Progress Exam Countdown Logic ---
+const setupInProgressCountdown = () => {
+  if (props.exam.attempt?.status === 'in_progress' && props.exam.duration && props.exam.attempt.startedAt) {
+    const endTime = new Date(props.exam.attempt.startedAt).getTime() + props.exam.duration * 60 * 1000;
+    
+    const update = () => {
+      const newRemaining = endTime - new Date().getTime();
+      if (newRemaining > 0) {
+        remainingTime.value = newRemaining;
+      } else {
+        remainingTime.value = 0;
+        emit('attempt-expired', props.exam.id);
+        if (inProgressTimer) clearInterval(inProgressTimer);
+      }
+    };
+
+    update();
+    inProgressTimer = setInterval(update, 1000);
+  }
+};
+
+watch(() => props.exam.attempt, (newAttempt) => {
+  if (inProgressTimer) clearInterval(inProgressTimer);
+  if (newAttempt?.status === 'in_progress') {
+    setupInProgressCountdown();
+  }
+}, { immediate: true });
+
+
+const inProgressCountdown = computed(() => {
+  if (props.exam.attempt?.status !== 'in_progress' || remainingTime.value <= 0) {
+    return null;
+  }
+  const totalSeconds = Math.floor(remainingTime.value / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+});
+
+
+// --- Other Computed Properties ---
 const isFree = computed(() => props.exam.price === 'free');
 
 const priceText = computed(() => {
-  if (isFree.value) {
-    return 'رایگان';
-  }
+  if (isFree.value) return 'رایگان';
   return `${Number(props.exam.price).toLocaleString('fa-IR')} تومان`;
 });
 
-// --- Timed Exam Logic ---
 const isTimeless = computed(() => !props.exam.startTime);
 const startTime = computed(() => props.exam.startTime ? new Date(props.exam.startTime) : null);
 const endTime = computed(() => props.exam.endTime ? new Date(props.exam.endTime) : null);
@@ -129,7 +176,6 @@ const startActionState = computed(() => {
     return { text: 'مشاهده پاسخنامه', disabled: false, class: 'bg-sky-600 hover:bg-sky-700' };
   }
 
-  // This logic is for exams that have a specific start/end time
   if (!isTimeless.value) {
     if (isAfterEnd.value) {
       return { text: 'زمان آزمون تمام شده', disabled: true, class: 'bg-red-500' };
@@ -143,23 +189,18 @@ const startActionState = computed(() => {
     return { text: 'ادامه آزمون', disabled: false, class: 'bg-yellow-500 hover:bg-yellow-600' };
   }
   
-  // Default is 'start' for timeless exams or timed exams that are currently active
   return { text: 'شروع آزمون', disabled: false, class: 'bg-emerald-600 hover:bg-emerald-700' };
 });
 
 const countdownText = computed(() => {
   if (!isBeforeStart.value) return '';
-
   const diff = startTime.value.getTime() - now.value.getTime();
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-  if (days > 0) {
-    return `شروع تا ${days} روز دیگر`;
-  }
-  
+  if (days > 0) return `شروع تا ${days} روز دیگر`;
   return `شروع تا: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 });
 </script>

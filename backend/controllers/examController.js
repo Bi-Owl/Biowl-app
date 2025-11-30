@@ -156,7 +156,7 @@ const getPurchasedExams = async (req, res) => {
 
       const questionCount = await Question.count({ where: { ExamId: plainExam.id } });
 
-      plainExam.attempt = attempt ? { id: attempt.id, status: attempt.status } : null;
+      plainExam.attempt = attempt ? { id: attempt.id, status: attempt.status, startedAt: attempt.startedAt } : null;
       plainExam.questionCount = questionCount;
       
       return plainExam;

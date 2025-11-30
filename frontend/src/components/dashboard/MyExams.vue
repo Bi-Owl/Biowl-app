@@ -22,6 +22,7 @@
           :exam="exam"
           :action-type="'start'"
           @handle-action="handleExamAction"
+          @attempt-expired="handleAttemptExpired"
         />
       </div>
     </div>
@@ -96,6 +97,13 @@ const handleExamAction = (exam) => {
     // Start exam - show confirmation modal
     selectedExam.value = exam;
     showStartModal.value = true;
+  }
+};
+
+const handleAttemptExpired = (examId) => {
+  const exam = exams.value.find(e => e.id === examId);
+  if (exam && exam.attempt) {
+    exam.attempt.status = 'completed';
   }
 };
 
