@@ -69,7 +69,7 @@ const fetchExams = async () => {
   try {
     exams.value = await fetchPurchasedExams();
   } catch (error) {
-    toast.error(error.message || 'خطا در دریافت آزمون‌های خریداری شده.');
+    toast.error(error.message);
   } finally {
     loading.value = false;
   }
@@ -105,12 +105,12 @@ const handleAttemptExpired = async (examId) => {
   if (exam && exam.attempt && exam.attempt.status !== 'completed') {
     try {
       // Call the API to mark as completed on the backend
-      await finishExamAttempt(exam.attempt.id);
+      const res = await finishExamAttempt(exam.attempt.id);
       // Update the local state to 'completed' to instantly refresh the UI
       exam.attempt.status = 'completed';
-      toast.info(`زمان آزمون "${exam.name}" به پایان رسید و پاسخنامه ثبت شد.`);
+      toast.success(res.message);
     } catch (error) {
-      toast.error(error.message || 'خطا در ثبت خودکار آزمون.');
+      toast.error(error.message);
     }
   }
 };
@@ -123,7 +123,7 @@ const confirmStartExam = async () => {
     
     sessionStorage.setItem('examAttemptData', JSON.stringify(data));
 
-    toast.success(`آزمون "${selectedExam.value.name}" با موفقیت شروع شد!`);
+    toast.success(data.message);
     
     router.push({
       name: 'ExamAttempt',

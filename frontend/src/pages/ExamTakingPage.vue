@@ -148,7 +148,7 @@ const handleUpdateAnswer = async (payload) => {
       sessionStorage.setItem('examAttemptData', JSON.stringify(currentData));
     }
   } catch (error) {
-    toast.error(error.message || 'خطا در ذخیره پاسخ.');
+    toast.error(error.message);
   } finally {
     pendingUpdate.value = null;
   }
