@@ -125,7 +125,6 @@ const getPurchasedExams = async (req, res) => {
         },
         include: [{
           model: UserExamAttempt,
-          where: { UserId: userId },
           attributes: ['id', 'status'],
           required: false // LEFT JOIN
         }]
