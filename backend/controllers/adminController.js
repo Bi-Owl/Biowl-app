@@ -441,7 +441,7 @@ exports.getExamsWithReportCardStatus = async (req, res) => {
         attributes: ['id', 'name'],
         include: [{
           model: ReportCard,
-          attributes: ['id', 'isHidden', 'createdAt', 'updatedAt'],
+          attributes: ['id', 'isHidden', 'createdAt', 'updatedAt', 'description', 'answerKeyPdfUrl'],
           required: false, // LEFT JOIN to get all exams regardless of report card status
         }],
         order: [['createdAt', 'DESC']],
