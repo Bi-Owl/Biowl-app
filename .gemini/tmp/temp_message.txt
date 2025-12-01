@@ -1,0 +1,3 @@
+The default password for all users imported via the `importUsers.js` script is their respective **national ID (کد ملی)**.
+
+This password is then hashed and stored in the database. When users log in, they should use their national ID as the password.
