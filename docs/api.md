@@ -793,6 +793,85 @@ Reorders questions within an exam.
     -   `401 Unauthorized`: "توکن نامعتبر است"
     -   `403 Forbidden`: "اجازه دسترسی ندارید"
     -   `400 Bad Request`: "اطلاعات ارسالی برای آپدیت نامعتبر است."
-    -   `500 Internal Server Error`: "خطا در سرور هنگام مرتب‌سازی سوالات رخ داد."
-
----
+        -   `500 Internal Server Error`: "خطا در سرور هنگام مرتب‌سازی سوالات رخ داد."
+    
+    ---
+    
+    ### 4.16 Report Card Management Endpoints (`/api/admin/report-cards`)
+    
+    #### GET /api/admin/report-cards/exams
+    
+    Retrieves a list of all exams and includes their associated report card status.
+    
+    -   **Access:** Private (Admin)
+    -   **Method:** `GET`
+    -   **URL:** `/api/admin/report-cards/exams`
+    -   **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`
+    -   **Success Response (200 OK):**
+        ```json
+        [
+          {
+            "id": 1,
+            "name": "آزمون جامع زیست شناسی",
+            "ReportCard": {
+                "id": 1,
+                "isHidden": true,
+                "createdAt": "2023-12-01T10:00:00.000Z",
+                "updatedAt": "2023-12-01T10:00:00.000Z"
+            }
+          },
+          {
+            "id": 2,
+            "name": "آزمون دیگر",
+            "ReportCard": null
+          }
+        ]
+        ```
+    
+    #### POST /api/admin/report-cards/publish/:examId
+    
+    Publishes or re-publishes a report card for an exam. Snapshots correct answers and completes all in-progress attempts for that exam.
+    
+    -   **Access:** Private (Admin)
+    -   **Method:** `POST`
+    -   **URL:** `/api/admin/report-cards/publish/{examId}`
+    -   **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`, `Content-Type: multipart/form-data`
+    -   **Request Body (multipart/form-data):**
+        -   `description`: String (Optional)
+        -   `answerKeyPdf`: File (Optional PDF file)
+    -   **Success Response (201 Created):**
+        ```json
+        {
+            "message": "کارنامه با موفقیت منتشر شد. 15 آزمون در حال انجام به وضعیت 'تکمیل شده' تغییر یافت.",
+            "reportCard": {
+                "id": 1,
+                // ... other ReportCard fields
+            }
+        }
+        ```
+    
+    #### PUT /api/admin/report-cards/:examId
+    
+    Updates the details of an existing report card.
+    
+    -   **Access:** Private (Admin)
+    -   **Method:** `PUT`
+    -   **URL:** `/api/admin/report-cards/{examId}`
+    -   **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`, `Content-Type: multipart/form-data`
+    -   **Request Body (multipart/form-data):**
+        -   `description`: String (Optional)
+        -   `isHidden`: Boolean
+        -   `answerKeyPdf`: File (Optional PDF file)
+    -   **Success Response (200 OK):**
+        ```json
+        {
+            "message": "کارنامه با موفقیت به‌روزرسانی شد.",
+            "reportCard": {
+                "id": 1,
+                // ... other ReportCard fields
+            }
+        }
+        ```
+    
+    ---
+    

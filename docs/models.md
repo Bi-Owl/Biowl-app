@@ -74,6 +74,7 @@ Represents an exam available in the system.
 - `belongsToMany(User, { through: UserExam })`: An exam can be purchased by many users (via `UserExam` join table).
 - `hasMany(Question)`: An exam can have many questions.
 - `hasMany(UserExamAttempt)`: An exam can have many attempts from users.
+- `hasOne(ReportCard)`: An exam has one report card.
 
 ---
 
@@ -131,5 +132,30 @@ Records a user's attempt at an exam, including their answers and status.
 | `answers`    | `JSON`                        | Stores user's answers `{ questionId: answerOption }` | `NOT NULL`, `DEFAULT: {}` |
 | `UserId`     | `INTEGER`                     | Foreign Key to the User model                | `NOT NULL`            |
 | `ExamId`     | `INTEGER`                     | Foreign Key to the Exam model                | `NOT NULL`            |
+
+**Relationships:**
+- `belongsTo(User)`: An attempt belongs to a user.
+- `belongsTo(Exam)`: An attempt belongs to an exam.
+
+---
+
+## 7. ReportCard Model
+
+Stores the published results and answer key for an exam.
+
+**File:** `backend/models/reportCard.js`
+
+| Field        | Type                          | Description                                  | Constraints           |
+| :----------- | :---------------------------- | :------------------------------------------- | :-------------------- |
+| `id`         | `INTEGER`                     | Primary Key, Auto-increment                  | `PRIMARY KEY`         |
+| `description`| `TEXT`                        | Optional description or analysis of the results | `ALLOW NULL`          |
+| `answerKeyPdfUrl` | `STRING`                  | URL to the optional PDF answer key           | `ALLOW NULL`          |
+| `showRank`   | `BOOLEAN`                     | Whether to show ranks to users               | `NOT NULL`, `DEFAULT: false` |
+| `isHidden`   | `BOOLEAN`                     | Whether the report card is visible to users  | `NOT NULL`, `DEFAULT: true` |
+| `correctAnswers` | `JSON`                    | A snapshot of correct answers `{ questionId: correctOption }` | `NOT NULL`            |
+| `ExamId`     | `INTEGER`                     | Foreign Key to the Exam model (one-to-one)   | `NOT NULL`, `UNIQUE`  |
+
+**Relationships:**
+- `belongsTo(Exam)`: A report card belongs to one exam.
 
 ---
