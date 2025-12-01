@@ -1,6 +1,9 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-gray-800 mb-6 text-right">مدیریت کاربران</h1>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-gray-800 text-right">مدیریت کاربران</h1>
+      <SearchBar v-model="searchQuery" placeholder="جستجو در کاربران..." />
+    </div>
     <div class="bg-white shadow-md rounded-lg overflow-hidden">
       <table class="min-w-full bg-white text-right">
         <thead class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
@@ -14,7 +17,10 @@
           </tr>
         </thead>
         <tbody class="text-gray-600 text-sm font-light">
-          <tr v-for="(user, index) in users" :key="user.id" class="border-b border-gray-200 hover:bg-gray-100" :class="{ 'bg-gray-50': index % 2 !== 0 }">
+          <tr v-if="!filteredUsers.length">
+            <td colspan="6" class="text-center py-6 text-gray-500">کاربری مطابق با جستجوی شما یافت نشد.</td>
+          </tr>
+          <tr v-for="(user, index) in filteredUsers" :key="user.id" class="border-b border-gray-200 hover:bg-gray-100" :class="{ 'bg-gray-50': index % 2 !== 0 }">
             <td class="py-3 px-6">
               <div class="flex flex-col">
                 <div><span class="font-semibold">{{ user.id }}:</span> {{ user.firstName }} {{ user.lastName }}</div>
@@ -55,15 +61,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { getUsers, updateUser, deleteUser } from '@/api/admin';
 import { useToast } from 'vue-toastification';
 import { useModal } from 'vue-final-modal';
 import EditUserModal from '@/components/dashboard/EditUserModal.vue';
-import UserDetailsModal from '@/components/dashboard/UserDetailsModal.vue';
+import SearchBar from '@/components/ui/SearchBar.vue';
 
 const users = ref([]);
 const toast = useToast();
+const searchQuery = ref('');
+
+const filteredUsers = computed(() => {
+  if (!searchQuery.value) {
+    return users.value;
+  }
+  const query = searchQuery.value.toLowerCase();
+  return users.value.filter(user => {
+    return (
+      user.firstName.toLowerCase().includes(query) ||
+      user.lastName.toLowerCase().includes(query) ||
+      user.email.toLowerCase().includes(query) ||
+      user.phoneNumber.includes(query) ||
+      user.nationalId.includes(query)
+    );
+  });
+});
 
 const openEditModal = (user) => {
   const { open, close } = useModal({
