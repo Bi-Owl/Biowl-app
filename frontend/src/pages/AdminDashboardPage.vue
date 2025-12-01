@@ -28,6 +28,7 @@
             @manage-questions="handleManageQuestions"
           />
         </div>
+        <ReportCardTable v-if="currentView === 'report-cards'" />
       </div>
     </div>
   </div>
@@ -39,6 +40,7 @@ import AdminSideMenu from '@/components/dashboard/AdminSideMenu.vue';
 import UsersTable from '@/components/dashboard/UsersTable.vue';
 import ExamsTable from '@/components/dashboard/ExamsTable.vue';
 import QuestionManager from '@/components/dashboard/QuestionManager.vue';
+import ReportCardTable from '@/components/dashboard/ReportCardTable.vue';
 
 const currentView = ref('users'); // Default view
 const selectedExamForQuestions = ref(null);

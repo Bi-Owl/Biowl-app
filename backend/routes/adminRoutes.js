@@ -26,4 +26,9 @@ router.post('/exams/:examId/questions', [adminAuthMiddleware, upload], adminCont
 router.put('/questions/:questionId', [adminAuthMiddleware, upload], adminController.updateQuestion);
 router.delete('/questions/:questionId', adminAuthMiddleware, adminController.deleteQuestion);
 
+// Report Card (Karnameh) management routes
+router.get('/report-cards/exams', adminAuthMiddleware, adminController.getExamsWithReportCardStatus);
+router.post('/report-cards/publish/:examId', [adminAuthMiddleware, upload.single('answerKeyPdf')], adminController.publishReportCard);
+router.put('/report-cards/:examId', [adminAuthMiddleware, upload.single('answerKeyPdf')], adminController.updateReportCard);
+
 module.exports = router;

@@ -3,6 +3,8 @@ const Admin = require('../models/admin');
 const User = require('../models/user');
 const Exam = require('../models/exam');
 const Question = require('../models/question');
+const UserExamAttempt = require('../models/userExamAttempt');
+const ReportCard = require('../models/reportCard');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
@@ -338,6 +340,147 @@ exports.reorderQuestions = async (req, res) => {
     } catch (error) {
         console.error("Error reordering questions:", error);
         res.status(500).json({ message: 'خطا در سرور هنگام مرتب‌سازی سوالات رخ داد.' });
+    }
+};
+
+// --- Report Card (Karnameh) Management ---
+
+/**
+ * Publishes or re-publishes a report card for an exam.
+ * This involves snapshotting correct answers and completing any in-progress attempts.
+ */
+exports.publishReportCard = async (req, res) => {
+  const { examId } = req.params;
+  const { description, showRank } = req.body;
+
+  const t = await sequelize.transaction();
+
+  try {
+    const exam = await Exam.findByPk(examId, { transaction: t });
+    if (!exam) {
+      await t.rollback();
+      return res.status(404).json({ message: 'آزمون مورد نظر یافت نشد.' });
+    }
+
+    // 1. Snapshot all correct answers for this exam
+    const questions = await Question.findAll({
+      where: { ExamId: examId },
+      attributes: ['id', 'correctOption'],
+      transaction: t,
+    });
+
+    if (questions.length === 0) {
+      await t.rollback();
+      return res.status(400).json({ message: 'نمی‌توان برای آزمون بدون سوال، کارنامه منتشر کرد.' });
+    }
+
+    const correctAnswers = questions.reduce((acc, q) => {
+      acc[q.id] = q.correctOption;
+      return acc;
+    }, {});
+
+    // 2. Find or create the report card
+    const [reportCard, isNew] = await ReportCard.findOrCreate({
+      where: { ExamId: examId },
+      defaults: {
+        description: description,
+        showRank: showRank === 'true' || showRank === true,
+        correctAnswers: correctAnswers,
+        isHidden: true, // Remains hidden on first publish by default
+      },
+      transaction: t,
+    });
+
+    // 3. If it's a re-publish, update the fields
+    if (!isNew) {
+      reportCard.description = description;
+      reportCard.showRank = showRank === 'true' || showRank === true;
+      reportCard.correctAnswers = correctAnswers; // Overwrite with the latest correct answers
+    }
+
+    // 4. Handle optional PDF upload
+    if (req.file) {
+      // TODO: In a real app, delete the old file if it exists
+      reportCard.answerKeyPdfUrl = `/uploads/${req.file.filename}`;
+    }
+
+    await reportCard.save({ transaction: t });
+
+    // 5. Find all 'in_progress' attempts for this exam and mark them 'completed'
+    const [updateCount] = await UserExamAttempt.update(
+      { status: 'completed', finishedAt: new Date() },
+      {
+        where: {
+          ExamId: examId,
+          status: 'in_progress',
+        },
+        transaction: t,
+      }
+    );
+
+    await t.commit();
+
+    res.status(201).json({
+      message: `کارنامه با موفقیت منتشر شد. ${updateCount} آزمون در حال انجام به وضعیت "تکمیل شده" تغییر یافت.`,
+      reportCard,
+    });
+
+  } catch (error) {
+    await t.rollback();
+    console.error('Error publishing report card:', error);
+    res.status(500).json({ message: 'خطای سرور هنگام انتشار کارنامه.' });
+  }
+};
+
+/**
+ * Gets all exams and includes their report card status for the admin panel.
+ */
+exports.getExamsWithReportCardStatus = async (req, res) => {
+    try {
+      const exams = await Exam.findAll({
+        attributes: ['id', 'name'],
+        include: [{
+          model: ReportCard,
+          attributes: ['id', 'isHidden', 'createdAt', 'updatedAt'],
+          required: false, // LEFT JOIN to get all exams regardless of report card status
+        }],
+        order: [['createdAt', 'DESC']],
+      });
+      res.json(exams);
+    } catch (error) {
+      console.error('Error fetching exams with report card status:', error);
+      res.status(500).json({ message: 'خطای سرور' });
+    }
+};
+
+/**
+ * Updates a report card's mutable details (description, visibility, PDF file).
+ */
+exports.updateReportCard = async (req, res) => {
+    const { examId } = req.params;
+    const { description, isHidden } = req.body;
+
+    try {
+        const reportCard = await ReportCard.findOne({ where: { ExamId: examId } });
+
+        if (!reportCard) {
+            return res.status(404).json({ message: 'کارنامه‌ای برای این آزمون یافت نشد. ابتدا آن را منتشر کنید.' });
+        }
+
+        reportCard.description = description;
+        reportCard.isHidden = isHidden === 'true' || isHidden === true;
+
+        if (req.file) {
+            // TODO: In a real app, delete the old file if it exists
+            reportCard.answerKeyPdfUrl = `/uploads/${req.file.filename}`;
+        }
+
+        await reportCard.save();
+
+        res.json({ message: 'کارنامه با موفقیت به‌روزرسانی شد.', reportCard });
+    } catch (error) {
+        console.error('Error updating report card:', error);
+        res.status(500).json({ message: 'خطای سرور هنگام به‌روزرسانی کارنامه.' });
     }
 };
 
