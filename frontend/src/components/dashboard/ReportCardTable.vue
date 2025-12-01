@@ -73,7 +73,7 @@ const fetchExams = async () => {
   try {
     exams.value = await getExamsWithReportCardStatus();
   } catch (error) {
-    toast.error(error.message || 'خطا در دریافت لیست آزمون‌ها.');
+    toast.error(error.message);
   } finally {
     loading.value = false;
   }
