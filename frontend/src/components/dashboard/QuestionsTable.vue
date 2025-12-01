@@ -68,6 +68,7 @@ import draggable from 'vuedraggable';
 import { getQuestionsForExam, deleteQuestion, createQuestion, updateQuestion, reorderQuestions } from '@/api/admin';
 import { STATIC_BASE_URL } from '@/config/api';
 import AddEditQuestionModal from '@/components/dashboard/AddEditQuestionModal.vue';
+import ConfirmModal from '@/components/ui/ConfirmModal.vue';
 
 const props = defineProps({
   examId: {
@@ -155,16 +156,32 @@ const openEditModal = (question) => {
   open();
 };
 
-const confirmDelete = async (id) => {
-  if (confirm('آیا از حذف این سوال اطمینان دارید؟')) {
-    try {
-        const res = await deleteQuestion(id);
-        toast.success(res.message);
-        fetchQuestions();
-    } catch (error) {
-        toast.error(error.message);
+const confirmDelete = (questionId) => {
+  const { open, close } = useModal({
+    component: ConfirmModal,
+    attrs: {
+      title: 'تایید حذف سوال',
+      message: `آیا از حذف این سوال اطمینان دارید؟`,
+      confirmText: 'بله، حذف کن',
+      confirmClass: 'bg-red-600 hover:bg-red-700 focus:ring-red-300',
+      titleClass: 'text-red-800',
+      onConfirm: async () => {
+        try {
+          const res = await deleteQuestion(questionId);
+          toast.success(res.message);
+          fetchQuestions();
+        } catch (error) {
+          toast.error(error.message);
+        } finally {
+          close();
+        }
+      },
+      onClose() {
+        close();
+      }
     }
-  }
+  });
+  open();
 };
 
 const showImage = (url) => {
