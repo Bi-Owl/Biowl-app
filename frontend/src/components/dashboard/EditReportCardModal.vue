@@ -30,7 +30,7 @@
                 </div>
                 <input id="answerKeyPdf" type="file" class="hidden" @change="handleFileUpload" accept=".pdf" />
             </label> 
-            <p v-if="currentPdfFileName && !reportCardData.answerKeyPdf" class="mt-1 text-sm text-gray-500">فایل فعلی: <span class="font-semibold text-blue-700">{{ currentPdfFileName }}</span>. برای جایگزینی، یک فایل جدید انتخاب کنید.</p>
+            <p v-if="currentPdfFileName && !reportCardData.answerKeyPdf" class="mt-1 text-sm text-gray-500">فایل فعلی: <a :href="`/uploads/${currentPdfFileName}`" target="_blank" class="font-semibold text-blue-700 hover:underline">{{ currentPdfFileName }}</a>. برای جایگزینی، یک فایل جدید انتخاب کنید.</p>
             <p v-else-if="!currentPdfFileName" class="mt-1 text-sm text-gray-500">یک فایل جدید برای جایگزینی انتخاب کنید. در غیر اینصورت، فایل فعلی باقی می‌ماند.</p>
           </div>
           <div>
