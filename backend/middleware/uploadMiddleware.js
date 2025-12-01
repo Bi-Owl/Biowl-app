@@ -5,30 +5,52 @@ const path = require('path');
 const storage = multer.diskStorage({
   destination: './uploads/',
   filename: function(req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    // Sanitize originalname to prevent path traversal issues and ensure unique names
+    const safeOriginalName = path.basename(file.originalname).replace(/[^a-zA-Z0-9-_\.]/g, '');
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(safeOriginalName));
   }
 });
 
-// Check file type
-function checkFileType(file, cb) {
-  const filetypes = /jpeg|jpg|png|gif/;
+// Check file type for images
+function checkImageType(file, cb) {
+  const filetypes = /jpeg|jpg|png|gif|webp/;
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = filetypes.test(file.mimetype);
 
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb('Error: Images Only!');
+    cb(new Error('خطا: فقط فایل‌های تصویری (jpeg, jpg, png, gif, webp) مجاز هستند!'));
   }
 }
 
-// Init upload
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: function(req, file, cb) {
-    checkFileType(file, cb);
-  }
-}).single('questionImage'); // 'questionImage' is the field name in the form-data
+// Check file type for PDFs
+function checkPdfType(file, cb) {
+    const filetypes = /pdf/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+  
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('خطا: فقط فایل‌های PDF مجاز هستند!'));
+    }
+}
 
-module.exports = upload;
+// Middleware for uploading a single question image from a field named 'image'
+exports.uploadQuestionImage = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: function(req, file, cb) {
+        checkImageType(file, cb);
+    }
+}).single('image');
+
+// Middleware for uploading a single PDF answer key from a field named 'answerKeyPdf'
+exports.uploadAnswerKeyPdf = multer({
+    storage: storage,
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: function(req, file, cb) {
+        checkPdfType(file, cb);
+    }
+}).single('answerKeyPdf');

@@ -37,4 +37,9 @@ export const ADMIN_API = {
   UPDATE_QUESTION: (questionId) => `${API_BASE_URL}/admin/questions/${questionId}`,
   DELETE_QUESTION: (questionId) => `${API_BASE_URL}/admin/questions/${questionId}`,
   REORDER_QUESTIONS: `${API_BASE_URL}/admin/questions/reorder`,
+
+  // Report Card (Karnameh) management
+  GET_EXAMS_WITH_REPORT_CARD_STATUS: `${API_BASE_URL}/admin/report-cards/exams`,
+  PUBLISH_REPORT_CARD: (examId) => `${API_BASE_URL}/admin/report-cards/publish/${examId}`,
+  UPDATE_REPORT_CARD: (examId) => `${API_BASE_URL}/admin/report-cards/${examId}`,
 };

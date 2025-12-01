@@ -144,7 +144,7 @@ const submit = () => {
   });
 
   if (questionImageFile.value) {
-    formData.append('questionImage', questionImageFile.value);
+    formData.append('image', questionImageFile.value);
   }
   
   emit('confirm', formData);

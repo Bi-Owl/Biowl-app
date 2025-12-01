@@ -254,3 +254,44 @@ export const reorderQuestions = async (updates) => {
   }
   return response.json();
 };
+
+// --- Report Card Management ---
+
+export const getExamsWithReportCardStatus = async () => {
+  const response = await fetch(ADMIN_API.GET_EXAMS_WITH_REPORT_CARD_STATUS, {
+    headers: getHeaders(),
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to fetch exams with report card status');
+  }
+  return response.json();
+};
+
+export const publishReportCard = async (examId, formData) => {
+  const response = await fetch(ADMIN_API.PUBLISH_REPORT_CARD(examId), {
+    method: 'POST',
+    headers: getMultipartHeaders(), // Use multipart for potential file upload
+    body: formData,
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to publish report card');
+  }
+  return response.json();
+};
+
+export const updateReportCard = async (examId, formData) => {
+  // PUT method doesn't work as expected with multipart/form-data in some setups,
+  // so we use POST and can handle it on the backend or just use PUT. Sticking to PUT for RESTfulness.
+  const response = await fetch(ADMIN_API.UPDATE_REPORT_CARD(examId), {
+    method: 'PUT',
+    headers: getMultipartHeaders(),
+    body: formData,
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to update report card');
+  }
+  return response.json();
+};

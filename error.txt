@@ -1,0 +1,21 @@
+root@digiwork-server:/var/www/biowl-app# cd backend/
+root@digiwork-server:/var/www/biowl-app/backend# node server.js
+[dotenv@17.2.3] injecting env (10) from .env -- tip: ⚙️  override existing env vars with { override: true }
+/var/www/biowl-app/backend/routes/adminRoutes.js:31
+router.post('/report-cards/publish/:examId', [adminAuthMiddleware, upload.single('answerKeyPdf')], adminController.publishReportCard);
+                                                                          ^
+
+TypeError: upload.single is not a function
+    at Object.<anonymous> (/var/www/biowl-app/backend/routes/adminRoutes.js:31:75)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Module.require (node:internal/modules/cjs/loader:1463:12)
+    at require (node:internal/modules/helpers:147:16)
+    at Object.<anonymous> (/var/www/biowl-app/backend/server.js:14:21)
+
+Node.js v22.21.0
+root@digiwork-server:/var/www/biowl-app/backend#
