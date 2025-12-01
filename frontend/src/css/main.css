@@ -106,3 +106,8 @@ p {
 .animate-pulse-border {
   animation: pulse-border 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Ensure Vazirmatn font for toast messages */
+.Vue-Toastification__toast {
+  font-family: Vazirmatn, sans-serif !important;
+}
