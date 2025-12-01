@@ -13,8 +13,8 @@
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
         </button>
       </div>
-      <form @submit.prevent="confirm" class="p-6 space-y-6">
-        <fieldset :disabled="loading">
+      <form @submit.prevent="confirm" class="p-6">
+        <fieldset :disabled="loading" class="space-y-6">
           <div>
             <label for="description" class="block mb-2 text-sm font-medium text-blue-700">توضیحات کارنامه</label>
             <textarea v-model="reportCardData.description" id="description" rows="4" class="bg-blue-50 border border-blue-200 text-blue-800 text-sm rounded-lg focus:ring-2 focus:ring-blue-300 block w-full p-2.5" placeholder="توضیحات مربوط به این کارنامه..."></textarea>
@@ -30,7 +30,8 @@
                 </div>
                 <input id="answerKeyPdf" type="file" class="hidden" @change="handleFileUpload" accept=".pdf" />
             </label> 
-            <p v-if="initialData.answerKeyPdfUrl && !reportCardData.answerKeyPdf" class="mt-1 text-sm text-gray-500">یک فایل جدید برای جایگزینی انتخاب کنید. در غیر اینصورت، فایل فعلی باقی می‌ماند.</p>
+            <p v-if="currentPdfFileName && !reportCardData.answerKeyPdf" class="mt-1 text-sm text-gray-500">فایل فعلی: <span class="font-semibold text-blue-700">{{ currentPdfFileName }}</span>. برای جایگزینی، یک فایل جدید انتخاب کنید.</p>
+            <p v-else-if="!currentPdfFileName" class="mt-1 text-sm text-gray-500">یک فایل جدید برای جایگزینی انتخاب کنید. در غیر اینصورت، فایل فعلی باقی می‌ماند.</p>
           </div>
           <div>
               <label class="block text-sm font-medium text-blue-700">وضعیت نمایش کارنامه</label>
@@ -56,7 +57,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import { VueFinalModal } from 'vue-final-modal';
 import BaseToggle from '@/components/ui/BaseToggle.vue';
 
@@ -75,16 +76,32 @@ const reportCardData = ref({
   isHidden: true,
   answerKeyPdf: null,
 });
+const currentPdfFileName = ref(null); // To display the existing PDF filename
 
-onMounted(() => {
-  if (props.initialData) {
-    reportCardData.value.description = props.initialData.description || '';
-    reportCardData.value.isHidden = props.initialData.isHidden === true;
+watch(() => props.initialData, (newVal) => {
+  if (newVal) {
+    reportCardData.value.description = newVal.description || '';
+    reportCardData.value.isHidden = newVal.isHidden === true;
+    
+    // Set current PDF filename if it exists
+    if (newVal.answerKeyPdfUrl) {
+      currentPdfFileName.value = newVal.answerKeyPdfUrl.split('/').pop();
+    } else {
+      currentPdfFileName.value = null;
+    }
+    reportCardData.value.answerKeyPdf = null; // Clear file input value
   }
-});
+}, { immediate: true });
 
 const handleFileUpload = (event) => {
-  reportCardData.value.answerKeyPdf = event.target.files[0];
+  const file = event.target.files[0];
+  if (file) {
+    reportCardData.value.answerKeyPdf = file;
+    currentPdfFileName.value = file.name; // Display new file name
+  } else {
+    reportCardData.value.answerKeyPdf = null;
+    currentPdfFileName.value = props.initialData.answerKeyPdfUrl ? props.initialData.answerKeyPdfUrl.split('/').pop() : null;
+  }
 };
 
 const getFormData = (forRepublish = false) => {
