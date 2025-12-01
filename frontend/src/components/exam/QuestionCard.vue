@@ -21,6 +21,7 @@
         :is-readonly="isReadonly"
         :is-pending="pendingUpdate && pendingUpdate.questionId === question.id && pendingUpdate.answer === optionNum"
         :is-correct="correctAnswer === optionNum"
+        :was-answered="wasAnswered"
         @select="onSelectAnswer"
       />
     </div>
@@ -28,6 +29,7 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { STATIC_BASE_URL } from '@/config/api';
 import AnswerOption from './AnswerOption.vue';
 
@@ -55,6 +57,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update-answer']);
+
+const wasAnswered = computed(() => props.selectedAnswer !== null && props.selectedAnswer !== undefined);
 
 const onSelectAnswer = (optionNumber) => {
   if (props.isReadonly) return;

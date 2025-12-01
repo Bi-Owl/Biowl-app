@@ -55,6 +55,10 @@ const props = defineProps({
   isCorrect: {
     type: Boolean,
     default: false
+  },
+  wasAnswered: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -80,26 +84,36 @@ const interactiveModeCircleClasses = computed(() => ({
 }));
 
 const reviewModeClasses = computed(() => {
+  // Correct answer is always green
   if (props.isCorrect) {
-    // The correct answer, whether selected or not
     return 'bg-green-100 border-green-500';
   }
+  // User's incorrect selection is always red
   if (props.isSelected) {
-    // The selected answer, which must be incorrect if we reach here
     return 'bg-red-100 border-red-500';
   }
-  // An unselected, incorrect answer
-  return 'bg-blue-50 border-blue-200 opacity-70';
+  // For options that are neither correct nor selected by the user
+  if (props.wasAnswered) {
+    // If user answered (and it was wrong), other options are neutral gray
+    return 'bg-gray-50 border-gray-200 opacity-60';
+  } else {
+    // If user did not answer, other options are faint blue
+    return 'bg-blue-50 border-blue-200 opacity-80';
+  }
 });
 
 const reviewModeCircleClasses = computed(() => {
-    if (props.isCorrect) {
+  if (props.isCorrect) {
     return 'bg-green-500 text-white';
   }
   if (props.isSelected) {
     return 'bg-red-500 text-white';
   }
-  return 'bg-blue-100 text-blue-800';
+  if (props.wasAnswered) {
+    return 'bg-gray-200 text-gray-500';
+  } else {
+    return 'bg-blue-100 text-blue-800';
+  }
 });
 
 </script>
