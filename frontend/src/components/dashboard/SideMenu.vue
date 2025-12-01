@@ -21,6 +21,12 @@
           <i data-feather="shopping-cart" class="ml-3"></i>
           <span>فروشگاه</span>
         </li>
+        <li @click="$emit('navigate', 'report-cards')"
+            :class="[currentView === 'report-cards' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600']"
+            class="flex items-center text-lg font-semibold py-3 px-4 rounded-lg hover:bg-emerald-50 hover:text-emerald-700 transition-colors cursor-pointer mt-2">
+          <i data-feather="award" class="ml-3"></i>
+          <span>کارنامه ها</span>
+        </li>
       </ul>
     </nav>
     <!-- Logout Button -->

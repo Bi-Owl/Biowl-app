@@ -1,5 +1,5 @@
 import { auth } from '@/auth';
-import { EXAM_API } from '@/config/api';
+import { EXAM_API, REPORT_CARD_API } from '@/config/api';
 
 const getAuthHeaders = () => {
   const token = auth.state.token;
@@ -136,6 +136,36 @@ export const reviewAttempt = async (attemptId) => {
     return data;
   } catch (error) {
     console.error('API Error reviewing attempt:', error);
+    throw error;
+  }
+};
+
+export const fetchAvailableReportCards = async () => {
+  try {
+    const headers = getAuthHeaders();
+    const response = await fetch(REPORT_CARD_API.GET_AVAILABLE, { headers });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Failed to fetch report cards');
+    }
+    return response.json();
+  } catch (error) {
+    console.error('API Error fetching report cards:', error);
+    throw error;
+  }
+};
+
+export const fetchReportCardDetails = async (examId) => {
+  try {
+    const headers = getAuthHeaders();
+    const response = await fetch(REPORT_CARD_API.GET_DETAILS(examId), { headers });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.message || 'Failed to fetch report card details');
+    }
+    return response.json();
+  } catch (error) {
+    console.error('API Error fetching report card details:', error);
     throw error;
   }
 };

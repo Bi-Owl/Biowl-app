@@ -20,6 +20,7 @@
         :is-selected="selectedAnswer === optionNum"
         :is-readonly="isReadonly"
         :is-pending="pendingUpdate && pendingUpdate.questionId === question.id && pendingUpdate.answer === optionNum"
+        :is-correct="correctAnswer === optionNum"
         @select="onSelectAnswer"
       />
     </div>
@@ -45,6 +46,10 @@ const props = defineProps({
   },
   pendingUpdate: {
     type: Object,
+    default: null
+  },
+  correctAnswer: {
+    type: [Number, String, null],
     default: null
   }
 });

@@ -13,6 +13,7 @@
         <Profile v-if="currentView === 'profile'" />
         <MyExams v-else-if="currentView === 'my-exams'" :current-view="currentView" />
         <Store v-else-if="currentView === 'store'" />
+        <MyReportCards v-else-if="currentView === 'report-cards'" />
       </div>
     </div>
   </div>
@@ -23,6 +24,7 @@ import { ref } from 'vue';
 import SideMenu from '@/components/dashboard/SideMenu.vue';
 import MyExams from '@/components/dashboard/MyExams.vue';
 import Store from '@/components/dashboard/Store.vue';
+import MyReportCards from '@/components/dashboard/MyReportCards.vue';
 
 // A simple component for the profile view for now
 const Profile = {

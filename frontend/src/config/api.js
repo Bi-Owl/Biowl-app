@@ -18,6 +18,11 @@ export const EXAM_API = {
   REVIEW_ATTEMPT: (attemptId) => `${API_BASE_URL}/attempts/${attemptId}/review`,
 };
 
+export const REPORT_CARD_API = {
+  GET_AVAILABLE: `${API_BASE_URL}/report-cards`,
+  GET_DETAILS: (examId) => `${API_BASE_URL}/report-cards/${examId}`,
+};
+
 export const ADMIN_API = {
   GET_USERS: `${API_BASE_URL}/admin/users`,
   GET_USER_BY_ID: (id) => `${API_BASE_URL}/admin/users/${id}`,

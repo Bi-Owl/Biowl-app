@@ -13,6 +13,7 @@ const examRoutes = require('./routes/examRoutes');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes'); // Import the admin routes
 const examAttemptRoutes = require('./routes/examAttemptRoutes');
+const reportCardUserRoutes = require('./routes/reportCardUserRoutes');
 const path = require('path');
 
 const app = express();
@@ -38,8 +39,9 @@ ReportCard.belongsTo(Exam);
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/exams', examRoutes);
-app.use('/api/admin', adminRoutes); // Add the admin routes
+app.use('/api/admin', adminRoutes);
 app.use('/api/attempts', examAttemptRoutes);
+app.use('/api/report-cards', reportCardUserRoutes);
 
 // Test route
 app.get('/', (req, res) => {
