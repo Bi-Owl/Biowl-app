@@ -210,82 +210,114 @@ const handleReorder = async () => {
 
 // --- Question Modals ---
 const openAddModal = () => {
-  const { open, close } = useModal({
+  let modal;
+  const onConfirm = (formData) => {
+    createQuestion(props.examId, formData).then((res) => {
+      toast.success(res.message);
+      fetchData();
+      modal.close();
+    }).catch(err => toast.error(err.message));
+  };
+  const onCancel = () => modal.close();
+
+  modal = useModal({
     component: AddEditQuestionModal,
     attrs: {
       nextPosition: questions.value.length + 1,
-      onConfirm(formData) {
-        createQuestion(props.examId, formData).then((res) => {
-          toast.success(res.message);
-          fetchData();
-          close();
-        }).catch(err => toast.error(err.message));
-      },
-      onCancel: close,
+      onConfirm,
+      onCancel,
     },
   });
-  open();
+  modal.open();
 };
 
 const openEditModal = (question) => {
-  const { open, close } = useModal({
+  let modal;
+  const onConfirm = (formData) => {
+    updateQuestion(question.id, formData).then((res) => {
+      toast.success(res.message);
+      fetchData();
+      modal.close();
+    }).catch(err => toast.error(err.message));
+  };
+  const onCancel = () => modal.close();
+
+  modal = useModal({
     component: AddEditQuestionModal,
     attrs: {
       question: question,
-      onConfirm(formData) {
-        updateQuestion(question.id, formData).then((res) => {
-          toast.success(res.message);
-          fetchData();
-          close();
-        }).catch(err => toast.error(err.message));
-      },
-      onCancel: close,
+      onConfirm,
+      onCancel,
     },
   });
-  open();
+  modal.open();
 };
 
 // --- Explanation Modals ---
 const openAddExplanationModal = () => {
-  const { open, close } = useModal({
+  let modal;
+  const onConfirm = (formData) => {
+    createExplanation(props.examId, formData).then((res) => {
+      toast.success(res.message);
+      fetchData();
+      modal.close();
+    }).catch(err => toast.error(err.message));
+  };
+  const onCancel = () => modal.close();
+
+  modal = useModal({
     component: AddEditExplanationModal,
     attrs: {
       nextDisplayOrder: questions.value.length + 1,
-      onConfirm(formData) {
-        createExplanation(props.examId, formData).then((res) => {
-          toast.success(res.message);
-          fetchData();
-          close();
-        }).catch(err => toast.error(err.message));
-      },
-      onCancel: close,
+      onConfirm,
+      onCancel,
     },
   });
-  open();
+  modal.open();
 };
 
 const openEditExplanationModal = (explanation) => {
-  const { open, close } = useModal({
+  let modal;
+  const onConfirm = (formData) => {
+    updateExplanation(explanation.id, formData).then((res) => {
+      toast.success(res.message);
+      fetchData();
+      modal.close();
+    }).catch(err => toast.error(err.message));
+  };
+  const onCancel = () => modal.close();
+
+  modal = useModal({
     component: AddEditExplanationModal,
     attrs: {
       explanation: explanation,
-      onConfirm(formData) {
-        updateExplanation(explanation.id, formData).then((res) => {
-          toast.success(res.message);
-          fetchData();
-          close();
-        }).catch(err => toast.error(err.message));
-      },
-      onCancel: close,
+      onConfirm,
+      onCancel,
     },
   });
-  open();
+  modal.open();
 };
 
 // --- Generic Actions ---
 const confirmDelete = (item) => {
   const isQuestion = item.type === 'question';
-  const { open, close } = useModal({
+  let modal;
+
+  const onConfirm = async () => {
+    try {
+      const deleteAction = isQuestion ? deleteQuestion(item.id) : deleteExplanation(item.id);
+      const res = await deleteAction;
+      toast.success(res.message);
+      fetchData();
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      modal.close();
+    }
+  };
+  const onClose = () => modal.close();
+
+  modal = useModal({
     component: ConfirmModal,
     attrs: {
       title: `تایید حذف ${isQuestion ? 'سوال' : 'توضیحات'}`,
@@ -293,22 +325,11 @@ const confirmDelete = (item) => {
       confirmText: 'بله، حذف کن',
       confirmClass: 'bg-red-600 hover:bg-red-700 focus:ring-red-300',
       titleClass: 'text-red-800',
-      onConfirm: async () => {
-        try {
-          const deleteAction = isQuestion ? deleteQuestion(item.id) : deleteExplanation(item.id);
-          const res = await deleteAction;
-          toast.success(res.message);
-          fetchData();
-        } catch (error) {
-          toast.error(error.message);
-        } finally {
-          close();
-        }
-      },
-      onClose: close,
+      onConfirm,
+      onClose,
     }
   });
-  open();
+  modal.open();
 };
 
 const showImage = (url) => {
