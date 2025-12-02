@@ -40,7 +40,7 @@ function checkPdfType(file, cb) {
 // Middleware for uploading a single question image from a field named 'image'
 exports.uploadQuestionImage = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    limits: { fileSize: 15 * 1024 * 1024 }, // 15MB limit
     fileFilter: function(req, file, cb) {
         checkImageType(file, cb);
     }
@@ -49,7 +49,7 @@ exports.uploadQuestionImage = multer({
 // Middleware for uploading a single PDF answer key from a field named 'answerKeyPdf'
 exports.uploadAnswerKeyPdf = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    limits: { fileSize: 15 * 1024 * 1024 }, // 15MB limit
     fileFilter: function(req, file, cb) {
         checkPdfType(file, cb);
     }
