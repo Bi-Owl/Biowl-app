@@ -1,10 +1,10 @@
 <template>
   <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white min-h-[160px] flex flex-col justify-between">
     <div>
-      <h3 class="text-xl font-bold mb-2">خلاصه مشارکت در آزمون‌ها</h3>
+      <h3 class="text-xl font-bold mb-2">مشارکت در آزمون</h3>
       <template v-if="totalExamsCount !== null && completedExamsCount !== null">
         <p class="text-3xl font-extrabold mt-2">{{ completedExamsCount }} / {{ totalExamsCount }}</p>
-        <p class="text-lg opacity-90">آزمون بیول شرکت کرده‌اید</p>
+        <p class="text-lg opacity-90">شما در {{ completedExamsCount }} آزمون از {{ totalExamsCount }} آزمون بیول شرکت کردید</p>
       </template>
       <p v-else class="text-lg opacity-90">در حال بارگذاری اطلاعات مشارکت...</p>
     </div>

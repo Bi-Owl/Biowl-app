@@ -174,7 +174,7 @@ const getPurchasedExams = async (req, res) => {
 // @access  Private
 const getTotalExamsCount = async (req, res) => {
   try {
-    const count = await Exam.count();
+    const count = await Exam.count({ where: { isHidden: false } });
     res.json({ totalExams: count });
   } catch (err) {
     console.error(err.message);
