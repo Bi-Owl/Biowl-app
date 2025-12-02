@@ -10,7 +10,7 @@
     <!-- Main Content Area -->
     <div class="mr-64 flex-grow flex flex-col p-8">
       <div class="w-full bg-white rounded-lg shadow-md p-8 flex-grow">
-        <Profile v-if="currentView === 'profile'" />
+        <UserProfileView v-if="currentView === 'profile'" />
         <MyExams v-else-if="currentView === 'my-exams'" :current-view="currentView" />
         <Store v-else-if="currentView === 'store'" />
         <MyReportCards v-else-if="currentView === 'report-cards'" />

@@ -70,7 +70,7 @@ const formatTime = (time) => {
 
 onMounted(async () => {
   try {
-    const exams = await getPurchasedExams();
+    const exams = await fetchPurchasedExams();
     const now = new Date();
     
     const upcomingExams = exams
