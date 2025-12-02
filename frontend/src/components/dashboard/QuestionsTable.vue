@@ -21,40 +21,78 @@
             <th class="py-3 px-6 text-center">عملیات</th>
           </tr>
         </thead>
-        <draggable
-          v-model="questions"
-          tag="tbody"
-          item-key="id"
-          class="text-gray-600 text-sm font-light"
-          handle=".drag-handle"
-          @end="handleReorder"
-          :disabled="explanations.length > 0"
-        >
-          <template #item="{element: item}">
-             <tr :key="item.id" class="border-b border-gray-200 hover:bg-gray-50" :class="{'!bg-blue-50 hover:!bg-blue-100': item.type === 'explanation'}">
-              <td class="py-3 px-6">
-                <span :class="[item.type === 'question' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800']" class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
-                  {{ item.type === 'question' ? 'سوال' : 'توضیح' }}
-                </span>
-              </td>
-              <td class="py-3 px-6 font-semibold" :class="{'drag-handle cursor-move': item.type === 'question'}">
-                  {{ item.type === 'question' ? item.position : item.displayOrder }}
-              </td>
-              <td class="py-3 px-6">
-                  <img :src="`${STATIC_BASE_URL}${item.imageUrl}`" alt="Item Image" class="w-24 h-auto rounded-md object-cover cursor-pointer" @click="showImage(item.imageUrl)" />
-              </td>
-              <td class="py-3 px-6">
-                <div v-if="item.type === 'question'">
+        <tbody v-if="explanations.length === 0">
+          <draggable
+            v-model="questions"
+            tag="tbody"
+            item-key="id"
+            class="text-gray-600 text-sm font-light"
+            handle=".drag-handle"
+            @end="handleReorder"
+          >
+            <template #item="{element: item}">
+              <tr :key="item.id" class="border-b border-gray-200 hover:bg-gray-100">
+                <td class="py-3 px-6">
+                  <span class="bg-emerald-100 text-emerald-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">سوال</span>
+                </td>
+                <td class="py-3 px-6 font-semibold drag-handle cursor-move">{{ item.position }}</td>
+                <td class="py-3 px-6">
+                    <img :src="`${STATIC_BASE_URL}${item.imageUrl}`" alt="Question Image" class="w-24 h-auto rounded-md object-cover cursor-pointer" @click="showImage(item.imageUrl)" />
+                </td>
+                <td class="py-3 px-6">
                   <div>تعداد گزینه‌ها: <span class="font-semibold">{{ item.numberOfOptions }}</span></div>
                   <div>گزینه صحیح: <span class="font-semibold">{{ item.correctOption }}</span></div>
-                </div>
-                <div v-else class="text-gray-500">
-                  -
-                </div>
-              </td>
-              <td class="py-3 px-6 text-center">
-                <div v-if="item.type === 'question'">
-                  <button @click="openEditModal(item)" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center mx-auto">
+                </td>
+                <td class="py-3 px-6 text-center">
+                  <div>
+                    <button @click="openEditModal(item)" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center mx-auto">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                      ویرایش
+                    </button>
+                    <button @click="confirmDelete(item)" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center mt-2 mx-auto">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                      حذف
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+          </draggable>
+        </tbody>
+
+        <tbody v-else class="text-gray-600 text-sm font-light">
+          <tr v-for="item in sortedItems" :key="item.type + item.id" class="border-b border-gray-200 hover:bg-gray-50" :class="{'!bg-blue-50 hover:!bg-blue-100': item.type === 'explanation'}">
+            <td class="py-3 px-6">
+              <span :class="[item.type === 'question' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800']" class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
+                {{ item.type === 'question' ? 'سوال' : 'توضیح' }}
+              </span>
+            </td>
+            <td class="py-3 px-6 font-semibold">
+                {{ item.type === 'question' ? item.position : item.displayOrder }}
+            </td>
+            <td class="py-3 px-6">
+                <img :src="`${STATIC_BASE_URL}${item.imageUrl}`" alt="Item Image" class="w-24 h-auto rounded-md object-cover cursor-pointer" @click="showImage(item.imageUrl)" />
+            </td>
+            <td class="py-3 px-6">
+              <div v-if="item.type === 'question'">
+                <div>تعداد گزینه‌ها: <span class="font-semibold">{{ item.numberOfOptions }}</span></div>
+                <div>گزینه صحیح: <span class="font-semibold">{{ item.correctOption }}</span></div>
+              </div>
+              <div v-else class="text-gray-500">-</div>
+            </td>
+            <td class="py-3 px-6 text-center">
+              <div v-if="item.type === 'question'">
+                <button @click="openEditModal(item)" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center mx-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  ویرایش
+                </button>
+                <button @click="confirmDelete(item)" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center mt-2 mx-auto">
+                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                  حذف
+                </button>
+              </div>
+              <div v-else>
+                 <button @click="openEditExplanationModal(item)" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center mx-auto">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                     ویرایش
                   </button>
@@ -62,28 +100,18 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                     حذف
                   </button>
-                </div>
-                <div v-else>
-                  <button @click="openEditExplanationModal(item)" class="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center mx-auto">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                    ویرایش
-                  </button>
-                  <button @click="confirmDelete(item)" class="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center mt-2 mx-auto">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                    حذف
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </template>
-        </draggable>
-        <tbody v-if="!sortedItems.length && !loading">
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-if="sortedItems.length === 0 && !loading">
            <tr>
             <td colspan="5" class="py-4 px-6 text-center text-gray-500">
               هنوز سوال یا توضیحی برای این آزمون تعریف نشده است.
             </td>
           </tr>
         </tbody>
+      </table>
       </table>
     </div>
   </div>
@@ -128,7 +156,14 @@ const sortedItems = computed(() => {
   
   const combined = [...mappedQuestions, ...mappedExplanations];
   
-  return combined.sort((a, b) => a.sortKey - b.sortKey);
+  return combined.sort((a, b) => {
+    if (a.sortKey < b.sortKey) return -1;
+    if (a.sortKey > b.sortKey) return 1;
+    // If sortKeys are equal, use ID for stable sort
+    if (a.id < b.id) return -1;
+    if (a.id > b.id) return 1;
+    return 0;
+  });
 });
 
 const fetchData = async () => {
