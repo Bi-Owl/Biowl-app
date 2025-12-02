@@ -149,7 +149,7 @@ exports.getLatestReportCardSummary = async (req, res) => {
         required: true,
         attributes: [], // We only need it for the join condition
       }],
-      order: [[ReportCard, 'id', 'DESC']], // Order by report card creation to get latest published
+      order: [['id', 'DESC']], // Order by exam id to get latest published
     });
 
     if (!latestExamWithReportCard) {
