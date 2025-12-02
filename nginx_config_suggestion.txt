@@ -2,6 +2,10 @@ server {
     listen 80;
     server_name biowl.ir;
 
+    # Set maximum allowed size of the client request body.
+    # This needs to be at least 15M to accommodate image and PDF uploads.
+    client_max_body_size 20M; # Set to 20MB to be safe, slightly above 15MB
+
     # Root directory for the frontend build files
     root /var/www/biowl-app/frontend/dist;
     index index.html;
