@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getPublicExams, getExamStatusForUser, purchaseExam, getPurchasedExams } = require('../controllers/examController');
+const { getPublicExams, getExamStatusForUser, purchaseExam, getPurchasedExams, getTotalExamsCount, getCompletedExamsCount } = require('../controllers/examController');
 const { startAttempt } = require('../controllers/examAttemptController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -8,9 +8,17 @@ const { protect } = require('../middleware/authMiddleware');
 // @desc    Get all public exams
 router.get('/', getPublicExams);
 
+// @route   GET /api/exams/total
+// @desc    Get total number of exams in the system
+router.get('/total', protect, getTotalExamsCount);
+
 // @route   GET /api/exams/purchased
 // @desc    Get all exams purchased by the user
 router.get('/purchased', protect, getPurchasedExams);
+
+// @route   GET /api/users/me/completed-exams-count
+// @desc    Get count of exams the user has completed
+router.get('/me/completed-exams-count', protect, getCompletedExamsCount);
 
 // @route   POST /api/exams/:examId/purchase
 // @desc    Purchase an exam

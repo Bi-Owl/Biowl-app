@@ -6,6 +6,9 @@ const { protect } = require('../middleware/authMiddleware');
 // Get all available (visible) report cards for the logged-in user
 router.get('/', protect, reportCardUserController.getAvailableReportCards);
 
+// Get summary of the latest report card for the logged-in user
+router.get('/latest-summary', protect, reportCardUserController.getLatestReportCardSummary);
+
 // Get the detailed result for a specific report card
 router.get('/:examId', protect, reportCardUserController.getReportCardDetails);
 

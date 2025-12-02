@@ -127,3 +127,55 @@ exports.getReportCardDetails = async (req, res) => {
     res.status(500).json({ message: 'خطا در دریافت جزئیات کارنامه.' });
   }
 };
+
+/**
+ * @desc    Get summary of the latest report card for the logged-in user
+ * @route   GET /api/report-cards/latest-summary
+ * @access  Private
+ */
+exports.getLatestReportCardSummary = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Find the latest exam the user has completed an attempt for and has a visible report card
+    const latestExamWithReportCard = await Exam.findOne({
+      include: [{
+        model: ReportCard,
+        where: { isHidden: false },
+        required: true,
+      }, {
+        model: UserExamAttempt,
+        where: { UserId: userId, status: 'completed' },
+        required: true,
+        attributes: [], // We only need it for the join condition
+      }],
+      order: [[ReportCard, 'createdAt', 'DESC']], // Order by report card creation to get latest published
+    });
+
+    if (!latestExamWithReportCard) {
+      return res.status(404).json({ message: 'کارنامه تکمیل شده‌ای یافت نشد.' });
+    }
+
+    // Now fetch details for this specific latest report card
+    const reportCard = await ReportCard.findOne({
+      where: { ExamId: latestExamWithReportCard.id, isHidden: false },
+    });
+    const attempt = await UserExamAttempt.findOne({
+      where: { ExamId: latestExamWithReportCard.id, UserId: userId, status: 'completed' },
+    });
+    const questions = await Question.findAll({ where: { ExamId: latestExamWithReportCard.id } });
+
+    const score = calculateScore(attempt.answers, reportCard.correctAnswers, questions);
+
+    res.json({
+      examName: latestExamWithReportCard.name,
+      reportCardId: reportCard.id,
+      percentage: score.percentageWithNegative,
+      // Add more fields if needed
+    });
+
+  } catch (error) {
+    console.error('Error fetching latest report card summary:', error);
+    res.status(500).json({ message: 'خطا در دریافت خلاصه آخرین کارنامه.' });
+  }
+};

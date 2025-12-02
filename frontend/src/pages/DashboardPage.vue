@@ -25,11 +25,7 @@ import SideMenu from '@/components/dashboard/SideMenu.vue';
 import MyExams from '@/components/dashboard/MyExams.vue';
 import Store from '@/components/dashboard/Store.vue';
 import MyReportCards from '@/components/dashboard/MyReportCards.vue';
-
-// A simple component for the profile view for now
-const Profile = {
-  template: `<div><h1 class="text-2xl font-bold text-gray-800">پروفایل کاربری</h1><p class="mt-2 text-gray-600">اطلاعات پروفایل شما در اینجا نمایش داده می‌شود.</p></div>`
-};
+import UserProfileView from '@/components/dashboard/UserProfileView.vue'; // Import the new component
 
 const currentView = ref('profile'); // Default view
 

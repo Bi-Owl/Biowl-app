@@ -169,9 +169,40 @@ const getPurchasedExams = async (req, res) => {
   }
 };
 
+// @desc    Get total number of exams in the system
+// @route   GET /api/exams/total
+// @access  Private
+const getTotalExamsCount = async (req, res) => {
+  try {
+    const count = await Exam.count();
+    res.json({ totalExams: count });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('خطای سرور');
+  }
+};
+
+// @desc    Get count of exams the user has completed
+// @route   GET /api/users/me/completed-exams-count
+// @access  Private
+const getCompletedExamsCount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const count = await UserExamAttempt.count({
+      where: { UserId: userId, status: 'completed' }
+    });
+    res.json({ completedExamsCount: count });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('خطای سرور');
+  }
+};
+
 module.exports = {
   getPublicExams,
   getExamStatusForUser,
   purchaseExam,
   getPurchasedExams,
+  getTotalExamsCount,
+  getCompletedExamsCount,
 };
