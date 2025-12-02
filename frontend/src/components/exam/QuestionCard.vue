@@ -33,7 +33,6 @@
           :is-selected="selectedAnswer === optionNum"
           :is-readonly="isReadonly"
           :is-pending="pendingUpdate && pendingUpdate.questionId === question.id && pendingUpdate.answer === optionNum"
-          :is-question-unanswered="!wasAnswered"
           @select="onSelectAnswer"
         />
       </template>

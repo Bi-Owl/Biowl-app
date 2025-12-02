@@ -56,13 +56,16 @@ const computedClasses = computed(() => {
   if (!isCorrect.value && isSelected.value) {
     return 'bg-red-100 border-red-500';
   }
-  // The correct option, but not selected by user
+  // Unanswered question
+  if (!wasAnswered.value) {
+    if (isCorrect.value) {
+      return 'bg-green-100 border-green-500'; // Correct option in unanswered
+    }
+    return 'bg-blue-50 border-blue-200 opacity-80'; // Other options in unanswered
+  }
+  // The correct option, but not selected by user (in an answered q)
   if (isCorrect.value && !isSelected.value) {
     return 'bg-green-100 border-green-500';
-  }
-  // Unanswered question, options should be light blue
-  if (!wasAnswered.value) {
-      return 'bg-blue-50 border-blue-200 opacity-80';
   }
   // Other options in a question that was answered
   return 'bg-gray-50 border-gray-200 opacity-60';
@@ -77,13 +80,16 @@ const computedCircleClasses = computed(() => {
   if (!isCorrect.value && isSelected.value) {
     return 'bg-red-500 text-white';
   }
-  // The correct option, but not selected by user
-  if (isCorrect.value && !isSelected.value) {
-    return 'bg-green-500 text-white';
-  }
   // Unanswered question
   if (!wasAnswered.value) {
-      return 'bg-blue-100 text-blue-800';
+    if (isCorrect.value) {
+      return 'bg-green-500 text-white'; // Correct option in unanswered
+    }
+    return 'bg-blue-100 text-blue-800'; // Other options in unanswered
+  }
+  // The correct option, but not selected by user (in an answered q)
+  if (isCorrect.value && !isSelected.value) {
+    return 'bg-green-500 text-white';
   }
   // Other options
   return 'bg-gray-200 text-gray-500';
@@ -92,19 +98,19 @@ const computedCircleClasses = computed(() => {
 const label = computed(() => {
   // Correctly selected
   if (isCorrect.value && isSelected.value) {
-    return { text: 'انتخاب شما - گزینه درست', bgColor: 'bg-green-500' };
+    return { text: 'پاسخ صحیح - انتخاب شما', bgColor: 'bg-green-500' };
   }
   // Incorrectly selected by user
   if (!isCorrect.value && isSelected.value) {
-    return { text: 'پاسخ شما', bgColor: 'bg-red-500' };
+    return { text: 'انتخاب شما', bgColor: 'bg-red-500' };
   }
   // The correct option, when user answered incorrectly
   if (isCorrect.value && !isSelected.value && wasAnswered.value) {
-    return { text: 'گزینه درست', bgColor: 'bg-green-500' };
+    return { text: 'پاسخ صحیح', bgColor: 'bg-green-500' };
   }
   // The correct option, when user did not answer
   if (isCorrect.value && !isSelected.value && !wasAnswered.value) {
-    return { text: 'پاسخ درست - نزده', bgColor: 'bg-green-500' };
+    return { text: 'پاسخ صحیح - بدون پاسخ', bgColor: 'bg-green-500' };
   }
   return null;
 });

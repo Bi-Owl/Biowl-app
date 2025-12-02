@@ -23,12 +23,6 @@
     <div class="mr-4 text-gray-800 grow">
       <slot>گزینه {{ optionNumber }}</slot>
     </div>
-    <!-- Answer Sheet Mode Label -->
-    <template v-if="isReadonly">
-       <div v-if="isSelected" class="absolute top-1.5 left-2 text-xs bg-blue-500 text-white rounded-full px-2 py-0.5 shadow">
-        انتخاب شما
-      </div>
-    </template>
   </div>
 </template>
 
@@ -51,11 +45,6 @@ const props = defineProps({
   isPending: {
     type: Boolean,
     default: false
-  },
-  // For answer sheet view, if the entire question was unanswered
-  isQuestionUnanswered: {
-    type: Boolean,
-    default: false
   }
 });
 
@@ -70,21 +59,18 @@ const selectOption = () => {
 // --- Computed Classes for different modes ---
 
 const interactiveModeClasses = computed(() => ({
-  'bg-emerald-100 border-emerald-500 shadow-md': props.isSelected && !props.isPending,
+  'bg-blue-100 border-blue-500 shadow-md': props.isSelected && !props.isPending,
   'bg-white border-gray-200': !props.isSelected && !props.isPending,
-  'cursor-pointer hover:bg-emerald-50 hover:border-emerald-300': true,
+  'cursor-pointer hover:bg-blue-50 hover:border-blue-300': true,
 }));
 
 const interactiveModeCircleClasses = computed(() => ({
-  'bg-emerald-500 text-white': props.isSelected && !props.isPending,
-  'bg-emerald-100 text-emerald-800': !props.isSelected && !props.isPending,
+  'bg-blue-500 text-white': props.isSelected && !props.isPending,
+  'bg-blue-100 text-blue-800': !props.isSelected && !props.isPending,
 }));
 
 const reviewModeClasses = computed(() => {
   // Answer Sheet Mode
-  if (props.isQuestionUnanswered) {
-    return 'bg-blue-50 border-blue-200 opacity-80';
-  }
   if (props.isSelected) {
     return 'bg-blue-100 border-blue-500';
   }
@@ -93,9 +79,6 @@ const reviewModeClasses = computed(() => {
 
 const reviewModeCircleClasses = computed(() => {
   // Answer Sheet Mode
-  if (props.isQuestionUnanswered) {
-    return 'bg-blue-100 text-blue-800';
-  }
   if (props.isSelected) {
     return 'bg-blue-500 text-white';
   }
