@@ -89,19 +89,28 @@ exports.updateUser = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
+  const t = await sequelize.transaction();
   try {
-    const user = await User.findByPk(req.params.id);
+    const user = await User.findByPk(req.params.id, { transaction: t });
     if (user) {
-      await user.destroy();
-      res.json({ message: 'کاربر با موفقیت حذف شد' });
+      // Delete all related UserExam entries
+      await UserExam.destroy({ where: { UserId: user.id }, transaction: t });
+      
+      // Delete all related UserExamAttempt entries
+      await UserExamAttempt.destroy({ where: { UserId: user.id }, transaction: t });
+      
+      // Finally, delete the user
+      await user.destroy({ transaction: t });
+      
+      await t.commit();
+      res.json({ message: 'کاربر و تمام داده‌های مرتبط با او با موفقیت حذف شد' });
     } else {
+      await t.rollback();
       res.status(404).json({ message: 'کاربر یافت نشد' });
     }
   } catch (error) {
+    await t.rollback();
     console.error("Error deleting user:", error);
-    if (error.name === 'SequelizeForeignKeyConstraintError') {
-        return res.status(409).json({ message: 'نمی‌توان کاربری که آزمون خریداری کرده را حذف کرد.' });
-    }
     res.status(500).json({ message: 'خطا در سرور هنگام حذف کاربر رخ داد.' });
   }
 };
@@ -190,19 +199,52 @@ exports.updateExam = async (req, res) => {
 };
 
 exports.deleteExam = async (req, res) => {
+  const t = await sequelize.transaction();
   try {
-    const exam = await Exam.findByPk(req.params.id);
+    const exam = await Exam.findByPk(req.params.id, { transaction: t });
     if (exam) {
-      await exam.destroy();
-      res.json({ message: 'آزمون با موفقیت حذف شد' });
+      const examId = exam.id;
+
+      // 1. Delete Questions and their images
+      const questions = await Question.findAll({ where: { ExamId: examId }, transaction: t });
+      for (const question of questions) {
+        if (question.imageUrl) {
+          const imagePath = path.join(__dirname, '..', question.imageUrl);
+          if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+          }
+        }
+      }
+      await Question.destroy({ where: { ExamId: examId }, transaction: t });
+
+      // 2. Delete ReportCard and its PDF
+      const reportCard = await ReportCard.findOne({ where: { ExamId: examId }, transaction: t });
+      if (reportCard && reportCard.answerKeyPdfUrl) {
+        const pdfPath = path.join(__dirname, '..', reportCard.answerKeyPdfUrl);
+        if (fs.existsSync(pdfPath)) {
+          fs.unlinkSync(pdfPath);
+        }
+      }
+      await ReportCard.destroy({ where: { ExamId: examId }, transaction: t });
+
+      // 3. Delete UserExam entries (purchase records)
+      await UserExam.destroy({ where: { ExamId: examId }, transaction: t });
+
+      // 4. Delete UserExamAttempt entries
+      await UserExamAttempt.destroy({ where: { ExamId: examId }, transaction: t });
+      
+      // 5. Finally, delete the exam itself
+      await exam.destroy({ transaction: t });
+      
+      await t.commit();
+      res.json({ message: 'آزمون و تمام داده‌های مرتبط با آن با موفقیت حذف شد' });
     } else {
+      await t.rollback();
       res.status(404).json({ message: 'آزمون یافت نشد' });
     }
   } catch (error) {
+    await t.rollback();
     console.error("Error deleting exam:", error);
-    if (error.name === 'SequelizeForeignKeyConstraintError') {
-        return res.status(409).json({ message: 'نمی‌توان آزمونی که دارای سوال است را حذف کرد. ابتدا سوالات را حذف کنید.' });
-    }
     res.status(500).json({ message: 'خطا در سرور هنگام حذف آزمون رخ داد.' });
   }
 };
