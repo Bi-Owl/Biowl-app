@@ -6,6 +6,7 @@ const Question = require('../models/question');
 const UserExam = require('../models/userExam'); // Added this import
 const UserExamAttempt = require('../models/userExamAttempt');
 const ReportCard = require('../models/reportCard');
+const Explanation = require('../models/explanation');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
@@ -218,7 +219,19 @@ exports.deleteExam = async (req, res) => {
       }
       await Question.destroy({ where: { ExamId: examId }, transaction: t });
 
-      // 2. Delete ReportCard and its PDF
+      // 2. Delete Explanations and their images
+      const explanations = await Explanation.findAll({ where: { ExamId: examId }, transaction: t });
+      for (const explanation of explanations) {
+        if (explanation.imageUrl) {
+          const imagePath = path.join(__dirname, '..', explanation.imageUrl);
+          if (fs.existsSync(imagePath)) {
+            fs.unlinkSync(imagePath);
+          }
+        }
+      }
+      await Explanation.destroy({ where: { ExamId: examId }, transaction: t });
+
+      // 3. Delete ReportCard and its PDF
       const reportCard = await ReportCard.findOne({ where: { ExamId: examId }, transaction: t });
       if (reportCard && reportCard.answerKeyPdfUrl) {
         const pdfPath = path.join(__dirname, '..', reportCard.answerKeyPdfUrl);
@@ -383,6 +396,110 @@ exports.reorderQuestions = async (req, res) => {
     } catch (error) {
         console.error("Error reordering questions:", error);
         res.status(500).json({ message: 'خطا در سرور هنگام مرتب‌سازی سوالات رخ داد.' });
+    }
+};
+
+// --- Explanation Management ---
+
+exports.createExplanation = async (req, res) => {
+    try {
+        const { examId } = req.params;
+        const { displayOrder } = req.body;
+
+        if (!displayOrder) {
+            return res.status(400).json({ message: 'داده‌های ارسالی برای توضیحات ناقص است.' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ message: 'لطفا یک تصویر برای توضیحات آپلود کنید.' });
+        }
+
+        const imageUrl = `/uploads/${req.file.filename}`;
+
+        const explanation = await Explanation.create({
+            displayOrder,
+            imageUrl,
+            ExamId: examId,
+        });
+
+        res.status(201).json({ message: 'توضیحات با موفقیت ایجاد شد', explanation });
+    } catch (error) {
+        console.error("Error creating explanation:", error);
+        if (error.name === 'SequelizeValidationError') {
+            return res.status(400).json({ message: `خطای اعتبارسنجی: ${error.errors.map(e => e.message).join(', ')}` });
+        }
+        res.status(500).json({ message: 'خطا در سرور هنگام ایجاد توضیحات رخ داد.' });
+    }
+};
+
+exports.getExplanationsForExam = async (req, res) => {
+    try {
+        const { examId } = req.params;
+        const explanations = await Explanation.findAll({ 
+            where: { ExamId: examId },
+            order: [['displayOrder', 'ASC']]
+        });
+        res.json(explanations);
+    } catch (error) {
+        res.status(500).json({ message: 'خطای سرور' });
+    }
+};
+
+exports.updateExplanation = async (req, res) => {
+    try {
+        const { explanationId } = req.params;
+        const { displayOrder } = req.body;
+        
+        const explanation = await Explanation.findByPk(explanationId);
+        if (!explanation) {
+            return res.status(404).json({ message: 'توضیحات یافت نشد' });
+        }
+
+        let imageUrl = explanation.imageUrl;
+        if (req.file) {
+            if (explanation.imageUrl) {
+                const oldImagePath = path.join(__dirname, '..', explanation.imageUrl);
+                if (fs.existsSync(oldImagePath)) {
+                    fs.unlinkSync(oldImagePath);
+                }
+            }
+            imageUrl = `/uploads/${req.file.filename}`;
+        }
+        
+        await explanation.update({
+            displayOrder,
+            imageUrl,
+        });
+
+        res.json({ message: 'توضیحات با موفقیت به روز شد' });
+    } catch (error) {
+        console.error("Error updating explanation:", error);
+        if (error.name === 'SequelizeValidationError') {
+            return res.status(400).json({ message: `خطای اعتبارسنجی: ${error.errors.map(e => e.message).join(', ')}` });
+        }
+        res.status(500).json({ message: 'خطا در سرور هنگام ویرایش توضیحات رخ داد.' });
+    }
+};
+
+exports.deleteExplanation = async (req, res) => {
+    try {
+        const { explanationId } = req.params;
+        const explanation = await Explanation.findByPk(explanationId);
+
+        if (explanation) {
+            if (explanation.imageUrl) {
+                const imagePath = path.join(__dirname, '..', explanation.imageUrl);
+                if (fs.existsSync(imagePath)) {
+                    fs.unlinkSync(imagePath);
+                }
+            }
+            await explanation.destroy();
+            res.json({ message: 'توضیحات با موفقیت حذف شد' });
+        } else {
+            res.status(404).json({ message: 'توضیحات یافت نشد' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'خطای سرور' });
     }
 };
 

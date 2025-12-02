@@ -43,6 +43,12 @@ export const ADMIN_API = {
   DELETE_QUESTION: (questionId) => `${API_BASE_URL}/admin/questions/${questionId}`,
   REORDER_QUESTIONS: `${API_BASE_URL}/admin/questions/reorder`,
 
+  // Explanation management
+  GET_EXPLANATIONS_FOR_EXAM: (examId) => `${API_BASE_URL}/admin/exams/${examId}/explanations`,
+  CREATE_EXPLANATION: (examId) => `${API_BASE_URL}/admin/exams/${examId}/explanations`,
+  UPDATE_EXPLANATION: (explanationId) => `${API_BASE_URL}/admin/explanations/${explanationId}`,
+  DELETE_EXPLANATION: (explanationId) => `${API_BASE_URL}/admin/explanations/${explanationId}`,
+
   // Report Card (Karnameh) management
   GET_EXAMS_WITH_REPORT_CARD_STATUS: `${API_BASE_URL}/admin/report-cards/exams`,
   PUBLISH_REPORT_CARD: (examId) => `${API_BASE_URL}/admin/report-cards/publish/${examId}`,

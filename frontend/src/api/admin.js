@@ -255,6 +255,57 @@ export const reorderQuestions = async (updates) => {
   return response.json();
 };
 
+// --- Explanation Management ---
+
+export const getExplanationsForExam = async (examId) => {
+  const response = await fetch(ADMIN_API.GET_EXPLANATIONS_FOR_EXAM(examId), {
+    headers: getHeaders(),
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to fetch explanations');
+  }
+  return response.json();
+};
+
+export const createExplanation = async (examId, formData) => {
+  const response = await fetch(ADMIN_API.CREATE_EXPLANATION(examId), {
+    method: 'POST',
+    headers: getMultipartHeaders(),
+    body: formData,
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to create explanation');
+  }
+  return response.json();
+};
+
+export const updateExplanation = async (explanationId, formData) => {
+  const response = await fetch(ADMIN_API.UPDATE_EXPLANATION(explanationId), {
+    method: 'PUT',
+    headers: getMultipartHeaders(),
+    body: formData,
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to update explanation');
+  }
+  return response.json();
+};
+
+export const deleteExplanation = async (explanationId) => {
+  const response = await fetch(ADMIN_API.DELETE_EXPLANATION(explanationId), {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to delete explanation');
+  }
+  return response.json();
+};
+
 // --- Report Card Management ---
 
 export const getExamsWithReportCardStatus = async () => {

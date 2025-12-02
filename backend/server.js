@@ -8,6 +8,7 @@ const Admin = require('./models/admin'); // Import the Admin model
 const Question = require('./models/question');
 const UserExamAttempt = require('./models/userExamAttempt');
 const ReportCard = require('./models/reportCard');
+const Explanation = require('./models/explanation');
 
 const examRoutes = require('./routes/examRoutes');
 const authRoutes = require('./routes/authRoutes');
@@ -29,6 +30,8 @@ User.belongsToMany(Exam, { through: UserExam });
 Exam.belongsToMany(User, { through: UserExam });
 Exam.hasMany(Question);
 Question.belongsTo(Exam);
+Exam.hasMany(Explanation);
+Explanation.belongsTo(Exam);
 UserExamAttempt.belongsTo(User);
 User.hasMany(UserExamAttempt);
 UserExamAttempt.belongsTo(Exam);

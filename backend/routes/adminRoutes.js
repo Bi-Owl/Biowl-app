@@ -26,6 +26,12 @@ router.post('/exams/:examId/questions', [adminAuthMiddleware, uploadQuestionImag
 router.put('/questions/:questionId', [adminAuthMiddleware, uploadQuestionImage], adminController.updateQuestion);
 router.delete('/questions/:questionId', adminAuthMiddleware, adminController.deleteQuestion);
 
+// Explanation management routes
+router.get('/exams/:examId/explanations', adminAuthMiddleware, adminController.getExplanationsForExam);
+router.post('/exams/:examId/explanations', [adminAuthMiddleware, uploadQuestionImage], adminController.createExplanation);
+router.put('/explanations/:explanationId', [adminAuthMiddleware, uploadQuestionImage], adminController.updateExplanation);
+router.delete('/explanations/:explanationId', adminAuthMiddleware, adminController.deleteExplanation);
+
 // Report Card (Karnameh) management routes
 router.get('/report-cards/exams', adminAuthMiddleware, adminController.getExamsWithReportCardStatus);
 router.post('/report-cards/publish/:examId', [adminAuthMiddleware, uploadAnswerKeyPdf], adminController.publishReportCard);

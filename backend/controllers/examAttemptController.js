@@ -3,6 +3,7 @@ const Exam = require('../models/exam');
 const UserExam = require('../models/userExam');
 const UserExamAttempt = require('../models/userExamAttempt');
 const Question = require('../models/question');
+const Explanation = require('../models/explanation');
 
 // @desc    Start or resume an exam attempt
 // @route   POST /api/exams/:examId/start
@@ -73,6 +74,10 @@ const startAttempt = async (req, res) => {
         attributes: { exclude: ['correctOption'] }
     });
 
+    const explanations = await Explanation.findAll({
+        where: { ExamId: examId }
+    });
+
     res.json({
       message: 'آزمون با موفقیت شروع شد.',
       exam: {
@@ -87,6 +92,7 @@ const startAttempt = async (req, res) => {
         answers: attempt.answers,
       },
       questions,
+      explanations,
       remainingTime, // in milliseconds
       examToken,
     });
@@ -213,9 +219,14 @@ const reviewAttempt = async (req, res) => {
         attributes: { exclude: ['correctOption'] }
     });
 
+    const explanations = await Explanation.findAll({
+        where: { ExamId: attempt.ExamId }
+    });
+
     res.json({
       attempt,
       questions,
+      explanations,
     });
 
   } catch (error) {

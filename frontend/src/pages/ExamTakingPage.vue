@@ -14,15 +14,20 @@
     <div v-else>
       <!-- Main Content -->
       <main class="container mx-auto px-4 py-20"> <!-- Increased py to avoid overlap with timer -->
-        <div class="max-w-4xl mx-auto space-y-6"> <!-- Added space-y-6 for spacing between questions -->
-          <QuestionCard
-            v-for="question in questions"
-            :key="question.id"
-            :question="question"
-            :selected-answer="userAnswers[question.id]"
-            :pending-update="pendingUpdate"
-            @update-answer="handleUpdateAnswer"
-          />
+        <div class="max-w-4xl mx-auto space-y-6">
+          <div v-for="item in sortedItems" :key="item.type + '-' + item.id">
+            <QuestionCard
+              v-if="item.type === 'question'"
+              :question="item"
+              :selected-answer="userAnswers[item.id]"
+              :pending-update="pendingUpdate"
+              @update-answer="handleUpdateAnswer"
+            />
+            <ExplanationCard
+              v-else-if="item.type === 'explanation'"
+              :explanation="item"
+            />
+          </div>
 
           <!-- Finish Button -->
           <div class="mt-12 text-center">
@@ -45,11 +50,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import CountdownTimer from '@/components/exam/CountdownTimer.vue';
 import QuestionCard from '@/components/exam/QuestionCard.vue';
+import ExplanationCard from '@/components/exam/ExplanationCard.vue';
 import FinishConfirmModal from '@/components/exam/FinishConfirmModal.vue';
 import { updateAnswer, finishExamAttempt } from '@/api/exams';
 
@@ -58,6 +64,7 @@ const toast = useToast();
 
 const examData = ref(null);
 const questions = ref([]);
+const explanations = ref([]);
 const userAnswers = ref({});
 const remainingTime = ref(0);
 const examToken = ref(null);
@@ -66,6 +73,15 @@ const pendingUpdate = ref(null); // { questionId, answer }
 
 const showFinishModal = ref(false);
 const isFinishing = ref(false);
+
+const sortedItems = computed(() => {
+  const mappedQuestions = questions.value.map(q => ({ ...q, type: 'question', sortKey: q.position }));
+  const mappedExplanations = (explanations.value || []).map(e => ({ ...e, type: 'explanation', sortKey: e.displayOrder - 0.5 }));
+  
+  const combined = [...mappedQuestions, ...mappedExplanations];
+  
+  return combined.sort((a, b) => a.sortKey - b.sortKey);
+});
 
 const handleFinishExam = async (options = {}) => {
   const { silent = false } = options;
@@ -125,6 +141,7 @@ onMounted(() => {
 
   examData.value = data;
   questions.value = data.questions;
+  explanations.value = data.explanations || [];
   userAnswers.value = attempt.answers || {};
   remainingTime.value = calculatedRemainingTime;
   examToken.value = data.examToken;
