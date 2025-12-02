@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const UserExamAttempt = require('../models/userExamAttempt');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -107,8 +108,26 @@ const getMe = async (req, res) => {
   res.status(200).json(req.user);
 };
 
+const getCompletedExamsCount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const count = await UserExamAttempt.count({
+      where: {
+        UserId: userId,
+        status: 'completed',
+      },
+    });
+    res.json({ completedExamsCount: count });
+  } catch (error) {
+    console.error('Error fetching completed exams count:', error);
+    res.status(500).json({ message: 'خطا در دریافت تعداد آزمون‌های تکمیل شده.' });
+  }
+};
+
+
 module.exports = {
   register,
   login,
   getMe,
+  getCompletedExamsCount,
 };

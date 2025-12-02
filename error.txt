@@ -1,21 +1,95 @@
-root@digiwork-server:/var/www/biowl-app# cd backend/
-root@digiwork-server:/var/www/biowl-app/backend# node server.js
-[dotenv@17.2.3] injecting env (10) from .env -- tip: ⚙️  override existing env vars with { override: true }
-/var/www/biowl-app/backend/routes/adminRoutes.js:31
-router.post('/report-cards/publish/:examId', [adminAuthMiddleware, upload.single('answerKeyPdf')], adminController.publishReportCard);
-                                                                          ^
+index-Cqp2Ln8Y.js:9  GET https://biowl.ir/api/users/me/completed-exams-count 404 (Not Found)
+u3 @ index-Cqp2Ln8Y.js:9
+(anonymous) @ index-Cqp2Ln8Y.js:9
+(anonymous) @ index-Cqp2Ln8Y.js:5
+ys @ index-Cqp2Ln8Y.js:3
+Rn @ index-Cqp2Ln8Y.js:3
+Tl.t.__weh.t.__weh @ index-Cqp2Ln8Y.js:5
+$a @ index-Cqp2Ln8Y.js:3
+Nh @ index-Cqp2Ln8Y.js:3
+Promise.then
+Ih @ index-Cqp2Ln8Y.js:3
+Du @ index-Cqp2Ln8Y.js:3
+te.scheduler @ index-Cqp2Ln8Y.js:5
+trigger @ index-Cqp2Ln8Y.js:3
+Ru @ index-Cqp2Ln8Y.js:3
+notify @ index-Cqp2Ln8Y.js:3
+trigger @ index-Cqp2Ln8Y.js:3
+set value @ index-Cqp2Ln8Y.js:3
+R @ index-Cqp2Ln8Y.js:5
+(anonymous) @ index-Cqp2Ln8Y.js:5
+Promise.then
+P @ index-Cqp2Ln8Y.js:5
+E @ index-Cqp2Ln8Y.js:5
+install @ index-Cqp2Ln8Y.js:5
+use @ index-Cqp2Ln8Y.js:5
+(anonymous) @ index-Cqp2Ln8Y.js:21
+index-Cqp2Ln8Y.js:9  GET https://biowl.ir/api/report-cards/latest-summary 500 (Internal Server Error)
+c3 @ index-Cqp2Ln8Y.js:9
+(anonymous) @ index-Cqp2Ln8Y.js:9
+(anonymous) @ index-Cqp2Ln8Y.js:5
+ys @ index-Cqp2Ln8Y.js:3
+Rn @ index-Cqp2Ln8Y.js:3
+Tl.t.__weh.t.__weh @ index-Cqp2Ln8Y.js:5
+$a @ index-Cqp2Ln8Y.js:3
+Nh @ index-Cqp2Ln8Y.js:3
+Promise.then
+Ih @ index-Cqp2Ln8Y.js:3
+Du @ index-Cqp2Ln8Y.js:3
+te.scheduler @ index-Cqp2Ln8Y.js:5
+trigger @ index-Cqp2Ln8Y.js:3
+Ru @ index-Cqp2Ln8Y.js:3
+notify @ index-Cqp2Ln8Y.js:3
+trigger @ index-Cqp2Ln8Y.js:3
+set value @ index-Cqp2Ln8Y.js:3
+R @ index-Cqp2Ln8Y.js:5
+(anonymous) @ index-Cqp2Ln8Y.js:5
+Promise.then
+P @ index-Cqp2Ln8Y.js:5
+E @ index-Cqp2Ln8Y.js:5
+install @ index-Cqp2Ln8Y.js:5
+use @ index-Cqp2Ln8Y.js:5
+(anonymous) @ index-Cqp2Ln8Y.js:21
+index-Cqp2Ln8Y.js:9 Error fetching exam participation data: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+(anonymous) @ index-Cqp2Ln8Y.js:9
+await in (anonymous)
+(anonymous) @ index-Cqp2Ln8Y.js:5
+ys @ index-Cqp2Ln8Y.js:3
+Rn @ index-Cqp2Ln8Y.js:3
+Tl.t.__weh.t.__weh @ index-Cqp2Ln8Y.js:5
+$a @ index-Cqp2Ln8Y.js:3
+Nh @ index-Cqp2Ln8Y.js:3
+Promise.then
+Ih @ index-Cqp2Ln8Y.js:3
+Du @ index-Cqp2Ln8Y.js:3
+te.scheduler @ index-Cqp2Ln8Y.js:5
+trigger @ index-Cqp2Ln8Y.js:3
+Ru @ index-Cqp2Ln8Y.js:3
+notify @ index-Cqp2Ln8Y.js:3
+trigger @ index-Cqp2Ln8Y.js:3
+set value @ index-Cqp2Ln8Y.js:3
+R @ index-Cqp2Ln8Y.js:5
+(anonymous) @ index-Cqp2Ln8Y.js:5
+Promise.then
+P @ index-Cqp2Ln8Y.js:5
+E @ index-Cqp2Ln8Y.js:5
+install @ index-Cqp2Ln8Y.js:5
+use @ index-Cqp2Ln8Y.js:5
+(anonymous) @ index-Cqp2Ln8Y.js:21
+index-Cqp2Ln8Y.js:9 Error fetching latest report card: Error: خطا در دریافت خلاصه آخرین کارنامه.
+    at an (index-Cqp2Ln8Y.js:9:122799)
+    at async index-Cqp2Ln8Y.js:9:167731
 
-TypeError: upload.single is not a function
-    at Object.<anonymous> (/var/www/biowl-app/backend/routes/adminRoutes.js:31:75)
-    at Module._compile (node:internal/modules/cjs/loader:1706:14)
-    at Object..js (node:internal/modules/cjs/loader:1839:10)
-    at Module.load (node:internal/modules/cjs/loader:1441:32)
-    at Function._load (node:internal/modules/cjs/loader:1263:12)
-    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
-    at Module.require (node:internal/modules/cjs/loader:1463:12)
-    at require (node:internal/modules/helpers:147:16)
-    at Object.<anonymous> (/var/www/biowl-app/backend/server.js:14:21)
+    
+/root/.pm2/logs/biowl-backend-error.log last 15 lines:
+0|biowl-ba | xam` INNER JOIN `UserExamAttempts` AS `UserExamAttempts` ON `Exam`.`id` = `UserExamAttempts`.`ExamId` AND `UserExamAttempts`.`UserId` = 60 AND `UserExamAttempts`.`status` = 'completed' ORDER BY `ReportCard`.`createdAt` DESC;"
+0|biowl-ba |   },
+0|biowl-ba |   original: [Error: SQLITE_ERROR: no such column: ReportCard.createdAt] {
+0|biowl-ba |     errno: 1,
+0|biowl-ba |     code: 'SQLITE_ERROR',
+0|biowl-ba |     sql: "SELECT `Exam`.* FROM (SELECT `Exam`.`id`, `Exam`.`name`, `Exam`.`description`, `Exam`.`startTime`, `Exam`.`endTime`, `Exam`.`duration`, `Exam`.`isHidden`, `Exam`.`isPurchasable`, `Exam`.`price`, `Exam`.`createdAt`, `Exam`.`updatedAt`, `ReportCard`.`id` AS `ReportCard.id`, `ReportCard`.`description` AS `ReportCard.description`, `ReportCard`.`answerKeyPdfUrl` AS `ReportCard.answerKeyPdfUrl`, `ReportCard`.`showRank` AS `ReportCard.showRank`, `ReportCard`.`isHidden` AS `ReportCard.isHidden`, `ReportCard`.`correctAnswers` AS `ReportCard.correctAnswers`, `ReportCard`.`createdAt` AS `ReportCard.createdAt`, `ReportCard`.`updatedAt` AS `ReportCard.updatedAt`, `ReportCard`.`ExamId` AS `ReportCard.ExamId` FROM `Exams` AS `Exam` INNER JOIN `ReportCards` AS `ReportCard` ON `Exam`.`id` = `ReportCard`.`ExamId` AND `ReportCard`.`isHidden` = 0 WHERE ( SELECT `ExamId` FROM `UserExamAttempts` AS `UserExamAttempts` WHERE ((`UserExamAttempts`.`UserId` = 60 AND `UserExamAttempts`.`status` = 'completed') AND `UserExamAttempts`.`ExamId` = `Exam`.`id`) LIMIT 1 ) IS NOT NULL LIMIT 1) AS `Exam` INNER JOIN `UserExamAttempts` AS `UserExamAttempts` ON `Exam`.`id` = `UserExamAttempts`.`ExamId` AND `UserExamAttempts`.`UserId` = 60 AND `UserExamAttempts`.`status` = 'completed' ORDER BY `ReportCard`.`createdAt` DESC;"
+0|biowl-ba |   },
+0|biowl-ba |   sql: "SELECT `Exam`.* FROM (SELECT `Exam`.`id`, `Exam`.`name`, `Exam`.`description`, `Exam`.`startTime`, `Exam`.`endTime`, `Exam`.`duration`, `Exam`.`isHidden`, `Exam`.`isPurchasable`, `Exam`.`price`, `Exam`.`createdAt`, `Exam`.`updatedAt`, `ReportCard`.`id` AS `ReportCard.id`, `ReportCard`.`description` AS `ReportCard.description`, `ReportCard`.`answerKeyPdfUrl` AS `ReportCard.answerKeyPdfUrl`, `ReportCard`.`showRank` AS `ReportCard.showRank`, `ReportCard`.`isHidden` AS `ReportCard.isHidden`, `ReportCard`.`correctAnswers` AS `ReportCard.correctAnswers`, `ReportCard`.`createdAt` AS `ReportCard.createdAt`, `ReportCard`.`updatedAt` AS `ReportCard.updatedAt`, `ReportCard`.`ExamId` AS `ReportCard.ExamId` FROM `Exams` AS `Exam` INNER JOIN `ReportCards` AS `ReportCard` ON `Exam`.`id` = `ReportCard`.`ExamId` AND `ReportCard`.`isHidden` = 0 WHERE ( SELECT `ExamId` FROM `UserExamAttempts` AS `UserExamAttempts` WHERE ((`UserExamAttempts`.`UserId` = 60 AND `UserExamAttempts`.`status` = 'completed') AND `UserExamAttempts`.`ExamId` = `Exam`.`id`) LIMIT 1 ) IS NOT NULL LIMIT 1) AS `Exam` INNER JOIN `UserExamAttempts` AS `UserExamAttempts` ON `Exam`.`id` = `UserExamAttempts`.`ExamId` AND `UserExamAttempts`.`UserId` = 60 AND `UserExamAttempts`.`status` = 'completed' ORDER BY `ReportCard`.`createdAt` DESC;",
+0|biowl-ba |   parameters: {}
+0|biowl-ba | }
 
-Node.js v22.21.0
-root@digiwork-server:/var/www/biowl-app/backend#

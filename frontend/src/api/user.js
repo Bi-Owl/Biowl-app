@@ -13,7 +13,7 @@ export const getLatestReportCardSummary = async () => {
 export const getCompletedExamsCount = async () => {
     try {
         const headers = getAuthHeaders();
-        const response = await fetch('/api/users/me/completed-exams-count', { headers });
+        const response = await fetch('/api/auth/me/completed-exams-count', { headers });
         return handleResponse(response);
     } catch (error) {
         throw error.message;
