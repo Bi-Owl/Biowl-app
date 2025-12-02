@@ -52,6 +52,7 @@
           :selected-answer="userAnswers[question.id]"
           :correct-answer="correctAnswers[question.id]"
           :is-readonly="true"
+          view-mode="report-card"
         />
       </div>
     </div>

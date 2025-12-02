@@ -26,6 +26,7 @@
         :question="question"
         :selected-answer="userAnswers[question.id]"
         :is-readonly="true"
+        view-mode="answer-sheet"
       />
     </div>
   </div>

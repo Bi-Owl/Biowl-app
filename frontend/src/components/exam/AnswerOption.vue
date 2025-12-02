@@ -23,20 +23,8 @@
     <div class="mr-4 text-gray-800 grow">
       <slot>گزینه {{ optionNumber }}</slot>
     </div>
-    <!-- Report Card Mode Labels -->
-    <template v-if="isReadonly && correctAnswer !== null">
-      <div v-if="isCorrect && isSelected" class="absolute top-1.5 left-2 text-xs bg-green-500 text-white rounded-full px-2 py-0.5 shadow">
-        انتخاب شما - گزینه درست
-      </div>
-      <div v-else-if="isCorrect" class="absolute top-1.5 left-2 text-xs bg-green-500 text-white rounded-full px-2 py-0.5 shadow">
-        {{ wasAnswered ? 'گزینه درست' : 'گزینه درست - بدون جواب' }}
-      </div>
-      <div v-if="isSelected && !isCorrect" class="absolute top-1.5 left-2 text-xs bg-red-500 text-white rounded-full px-2 py-0.5 shadow">
-        انتخاب شما
-      </div>
-    </template>
     <!-- Answer Sheet Mode Label -->
-    <template v-if="isReadonly && correctAnswer === null">
+    <template v-if="isReadonly">
        <div v-if="isSelected" class="absolute top-1.5 left-2 text-xs bg-blue-500 text-white rounded-full px-2 py-0.5 shadow">
         انتخاب شما
       </div>
@@ -64,21 +52,14 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  // If correctAnswer is passed, we are in "Report Card" mode
-  // If it's null, we are in "Answer Sheet" mode
-  correctAnswer: {
-    type: [Number, String, null],
-    default: null
-  },
-  wasAnswered: {
+  // For answer sheet view, if the entire question was unanswered
+  isQuestionUnanswered: {
     type: Boolean,
     default: false
   }
 });
 
 const emit = defineEmits(['select']);
-
-const isCorrect = computed(() => props.correctAnswer === props.optionNumber);
 
 const selectOption = () => {
   if (!props.isReadonly && !props.isPending) {
@@ -100,32 +81,24 @@ const interactiveModeCircleClasses = computed(() => ({
 }));
 
 const reviewModeClasses = computed(() => {
-  // Report Card Mode
-  if (props.correctAnswer !== null) {
-    if (isCorrect.value) return 'bg-green-100 border-green-500';
-    if (props.isSelected) return 'bg-red-100 border-red-500';
-    if (props.wasAnswered) return 'bg-gray-50 border-gray-200 opacity-60';
-    return 'bg-blue-50 border-blue-200 opacity-80';
-  } 
   // Answer Sheet Mode
-  else {
-    if (props.isSelected) return 'bg-blue-100 border-blue-500';
-    return 'bg-white border-gray-200';
+  if (props.isQuestionUnanswered) {
+    return 'bg-blue-50 border-blue-200 opacity-80';
   }
+  if (props.isSelected) {
+    return 'bg-blue-100 border-blue-500';
+  }
+  return 'bg-white border-gray-200';
 });
 
 const reviewModeCircleClasses = computed(() => {
-  // Report Card Mode
-  if (props.correctAnswer !== null) {
-    if (isCorrect.value) return 'bg-green-500 text-white';
-    if (props.isSelected) return 'bg-red-500 text-white';
-    if (props.wasAnswered) return 'bg-gray-200 text-gray-500';
+  // Answer Sheet Mode
+  if (props.isQuestionUnanswered) {
     return 'bg-blue-100 text-blue-800';
   }
-  // Answer Sheet Mode
-  else {
-    if (props.isSelected) return 'bg-blue-500 text-white';
-    return 'bg-gray-200 text-gray-600';
+  if (props.isSelected) {
+    return 'bg-blue-500 text-white';
   }
+  return 'bg-gray-200 text-gray-600';
 });
 </script>

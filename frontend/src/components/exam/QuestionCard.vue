@@ -13,17 +13,30 @@
       />
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <AnswerOption
-        v-for="optionNum in question.numberOfOptions"
-        :key="optionNum"
-        :option-number="optionNum"
-        :is-selected="selectedAnswer === optionNum"
-        :is-readonly="isReadonly"
-        :is-pending="pendingUpdate && pendingUpdate.questionId === question.id && pendingUpdate.answer === optionNum"
-        :is-correct="correctAnswer === optionNum"
-        :was-answered="wasAnswered"
-        @select="onSelectAnswer"
-      />
+      <!-- Report Card Mode -->
+      <template v-if="viewMode === 'report-card'">
+        <ReportCardAnswerOption
+          v-for="optionNum in question.numberOfOptions"
+          :key="optionNum"
+          :option-number="optionNum"
+          :user-answer="selectedAnswer"
+          :correct-answer="correctAnswer"
+        />
+      </template>
+
+      <!-- Interactive or Answer Sheet Mode -->
+      <template v-else>
+        <AnswerOption
+          v-for="optionNum in question.numberOfOptions"
+          :key="optionNum"
+          :option-number="optionNum"
+          :is-selected="selectedAnswer === optionNum"
+          :is-readonly="isReadonly"
+          :is-pending="pendingUpdate && pendingUpdate.questionId === question.id && pendingUpdate.answer === optionNum"
+          :is-question-unanswered="!wasAnswered"
+          @select="onSelectAnswer"
+        />
+      </template>
     </div>
   </div>
 </template>
@@ -32,6 +45,7 @@
 import { computed } from 'vue';
 import { STATIC_BASE_URL } from '@/config/api';
 import AnswerOption from './AnswerOption.vue';
+import ReportCardAnswerOption from '../dashboard/ReportCardAnswerOption.vue';
 
 const props = defineProps({
   question: {
@@ -53,6 +67,10 @@ const props = defineProps({
   correctAnswer: {
     type: [Number, String, null],
     default: null
+  },
+  viewMode: {
+    type: String,
+    default: 'interactive', // interactive, answer-sheet, report-card
   }
 });
 
