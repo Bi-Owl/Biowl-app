@@ -1,28 +1,31 @@
-import axios from './axios';
+import { getAuthHeaders, handleResponse } from './utils';
 
 export const getLatestReportCardSummary = async () => {
     try {
-        const response = await axios.get('/api/report-cards/latest-summary');
-        return response.data;
+        const headers = getAuthHeaders();
+        const response = await fetch('/api/report-cards/latest-summary', { headers });
+        return handleResponse(response);
     } catch (error) {
-        throw error.response?.data?.message || error.message;
+        throw error.message; // handleResponse already parses message
     }
 };
 
 export const getCompletedExamsCount = async () => {
     try {
-        const response = await axios.get('/api/users/me/completed-exams-count');
-        return response.data;
+        const headers = getAuthHeaders();
+        const response = await fetch('/api/users/me/completed-exams-count', { headers });
+        return handleResponse(response);
     } catch (error) {
-        throw error.response?.data?.message || error.message;
+        throw error.message;
     }
 };
 
 export const getTotalExamsCount = async () => {
     try {
-        const response = await axios.get('/api/exams/total');
-        return response.data;
+        const headers = getAuthHeaders();
+        const response = await fetch('/api/exams/total', { headers });
+        return handleResponse(response);
     } catch (error) {
-        throw error.response?.data?.message || error.message;
+        throw error.message;
     }
 };

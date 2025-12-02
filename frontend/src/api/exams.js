@@ -1,30 +1,13 @@
-import { auth } from '@/auth';
 import { EXAM_API, REPORT_CARD_API } from '@/config/api';
-
-const getAuthHeaders = () => {
-  const token = auth.state.token;
-  if (!token) {
-    // This is not necessarily an error, as some endpoints can be public
-    // The caller should handle cases where auth is required but no token is present.
-    return { 'Content-Type': 'application/json' };
-  }
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
-  };
-};
+import { getAuthHeaders, handleResponse } from './utils';
 
 export const fetchPublicExams = async () => {
   try {
     const response = await fetch(EXAM_API.GET_ALL);
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'خطایی در دریافت لیست آزمون‌ها رخ داد.');
-    }
-    return await response.json();
+    return handleResponse(response);
   } catch (error) {
     console.error(error);
-    throw error; // Re-throw the error to be caught by the component
+    throw error;
   }
 };
 
@@ -32,14 +15,10 @@ export const fetchPurchasedExams = async () => {
   try {
     const headers = getAuthHeaders();
     const response = await fetch(EXAM_API.GET_PURCHASED, { headers });
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || 'خطایی در دریافت آزمون‌های شما رخ داد.');
-    }
-    return await response.json();
+    return handleResponse(response);
   } catch (error) {
     console.error(error);
-    throw error; // Re-throw the error to be caught by the component
+    throw error;
   }
 };
 
@@ -50,11 +29,7 @@ export const purchaseExam = async (examId) => {
       method: 'POST',
       headers,
     });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || 'خطایی در فرآیند خرید رخ داد.');
-    }
-    return data;
+    return handleResponse(response);
   } catch (error) {
     console.error(error);
     throw error;
@@ -76,11 +51,7 @@ export const startExamAttempt = async (examId) => {
       method: 'POST',
       headers,
     });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || 'خطایی در شروع آزمون رخ داد.');
-    }
-    return data;
+    return handleResponse(response);
   } catch (error) {
     console.error('API Error starting exam:', error);
     throw error;
@@ -96,11 +67,7 @@ export const updateAnswer = async (attemptId, questionId, answer, examToken) => 
       headers,
       body,
     });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || 'خطایی در ذخیره پاسخ رخ داد.');
-    }
-    return data;
+    return handleResponse(response);
   } catch (error) {
     console.error('API Error updating answer:', error);
     throw error;
@@ -114,11 +81,7 @@ export const finishExamAttempt = async (attemptId) => {
       method: 'POST',
       headers,
     });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || 'خطایی در پایان آزمون رخ داد.');
-    }
-    return data;
+    return handleResponse(response);
   } catch (error) {
     console.error('API Error finishing exam:', error);
     throw error;
@@ -129,11 +92,7 @@ export const reviewAttempt = async (attemptId) => {
   try {
     const headers = getAuthHeaders(); // Uses standard login token
     const response = await fetch(EXAM_API.REVIEW_ATTEMPT(attemptId), { headers });
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || 'خطایی در دریافت اطلاعات آزمون رخ داد.');
-    }
-    return data;
+    return handleResponse(response);
   } catch (error) {
     console.error('API Error reviewing attempt:', error);
     throw error;
@@ -144,11 +103,7 @@ export const fetchAvailableReportCards = async () => {
   try {
     const headers = getAuthHeaders();
     const response = await fetch(REPORT_CARD_API.GET_AVAILABLE, { headers });
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to fetch report cards');
-    }
-    return response.json();
+    return handleResponse(response);
   } catch (error) {
     console.error('API Error fetching report cards:', error);
     throw error;
@@ -159,13 +114,10 @@ export const fetchReportCardDetails = async (examId) => {
   try {
     const headers = getAuthHeaders();
     const response = await fetch(REPORT_CARD_API.GET_DETAILS(examId), { headers });
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.message || 'Failed to fetch report card details');
-    }
-    return response.json();
+    return handleResponse(response);
   } catch (error) {
     console.error('API Error fetching report card details:', error);
     throw error;
   }
 };
+
