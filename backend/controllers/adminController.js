@@ -3,6 +3,7 @@ const Admin = require('../models/admin');
 const User = require('../models/user');
 const Exam = require('../models/exam');
 const Question = require('../models/question');
+const UserExam = require('../models/userExam'); // Added this import
 const UserExamAttempt = require('../models/userExamAttempt');
 const ReportCard = require('../models/reportCard');
 const jwt = require('jsonwebtoken');
