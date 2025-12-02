@@ -514,7 +514,13 @@ exports.updateReportCard = async (req, res) => {
         reportCard.isHidden = isHidden === 'true' || isHidden === true;
 
         if (req.file) {
-            // TODO: In a real app, delete the old file if it exists
+            // Delete the old file if it exists
+            if (reportCard.answerKeyPdfUrl) {
+                const oldPdfPath = path.join(__dirname, '..', reportCard.answerKeyPdfUrl);
+                if (fs.existsSync(oldPdfPath)) {
+                    fs.unlinkSync(oldPdfPath);
+                }
+            }
             reportCard.answerKeyPdfUrl = `/uploads/${req.file.filename}`;
         }
 
