@@ -2,6 +2,7 @@ const Exam = require('../models/exam');
 const UserExamAttempt = require('../models/userExamAttempt');
 const ReportCard = require('../models/reportCard');
 const Question = require('../models/question');
+const Explanation = require('../models/explanation');
 
 /**
  * Calculates the score for a given attempt against the correct answers.
@@ -111,6 +112,9 @@ exports.getReportCardDetails = async (req, res) => {
     // 3. Fetch all questions for the exam (we need them for score calculation)
     const questions = await Question.findAll({ where: { ExamId: examId } });
 
+    // Fetch all explanations for the exam
+    const explanations = await Explanation.findAll({ where: { ExamId: examId } });
+
     // 4. Calculate score
     const score = calculateScore(attempt.answers, reportCard.correctAnswers, questions);
 
@@ -119,6 +123,7 @@ exports.getReportCardDetails = async (req, res) => {
       reportCard,
       attempt,
       questions,
+      explanations, // Include explanations here
       score,
     });
 

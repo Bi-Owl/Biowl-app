@@ -45,25 +45,31 @@
 
       <!-- Questions Section -->
       <div class="space-y-6">
-        <QuestionCard
-          v-for="question in questions"
-          :key="question.id"
-          :question="question"
-          :selected-answer="userAnswers[question.id]"
-          :correct-answer="correctAnswers[question.id]"
-          :is-readonly="true"
-          view-mode="report-card"
-        />
+        <div v-for="item in sortedItems" :key="item.type + '-' + item.id">
+          <QuestionCard
+            v-if="item.type === 'question'"
+            :question="item"
+            :selected-answer="userAnswers[item.id]"
+            :correct-answer="correctAnswers[item.id]"
+            :is-readonly="true"
+            view-mode="report-card"
+          />
+          <ExplanationCard
+            v-else-if="item.type === 'explanation'"
+            :explanation="item"
+          />
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useToast } from 'vue-toastification';
 import { fetchReportCardDetails } from '@/api/exams';
 import QuestionCard from '@/components/exam/QuestionCard.vue';
+import ExplanationCard from '@/components/exam/ExplanationCard.vue';
 
 const props = defineProps({
   examId: {
@@ -79,9 +85,25 @@ const loading = ref(true);
 const error = ref(null);
 const examName = ref('');
 const questions = ref([]);
+const explanations = ref([]); // New ref for explanations
 const userAnswers = ref({});
 const correctAnswers = ref({});
 const score = ref({});
+
+const sortedItems = computed(() => {
+  const mappedQuestions = questions.value.map(q => ({ ...q, type: 'question', sortKey: q.position }));
+  const mappedExplanations = (explanations.value || []).map(e => ({ ...e, type: 'explanation', sortKey: e.displayOrder - 0.5 }));
+  
+  const combined = [...mappedQuestions, ...mappedExplanations];
+  
+  return combined.sort((a, b) => {
+    if (a.sortKey < b.sortKey) return -1;
+    if (a.sortKey > b.sortKey) return 1;
+    if (a.id < b.id) return -1;
+    if (a.id > b.id) return 1;
+    return 0;
+  });
+});
 
 onMounted(async () => {
   loading.value = true;
@@ -90,6 +112,7 @@ onMounted(async () => {
     const data = await fetchReportCardDetails(props.examId);
     examName.value = data.reportCard.name; // Assuming name is on reportCard or exam object
     questions.value = data.questions;
+    explanations.value = data.explanations || []; // Populate explanations
     userAnswers.value = data.attempt.answers || {};
     correctAnswers.value = data.reportCard.correctAnswers || {};
     score.value = data.score;

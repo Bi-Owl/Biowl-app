@@ -20,14 +20,19 @@
     </div>
 
     <div v-else class="max-w-4xl mx-auto space-y-6">
-      <QuestionCard
-        v-for="question in questions"
-        :key="question.id"
-        :question="question"
-        :selected-answer="userAnswers[question.id]"
-        :is-readonly="true"
-        view-mode="answer-sheet"
-      />
+      <div v-for="item in sortedItems" :key="item.type + '-' + item.id">
+        <QuestionCard
+          v-if="item.type === 'question'"
+          :question="item"
+          :selected-answer="userAnswers[item.id]"
+          :is-readonly="true"
+          view-mode="answer-sheet"
+        />
+        <ExplanationCard
+          v-else-if="item.type === 'explanation'"
+          :explanation="item"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -37,6 +42,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useToast } from 'vue-toastification';
 import { reviewAttempt } from '@/api/exams';
 import QuestionCard from '@/components/exam/QuestionCard.vue';
+import ExplanationCard from '@/components/exam/ExplanationCard.vue';
 
 const props = defineProps({
   attemptId: {
@@ -55,7 +61,23 @@ const toast = useToast();
 const loading = ref(true);
 const error = ref(null);
 const questions = ref([]);
+const explanations = ref([]); // New ref for explanations
 const userAnswers = ref({});
+
+const sortedItems = computed(() => {
+  const mappedQuestions = questions.value.map(q => ({ ...q, type: 'question', sortKey: q.position }));
+  const mappedExplanations = (explanations.value || []).map(e => ({ ...e, type: 'explanation', sortKey: e.displayOrder - 0.5 }));
+  
+  const combined = [...mappedQuestions, ...mappedExplanations];
+  
+  return combined.sort((a, b) => {
+    if (a.sortKey < b.sortKey) return -1;
+    if (a.sortKey > b.sortKey) return 1;
+    if (a.id < b.id) return -1;
+    if (a.id > b.id) return 1;
+    return 0;
+  });
+});
 
 onMounted(async () => {
   loading.value = true;
@@ -63,6 +85,7 @@ onMounted(async () => {
   try {
     const data = await reviewAttempt(props.attemptId);
     questions.value = data.questions;
+    explanations.value = data.explanations || []; // Populate explanations
     userAnswers.value = data.attempt.answers || {};
   } catch (err) {
     toast.error(err.message);
