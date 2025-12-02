@@ -11,7 +11,9 @@ export const getAuthHeaders = () => {
 export const handleResponse = async (response) => {
   const data = await response.json();
   if (!response.ok) {
-    throw new Error(data.message || 'خطایی رخ داد.');
+    const error = new Error(data.message || 'خطایی رخ داد.');
+    error.status = response.status;
+    throw error;
   }
   return data;
 };

@@ -83,8 +83,13 @@ onMounted(async () => {
       timer.value = setInterval(calculateTimeLeft, 1000);
     }
   } catch (error) {
-    toast.error('خطا در دریافت آزمون‌های بعدی.');
-    console.error('Error fetching upcoming exams:', error);
+    if (error.status === 404) {
+      // It's possible there are no purchased exams, which is not a critical error.
+      console.info('No purchased exams found.');
+    } else {
+      toast.error('خطا در دریافت آزمون‌های بعدی.');
+      console.error('Error fetching upcoming exams:', error);
+    }
   }
 });
 

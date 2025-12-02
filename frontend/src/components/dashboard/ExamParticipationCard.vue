@@ -29,8 +29,12 @@ onMounted(async () => {
     totalExamsCount.value = totalExamsData.totalExams;
     completedExamsCount.value = completedExamsData.completedExamsCount;
   } catch (error) {
-    toast.error('خطا در دریافت اطلاعات مشارکت در آزمون‌ها.');
-    console.error('Error fetching exam participation data:', error);
+    if (error.status === 404) {
+      console.error('Could not find exam participation API endpoints.');
+    } else {
+      toast.error('خطا در دریافت اطلاعات مشارکت در آزمون‌ها.');
+      console.error('Error fetching exam participation data:', error);
+    }
   }
 });
 </script>

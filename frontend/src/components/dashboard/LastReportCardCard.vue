@@ -36,8 +36,8 @@ onMounted(async () => {
   try {
     lastReportCard.value = await getLatestReportCardSummary();
   } catch (error) {
-    if (error === 'کارنامه تکمیل شده‌ای یافت نشد.') {
-      lastReportCard.value = null; // Explicitly set to null if not found
+    if (error.status === 404) {
+      lastReportCard.value = null; // This is expected if no report card is found
     } else {
       toast.error('خطا در دریافت آخرین کارنامه.');
       console.error('Error fetching latest report card:', error);
