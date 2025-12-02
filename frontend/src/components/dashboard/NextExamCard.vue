@@ -19,7 +19,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useToast } from 'vue-toastification';
-import { getPurchasedExams } from '@/api/exams'; // Assuming getPurchasedExams is here
+import { fetchPurchasedExams } from '@/api/exams';
 
 const toast = useToast();
 const nextExam = ref(null);
