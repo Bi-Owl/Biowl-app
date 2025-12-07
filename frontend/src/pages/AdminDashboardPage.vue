@@ -1,3 +1,33 @@
+<script setup>
+import { ref } from 'vue';
+import AdminSideMenu from '@/components/dashboard/AdminSideMenu.vue';
+import UsersTable from '@/components/dashboard/UsersTable.vue';
+import ExamsTable from '@/components/dashboard/ExamsTable.vue';
+import QuestionManager from '@/components/dashboard/QuestionManager.vue';
+import ReportCardTable from '@/components/dashboard/ReportCardTable.vue';
+import ExamStatusOverview from '@/components/dashboard/ExamStatusOverview.vue';
+import ExamAttemptList from '@/components/dashboard/ExamAttemptList.vue';
+
+const currentView = ref('users'); // Default view
+const selectedExamForQuestions = ref(null);
+const selectedExamForStatus = ref(null);
+
+const handleNavigation = (view) => {
+  currentView.value = view;
+  // Reset selections when changing main view
+  selectedExamForQuestions.value = null; 
+  selectedExamForStatus.value = null;
+};
+
+const handleManageQuestions = (exam) => {
+  selectedExamForQuestions.value = exam;
+};
+
+const handleViewAttempts = (exam) => {
+  selectedExamForStatus.value = exam;
+};
+</script>
+
 <template>
   <div class="relative flex min-h-screen">
     <!-- Admin Side Menu -->
@@ -28,30 +58,21 @@
             @manage-questions="handleManageQuestions"
           />
         </div>
+
+        <div v-if="currentView === 'exam-status'">
+          <ExamAttemptList 
+            v-if="selectedExamForStatus"
+            :exam="selectedExamForStatus"
+            @back="selectedExamForStatus = null"
+          />
+          <ExamStatusOverview 
+            v-else 
+            @view-attempts="handleViewAttempts"
+          />
+        </div>
+
         <ReportCardTable v-if="currentView === 'report-cards'" />
       </div>
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import AdminSideMenu from '@/components/dashboard/AdminSideMenu.vue';
-import UsersTable from '@/components/dashboard/UsersTable.vue';
-import ExamsTable from '@/components/dashboard/ExamsTable.vue';
-import QuestionManager from '@/components/dashboard/QuestionManager.vue';
-import ReportCardTable from '@/components/dashboard/ReportCardTable.vue';
-
-const currentView = ref('users'); // Default view
-const selectedExamForQuestions = ref(null);
-
-const handleNavigation = (view) => {
-  currentView.value = view;
-  // Reset selection when changing main view
-  selectedExamForQuestions.value = null; 
-};
-
-const handleManageQuestions = (exam) => {
-  selectedExamForQuestions.value = exam;
-};
-</script>

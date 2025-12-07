@@ -15,6 +15,11 @@ router.delete('/users/:id', adminAuthMiddleware, adminController.deleteUser);
 // Exam management routes
 router.post('/exams', adminAuthMiddleware, adminController.createExam);
 router.get('/exams', adminAuthMiddleware, adminController.getAllExams);
+
+// New routes for Exam Status feature
+router.get('/exams/status-overview', adminAuthMiddleware, adminController.getExamsStatusOverview);
+router.get('/exams/:examId/attempts', adminAuthMiddleware, adminController.getExamAttempts);
+
 router.get('/exams/:id', adminAuthMiddleware, adminController.getExamById);
 router.put('/exams/:id', adminAuthMiddleware, adminController.updateExam);
 router.delete('/exams/:id', adminAuthMiddleware, adminController.deleteExam);

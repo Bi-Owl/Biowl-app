@@ -180,6 +180,29 @@ export const deleteExam = async (id) => {
   return response.json();
 };
 
+// --- Exam Status ---
+export const getExamsStatusOverview = async () => {
+  const response = await fetch(ADMIN_API.GET_EXAMS_STATUS_OVERVIEW, {
+    headers: getHeaders(),
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to fetch exam status overview');
+  }
+  return response.json();
+};
+
+export const getExamAttempts = async (examId) => {
+  const response = await fetch(ADMIN_API.GET_EXAM_ATTEMPTS(examId), {
+    headers: getHeaders(),
+  });
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.message || 'Failed to fetch exam attempts');
+  }
+  return response.json();
+};
+
 // --- Question Management ---
 
 const getMultipartHeaders = () => {

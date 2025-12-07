@@ -26,6 +26,12 @@
           <i data-feather="file-text" class="ml-3"></i>
           <span>کارنامه ها</span>
         </li>
+        <li @click="$emit('navigate', 'exam-status')"
+            :class="[currentView === 'exam-status' ? 'bg-emerald-50 text-emerald-700' : 'text-gray-600']"
+            class="flex items-center text-lg font-semibold py-3 px-4 rounded-lg hover:bg-emerald-50 hover:text-emerald-700 transition-colors cursor-pointer mt-2">
+          <i data-feather="activity" class="ml-3"></i>
+          <span>وضعیت آزمون</span>
+        </li>
       </ul>
     </nav>
     <!-- Logout Button -->
