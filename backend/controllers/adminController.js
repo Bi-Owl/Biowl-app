@@ -340,18 +340,22 @@ exports.deleteExam = async (req, res) => {
                   }
                 }
                 
-                const answeredCount = correctCount + incorrectCount;
-                const unansweredCount = totalQuestions - answeredCount;
-                const percentage = (correctCount / totalQuestions) * 100;
-        
-                result.stats = {
-                  correct: correctCount,
-                  incorrect: incorrectCount,
-                  unanswered: unansweredCount,
-                  total: totalQuestions,
-                  percentage: Math.round(percentage * 100) / 100 // round to 2 decimal places
-                };
-              }
+                        const answeredCount = correctCount + incorrectCount;
+                        const unansweredCount = totalQuestions - answeredCount;
+                        
+                        // Standard negative marking: 3 wrong answers cancel 1 correct answer.
+                        const score = (correctCount * 3) - incorrectCount;
+                        const maxScore = totalQuestions * 3;
+                        const finalScore = Math.max(0, score);
+                        const percentage = maxScore > 0 ? (finalScore / maxScore) * 100 : 0;
+                
+                        result.stats = {
+                          correct: correctCount,
+                          incorrect: incorrectCount,
+                          unanswered: unansweredCount,
+                          total: totalQuestions,
+                          percentage: Math.round(percentage * 100) / 100 // round to 2 decimal places
+                        };              }
         
               return result;
             });
