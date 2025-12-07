@@ -37,7 +37,7 @@
             <p class="text-sm text-gray-600">نزده</p>
           </div>
           <div class="p-4 bg-blue-50 rounded-lg">
-            <p class="text-2xl font-bold text-blue-600">{{ score.percentageWithNegative }}%</p>
+            <p class="text-2xl font-bold" :class="getPercentageClass(score.percentageWithNegative)">{{ score.percentageWithNegative }}%</p>
             <p class="text-sm text-gray-600">درصد (با نمره منفی)</p>
           </div>
         </div>
@@ -89,6 +89,13 @@ const explanations = ref([]); // New ref for explanations
 const userAnswers = ref({});
 const correctAnswers = ref({});
 const score = ref({});
+
+const getPercentageClass = (percentage) => {
+  if (percentage >= 70) return 'text-green-600';
+  if (percentage >= 40) return 'text-yellow-600';
+  if (percentage >= 0) return 'text-orange-600';
+  return 'text-red-600'; // For negative percentages
+};
 
 const sortedItems = computed(() => {
   const mappedQuestions = questions.value.map(q => ({ ...q, type: 'question', sortKey: q.position }));

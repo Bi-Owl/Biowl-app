@@ -259,118 +259,117 @@ exports.deleteExam = async (req, res) => {
   } catch (error) {
     await t.rollback();
     console.error("Error deleting exam:", error);
-        res.status(500).json({ message: 'خطا در سرور هنگام حذف آزمون رخ داد.' });
+    res.status(500).json({ message: 'خطا در سرور هنگام حذف آزمون رخ داد.' });
+  }
+};
+
+exports.getExamsStatusOverview = async (req, res) => {
+  try {
+    const exams = await Exam.findAll({
+      attributes: {
+        include: [
+          [sequelize.fn('COUNT', sequelize.col('UserExamAttempts.id')), 'attemptCount']
+        ]
+      },
+      include: [{
+        model: UserExamAttempt,
+        attributes: []
+      }],
+      group: ['Exam.id'],
+      order: [['createdAt', 'DESC']]
+    });
+    res.json(exams);
+  } catch (error) {
+    console.error("Error in getExamsStatusOverview:", error);
+    res.status(500).json({ message: 'خطای سرور' });
+  }
+};
+
+exports.getExamAttempts = async (req, res) => {
+  try {
+    const { examId } = req.params;
+
+    // 1. Get all attempts for the exam, including user data
+    const attempts = await UserExamAttempt.findAll({
+      where: { ExamId: examId },
+      include: {
+        model: User,
+        attributes: ['id', 'firstName', 'lastName', 'email']
+      },
+      order: [['createdAt', 'DESC']]
+    });
+
+    // 2. Get all correct answers for the exam for efficient lookup
+    const questions = await Question.findAll({
+      where: { ExamId: examId },
+      attributes: ['id', 'correctOption']
+    });
+    const correctAnswersMap = new Map(questions.map(q => [q.id, q.correctOption]));
+    const totalQuestions = questions.length;
+
+    // 3. Process each attempt to calculate stats
+    const results = attempts.map(attempt => {
+      const user = attempt.User;
+      const result = {
+        attemptId: attempt.id,
+        status: attempt.status,
+        user: {
+          id: user.id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+        },
+        stats: null
+      };
+
+      if (attempt.status === 'completed' && totalQuestions > 0) {
+        let correctCount = 0;
+        let incorrectCount = 0;
+        const userAnswers = attempt.answers || {};
+
+        for (const question of questions) {
+          const userAnswer = userAnswers[question.id];
+          const correctAnswer = correctAnswersMap.get(question.id);
+
+          if (userAnswer) {
+            if (userAnswer === correctAnswer) {
+              correctCount++;
+            } else {
+              incorrectCount++;
+            }
+          }
+        }
+        
+        const answeredCount = correctCount + incorrectCount;
+        const unansweredCount = totalQuestions - answeredCount;
+        
+        // Standard negative marking: 3 wrong answers cancel 1 correct answer.
+        const score = (correctCount * 3) - incorrectCount;
+        const maxScore = totalQuestions * 3;
+        const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
+        
+        result.stats = {
+          correct: correctCount,
+          incorrect: incorrectCount,
+          unanswered: unansweredCount,
+          total: totalQuestions,
+          percentage: Math.round(percentage * 100) / 100 // round to 2 decimal places
+        };
       }
-    };
-    
-    exports.getExamsStatusOverview = async (req, res) => {
-      try {
-        const exams = await Exam.findAll({
-          attributes: {
-            include: [
-              [sequelize.fn('COUNT', sequelize.col('UserExamAttempts.id')), 'attemptCount']
-            ]
-          },
-          include: [{
-            model: UserExamAttempt,
-            attributes: []
-          }],
-          group: ['Exam.id'],
-          order: [['createdAt', 'DESC']]
-        });
-        res.json(exams);
-      } catch (error) {
-        console.error("Error in getExamsStatusOverview:", error);
-            res.status(500).json({ message: 'خطای سرور' });
-          }
-        };
-        
-        exports.getExamAttempts = async (req, res) => {
-          try {
-            const { examId } = req.params;
-        
-            // 1. Get all attempts for the exam, including user data
-            const attempts = await UserExamAttempt.findAll({
-              where: { ExamId: examId },
-              include: {
-                model: User,
-                attributes: ['id', 'firstName', 'lastName', 'email']
-              },
-              order: [['createdAt', 'DESC']]
-            });
-        
-            // 2. Get all correct answers for the exam for efficient lookup
-            const questions = await Question.findAll({
-              where: { ExamId: examId },
-              attributes: ['id', 'correctOption']
-            });
-            const correctAnswersMap = new Map(questions.map(q => [q.id, q.correctOption]));
-            const totalQuestions = questions.length;
-        
-            // 3. Process each attempt to calculate stats
-            const results = attempts.map(attempt => {
-              const user = attempt.User;
-              const result = {
-                attemptId: attempt.id,
-                status: attempt.status,
-                user: {
-                  id: user.id,
-                  firstName: user.firstName,
-                  lastName: user.lastName,
-                  email: user.email,
-                },
-                stats: null
-              };
-        
-              if (attempt.status === 'completed' && totalQuestions > 0) {
-                let correctCount = 0;
-                let incorrectCount = 0;
-                const userAnswers = attempt.answers || {};
-        
-                for (const question of questions) {
-                  const userAnswer = userAnswers[question.id];
-                  const correctAnswer = correctAnswersMap.get(question.id);
-        
-                  if (userAnswer) {
-                    if (userAnswer === correctAnswer) {
-                      correctCount++;
-                    } else {
-                      incorrectCount++;
-                    }
-                  }
-                }
-                
-                        const answeredCount = correctCount + incorrectCount;
-                        const unansweredCount = totalQuestions - answeredCount;
-                        
-                        // Standard negative marking: 3 wrong answers cancel 1 correct answer.
-                        const score = (correctCount * 3) - incorrectCount;
-                        const maxScore = totalQuestions * 3;
-                        const finalScore = Math.max(0, score);
-                        const percentage = maxScore > 0 ? (finalScore / maxScore) * 100 : 0;
-                
-                        result.stats = {
-                          correct: correctCount,
-                          incorrect: incorrectCount,
-                          unanswered: unansweredCount,
-                          total: totalQuestions,
-                          percentage: Math.round(percentage * 100) / 100 // round to 2 decimal places
-                        };              }
-        
-              return result;
-            });
-        
-            res.json(results);
-        
-          } catch (error) {
-            console.error("Error in getExamAttempts:", error);
-            res.status(500).json({ message: 'خطای سرور' });
-          }
-        };
-        
-        
-        // --- Question Management ---
-exports.createQuestion = async (req, res) => {
+
+      return result;
+    });
+
+    res.json(results);
+
+  } catch (error) {
+    console.error("Error in getExamAttempts:", error);
+    res.status(500).json({ message: 'خطای سرور' });
+  }
+};
+
+
+// --- Question Management ---exports.createQuestion = async (req, res) => {
     try {
         const { examId } = req.params;
         const { numberOfOptions, correctOption, position } = req.body;
