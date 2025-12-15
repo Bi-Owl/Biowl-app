@@ -33,8 +33,8 @@ const calculateScore = (userAnswers, correctAnswers, questions) => {
   const unansweredCount = totalQuestions - correctCount - incorrectCount;
   
   // Negative marking logic
-  const scoreRaw = (correctCount * 3) - incorrectCount;
-  const maxScore = totalQuestions * 3;
+  const scoreRaw = (correctCount * 4) - incorrectCount;
+  const maxScore = totalQuestions * 4;
   const percentageWithNegative = maxScore > 0 ? (scoreRaw / maxScore) * 100 : 0;
   
   const percentageWithoutNegative = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;

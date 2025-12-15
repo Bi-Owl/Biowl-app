@@ -265,8 +265,8 @@ exports.getExamAttempts = async (req, res) => {
           }
         }
         const unansweredCount = totalQuestions - correctCount - incorrectCount;
-        const score = (correctCount * 3) - incorrectCount;
-        const maxScore = totalQuestions * 3;
+        const score = (correctCount * 4) - incorrectCount;
+        const maxScore = totalQuestions * 4;
         const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
         result.stats = {
           correct: correctCount,
