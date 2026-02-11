@@ -28,7 +28,7 @@ const Question = sequelize.define('Question', {
     comment: 'The number of the correct option (e.g., 1, 2, 3, etc.).',
   },
   type: {
-    type: DataTypes.ENUM('multiple_choice', 'numeric'),
+    type: DataTypes.ENUM('multiple_choice', 'numeric', 'multi_boolean'),
     defaultValue: 'multiple_choice',
     allowNull: false,
     comment: 'Type of the question: multiple_choice or numeric',

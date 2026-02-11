@@ -3,7 +3,7 @@
     :class="[
       'flex items-center p-4 rounded-lg border-2 transition-all duration-200 ease-in-out relative',
       computedClasses,
-      'cursor-not-allowed'
+      'cursor-default'
     ]"
   >
     <div

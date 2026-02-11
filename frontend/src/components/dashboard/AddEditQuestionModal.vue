@@ -30,6 +30,10 @@
                   <input type="radio" value="numeric" v-model="questionData.type" name="questionType" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
                   <span class="ml-2 text-sm text-gray-700">پاسخ عددی</span>
                 </label>
+                <label class="flex items-center cursor-pointer">
+                  <input type="radio" value="multi_boolean" v-model="questionData.type" name="questionType" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                  <span class="ml-2 text-sm text-gray-700">چند گزاره‌ای (۵تایی)</span>
+                </label>
               </div>
             </div>
 
@@ -54,11 +58,32 @@
                 </div>
               </div>
             </div>
-
             <div v-if="questionData.type === 'numeric'" class="md:col-span-2">
-              <label for="correctNumericAnswer" class="block mb-2 text-sm font-medium text-emerald-700">پاسخ صحیح (عدد)</label>
-              <input :value="questionData.correctNumericAnswer" @input="event => questionData.correctNumericAnswer = cleanNumericInput(event.target.value, true)" type="text" id="correctNumericAnswer" class="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-lg focus:ring-2 focus:ring-emerald-300 block w-full p-2.5 dir-ltr" required placeholder="مثلا: 12.5 یا 10, 10.5 (برای چند پاسخ صحیح با کاما جدا کنید)">
+              <label for="correctNumericAnswer" class="block mb-2 text-sm font-medium text-emerald-700">پاسخ صحیح (عددی)</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path></svg>
+                </div>
+                <input v-model="questionData.correctNumericAnswer" type="text" id="correctNumericAnswer" @input="e => questionData.correctNumericAnswer = cleanNumericInput(e.target.value, true)" class="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-lg focus:ring-2 focus:ring-emerald-300 block w-full pl-10 p-2.5 dir-ltr" required>
+              </div>
               <p class="mt-1 text-xs text-gray-500">برای چندین پاسخ صحیح، اعداد را با کاما جدا کنید (مثلا: "10, 10.5"). کاربر با وارد کردن هر کدام امتیاز کامل می‌گیرد.</p>
+            </div>
+
+            <div v-if="questionData.type === 'multi_boolean'" class="md:col-span-2 space-y-3">
+              <label class="block mb-2 text-sm font-medium text-emerald-700">تعیین درستی/نادرستی گزاره‌ها</label>
+              <div v-for="i in 5" :key="i" class="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                <span class="text-sm font-bold text-emerald-900">گزاره {{ i }}</span>
+                <div class="flex items-center gap-4">
+                  <label class="flex items-center cursor-pointer">
+                    <input type="radio" :name="'stmt-' + i" :value="true" v-model="questionData.multiBooleanAnswers[i-1]" class="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300">
+                    <span class="mr-2 text-sm text-green-700 font-bold">صحیح</span>
+                  </label>
+                  <label class="flex items-center cursor-pointer">
+                    <input type="radio" :name="'stmt-' + i" :value="false" v-model="questionData.multiBooleanAnswers[i-1]" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
+                    <span class="mr-2 text-sm text-red-700 font-bold">غلط</span>
+                  </label>
+                </div>
+              </div>
             </div>
 
             <div class="md:col-span-2">
@@ -119,13 +144,17 @@ const formTitle = computed(() => isEditing.value ? `ویرایش سوال ${prop
 
 watch(() => props.question, (newVal) => {
   if (isEditing.value) {
-    questionData.value = { ...newVal };
+    questionData.value = { 
+      ...newVal,
+      multiBooleanAnswers: newVal.type === 'multi_boolean' ? (Array.isArray(newVal.correctNumericAnswer) ? [...newVal.correctNumericAnswer] : JSON.parse(newVal.correctNumericAnswer || '[null,null,null,null,null]')) : [null, null, null, null, null]
+    };
   } else {
     questionData.value = {
-      numberOfOptions: 4,
+      numberOfOptions: 5,
       correctOption: null,
       type: 'multiple_choice',
       correctNumericAnswer: null,
+      multiBooleanAnswers: [null, null, null, null, null]
     };
   }
   questionImageFile.value = null;
@@ -153,6 +182,11 @@ const submit = () => {
       toast.error('لطفا پاسخ صحیح را وارد کنید.');
       return;
     }
+  } else if (questionData.value.type === 'multi_boolean') {
+    if (questionData.value.multiBooleanAnswers.some(a => a === null)) {
+      toast.error('لطفا وضعیت درستی/نادرستی تمام ۵ گزاره را مشخص کنید.');
+      return;
+    }
   }
   
   if (!isEditing.value && !questionImageFile.value) {
@@ -169,16 +203,18 @@ const submit = () => {
   }
 
   Object.keys(questionData.value).forEach(key => {
-    if (key !== 'imageUrl' && key !== 'position' && questionData.value[key] !== null) {
+    if (key !== 'imageUrl' && key !== 'position' && key !== 'multiBooleanAnswers' && questionData.value[key] !== null) {
       if (key === 'correctNumericAnswer' && questionData.value.type === 'numeric') {
-         // Should we format it? Backend handles comma separated string.
-         // Let's just send it as is.
          formData.append(key, questionData.value[key]);
       } else {
          formData.append(key, questionData.value[key]);
       }
     }
   });
+
+  if (questionData.value.type === 'multi_boolean') {
+    formData.append('correctNumericAnswer', JSON.stringify(questionData.value.multiBooleanAnswers));
+  }
 
   if (questionImageFile.value) {
     formData.append('image', questionImageFile.value);

@@ -14,6 +14,7 @@ const Explanation = require('../models/explanation');
 const calculateScore = (userAnswers, correctAnswers, questions) => {
   let correctCount = 0;
   let incorrectCount = 0;
+  let totalWeightedScore = 0;
   const totalQuestions = questions.length;
 
   for (const question of questions) {
@@ -21,10 +22,8 @@ const calculateScore = (userAnswers, correctAnswers, questions) => {
     const userAnswer = userAnswers[questionId];
     const correctAnswer = correctAnswers[questionId];
 
-    if (userAnswer) { // If the user answered the question
+    if (userAnswer) {
       if (question.type === 'numeric') {
-        // Numeric question grading
-        // correctAnswer might be an array or string from ReportCard snapshot
         let correctAnswersList = [];
         if (Array.isArray(correctAnswer)) {
           correctAnswersList = correctAnswer;
@@ -43,32 +42,63 @@ const calculateScore = (userAnswers, correctAnswers, questions) => {
         }
 
         const userFloat = parseFloat(userAnswer);
-        // Check if user answer matches any of the correct answers
         if (correctAnswersList.some(ans => Math.abs(parseFloat(ans) - userFloat) < 0.0001)) {
           correctCount++;
-        } else {
-          // No negative marking for numeric questions
-          // incorrectCount++; 
+          totalWeightedScore += 4;
+        }
+      } else if (question.type === 'multi_boolean') {
+        let userBools = [];
+        try {
+          userBools = Array.isArray(userAnswer) ? userAnswer : JSON.parse(userAnswer);
+        } catch (e) {
+          userBools = [];
         }
 
+        let correctBools = [];
+        try {
+          correctBools = Array.isArray(correctAnswer) ? correctAnswer : JSON.parse(correctAnswer);
+        } catch (e) {
+          correctBools = [];
+        }
+
+        if (Array.isArray(userBools) && Array.isArray(correctBools)) {
+          let qCorrect = 0;
+          let qIncorrect = 0;
+          for (let k = 0; k < 5; k++) {
+            if (userBools[k] === true || userBools[k] === false) {
+              if (userBools[k] === correctBools[k]) qCorrect++;
+              else qIncorrect++;
+            }
+          }
+
+          let tablePoints = 0;
+          if (qCorrect === 5) tablePoints = 5;
+          else if (qCorrect === 4) tablePoints = 3;
+          else if (qCorrect === 3) tablePoints = 2;
+          else if (qCorrect === 2) tablePoints = 1;
+
+          const penalty = qIncorrect * 0.5;
+          const finalPoints = tablePoints - penalty;
+          totalWeightedScore += (finalPoints / 5) * 4;
+
+          if (qCorrect === 5) correctCount++;
+          else if (qIncorrect > 0) incorrectCount++;
+        }
       } else {
-        // Multiple choice grading
         if (parseInt(userAnswer) === parseInt(correctAnswer)) {
           correctCount++;
+          totalWeightedScore += 4;
         } else {
           incorrectCount++;
+          totalWeightedScore -= 1;
         }
       }
     }
   }
 
-  const unansweredCount = totalQuestions - correctCount - incorrectCount;
-
-  // Negative marking logic
-  const scoreRaw = (correctCount * 4) - incorrectCount;
+  const unansweredCount = (totalQuestions - correctCount - incorrectCount) < 0 ? 0 : (totalQuestions - correctCount - incorrectCount);
   const maxScore = totalQuestions * 4;
-  const percentageWithNegative = maxScore > 0 ? (scoreRaw / maxScore) * 100 : 0;
-
+  const percentageWithNegative = maxScore > 0 ? (totalWeightedScore / maxScore) * 100 : 0;
   const percentageWithoutNegative = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
 
   return {
@@ -76,7 +106,7 @@ const calculateScore = (userAnswers, correctAnswers, questions) => {
     incorrectCount,
     unansweredCount,
     totalQuestions,
-    percentageWithNegative: parseFloat(percentageWithNegative.toFixed(2)),
+    percentageWithNegative: parseFloat((percentageWithNegative > 100 ? 100 : percentageWithNegative).toFixed(2)),
     percentageWithoutNegative: parseFloat(percentageWithoutNegative.toFixed(2)),
   };
 };

@@ -149,11 +149,11 @@ onMounted(() => {
 });
 
 const handleUpdateAnswer = async (payload) => {
-  const { questionId, answer } = payload;
+  const { questionId, answer, index = null } = payload;
   
   if (pendingUpdate.value) return; // Don't allow multiple updates at once
 
-  pendingUpdate.value = { questionId, answer };
+  pendingUpdate.value = { questionId, answer, index };
 
   try {
     await updateAnswer(attemptId.value, questionId, answer, examToken.value);

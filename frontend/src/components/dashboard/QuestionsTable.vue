@@ -35,7 +35,9 @@
           <template #item="{element: item}">
             <tr :key="item.id" class="border-b border-gray-200 hover:bg-gray-100">
               <td class="py-3 px-6">
-                <span :class="{'bg-purple-100 text-purple-800': item.type === 'numeric', 'bg-emerald-100 text-emerald-800': item.type !== 'numeric'}" class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">{{ (item.type === 'numeric') ? 'سوال عددی' : 'سوال تستی' }}</span>
+                <span :class="{'bg-purple-100 text-purple-800': item.type === 'numeric', 'bg-orange-100 text-orange-800': item.type === 'multi_boolean', 'bg-emerald-100 text-emerald-800': item.type === 'multiple_choice'}" class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
+                  {{ (item.type === 'numeric') ? 'سوال عددی' : (item.type === 'multi_boolean' ? 'چند گزاره‌ای' : 'سوال تستی') }}
+                </span>
               </td>
               <td class="py-3 px-6 font-semibold drag-handle cursor-move">{{ item.position }}</td>
               <td class="py-3 px-6">
@@ -44,6 +46,15 @@
               <td class="py-3 px-6">
                 <div v-if="item.type === 'numeric'">
                     <div>پاسخ صحیح: <span class="font-semibold text-emerald-600 dir-ltr inline-block">{{ formatNumericAnswer(item.correctNumericAnswer) }}</span></div>
+                </div>
+                <div v-else-if="item.type === 'multi_boolean'">
+                    <div class="flex gap-1 flex-wrap">
+                      <span v-for="(val, idx) in parseBooleanArray(item.correctNumericAnswer)" :key="idx" 
+                            :class="val ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" 
+                            class="text-[10px] px-1.5 py-0.5 rounded font-bold">
+                        {{ idx + 1 }}: {{ val ? 'ص' : 'غ' }}
+                      </span>
+                    </div>
                 </div>
                 <div v-else>
                     <div>تعداد گزینه‌ها: <span class="font-semibold">{{ item.numberOfOptions || 4 }}</span></div>
@@ -70,11 +81,8 @@
         <tbody v-else class="text-gray-600 text-sm font-light">
           <tr v-for="item in sortedItems" :key="item.type + item.id" class="border-b border-gray-200 hover:bg-gray-50" :class="{'!bg-blue-50 hover:!bg-blue-100': item.type === 'explanation'}">
             <td class="py-3 px-6">
-              <span v-if="item.type === 'question'" :class="[item.type === 'question' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800']" class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
-                {{ item.questionType === 'numeric' ? 'عددی' : 'چند گزینه‌ای' }} <!-- Assuming backend sends 'type' as 'questionType' or we map it. Wait, backend sends 'type' as 'numeric' or 'multiple_choice'. But the item.type in frontend is 'question' or 'explanation'. I need to use the property from the model. Let's check the API response. API returns Question model fields. So item.type from backend model is 'numeric' or 'multiple_choice'. But here `item` is a mixed object. `item.type` is overwritten in `sortedItems` computed property! -->
-                <!-- I need to fix the conflict in `sortedItems`. `item.type` is set to 'question' or 'explanation'. The backend `type` field will be overwritten. -->
-                <!-- I should check the `sortedItems` computed property logic. -->
-                 {{ (item.modelType === 'numeric') ? 'سوال عددی' : 'سوال تستی' }}
+              <span v-if="item.type === 'question'" :class="{'bg-purple-100 text-purple-800': item.modelType === 'numeric', 'bg-orange-100 text-orange-800': item.modelType === 'multi_boolean', 'bg-emerald-100 text-emerald-800': item.modelType === 'multiple_choice'}" class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
+                {{ item.modelType === 'numeric' ? 'عددی' : (item.modelType === 'multi_boolean' ? 'چند گزاره‌ای' : 'تستی') }}
               </span>
                <span v-else class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">توضیح</span>
             </td>
@@ -92,6 +100,15 @@
                 </div>
                 <div v-else-if="item.modelType === 'numeric'">
                     <div>پاسخ صحیح: <span class="font-semibold text-emerald-600 dir-ltr inline-block">{{ formatNumericAnswer(item.correctNumericAnswer) }}</span></div>
+                </div>
+                <div v-else-if="item.modelType === 'multi_boolean'">
+                    <div class="flex gap-1 flex-wrap mt-1">
+                      <span v-for="(val, idx) in parseBooleanArray(item.correctNumericAnswer)" :key="idx" 
+                            :class="val ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" 
+                            class="text-[10px] px-1.5 py-0.5 rounded font-bold">
+                        {{ idx + 1 }}: {{ val ? 'ص' : 'غ' }}
+                      </span>
+                    </div>
                 </div>
               </div>
               <div v-else class="text-gray-500">-</div>
@@ -327,6 +344,16 @@ const formatNumericAnswer = (answer) => {
       }
   }
   return answer;
+};
+
+const parseBooleanArray = (answer) => {
+  if (Array.isArray(answer)) return answer;
+  try {
+    const parsed = JSON.parse(answer);
+    return Array.isArray(parsed) ? parsed : [false, false, false, false, false];
+  } catch (e) {
+    return [false, false, false, false, false];
+  }
 };
 const confirmDelete = (item) => {
   const isQuestion = item.type === 'question';

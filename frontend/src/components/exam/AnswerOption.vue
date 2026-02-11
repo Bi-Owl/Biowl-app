@@ -4,7 +4,11 @@
     :class="[
       'flex items-center p-4 rounded-lg border-2 transition-all duration-200 ease-in-out relative',
       isReadonly ? reviewModeClasses : interactiveModeClasses,
-      { 'cursor-not-allowed': isReadonly || isPending, 'border-yellow-400 animate-pulse-border': isPending }
+      { 
+        'cursor-not-allowed': isPending, 
+        'cursor-default': isReadonly && !isPending,
+        'border-yellow-400 animate-pulse-border': isPending 
+      }
     ]"
   >
     <div

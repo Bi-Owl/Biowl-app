@@ -253,17 +253,12 @@ exports.getExamAttempts = async (req, res) => {
         let correctCount = 0;
         let incorrectCount = 0;
         const userAnswers = attempt.answers || {};
+        let totalWeightedScore = 0;
         for (const question of questions) {
           const userAnswer = userAnswers[question.id];
-          const questionData = correctAnswersMap.get(question.id); // Get full question data
-          // const correctAnswer = questionData.correctOption; // Not used directly anymore, accessed from questionData
           if (userAnswer) {
             if (question.type === 'numeric') {
-              // For numeric questions, compare the user's answer with ANY of the correct numeric answers
-              // Assuming answer comes as string from frontend input, convert to float
               const userFloat = parseFloat(userAnswer);
-              let isCorrect = false;
-
               let correctAnswers = [];
               if (Array.isArray(question.correctNumericAnswer)) {
                 correctAnswers = question.correctNumericAnswer;
@@ -271,7 +266,6 @@ exports.getExamAttempts = async (req, res) => {
                 try {
                   correctAnswers = JSON.parse(question.correctNumericAnswer);
                 } catch (e) {
-                  // Fallback for single value or comma separated string if not standard JSON
                   if (question.correctNumericAnswer.includes(',')) {
                     correctAnswers = question.correctNumericAnswer.split(',').map(s => parseFloat(s.trim()));
                   } else {
@@ -282,29 +276,58 @@ exports.getExamAttempts = async (req, res) => {
                 correctAnswers = [question.correctNumericAnswer];
               }
 
-              // Check if user answer matches any of the correct answers
-              if (correctAnswers.some(ans => Math.abs(parseFloat(ans) - userFloat) < 0.0001)) { // Use epsilon for float comparison
-                isCorrect = true;
-              }
-
-              if (isCorrect) {
+              if (correctAnswers.some(ans => Math.abs(parseFloat(ans) - userFloat) < 0.0001)) {
                 correctCount++;
-              } else {
-                // Per user request: Numeric questions do NOT have negative marking.
-                // So we do NOT increment incorrectCount.
+                totalWeightedScore += 4;
+              }
+            } else if (question.type === 'multi_boolean') {
+              let userBools = [];
+              try {
+                userBools = Array.isArray(userAnswer) ? userAnswer : JSON.parse(userAnswer);
+              } catch (e) {
+                userBools = [];
+              }
+              let correctBools = [];
+              try {
+                correctBools = Array.isArray(question.correctNumericAnswer) ? question.correctNumericAnswer : JSON.parse(question.correctNumericAnswer);
+              } catch (e) {
+                correctBools = [];
+              }
+              if (Array.isArray(userBools) && Array.isArray(correctBools)) {
+                let questionCorrectCount = 0;
+                let questionIncorrectCount = 0;
+                for (let k = 0; k < 5; k++) {
+                  if (userBools[k] === true || userBools[k] === false) {
+                    if (userBools[k] === correctBools[k]) questionCorrectCount++;
+                    else questionIncorrectCount++;
+                  }
+                }
+                let tablePoints = 0;
+                if (questionCorrectCount === 5) tablePoints = 5;
+                else if (questionCorrectCount === 4) tablePoints = 3;
+                else if (questionCorrectCount === 3) tablePoints = 2;
+                else if (questionCorrectCount === 2) tablePoints = 1;
+
+                const penalty = questionIncorrectCount * 0.5;
+                const finalQuestionPoints = tablePoints - penalty;
+                totalWeightedScore += (finalQuestionPoints / 5) * 4;
+
+                if (questionCorrectCount === 5) correctCount++;
+                else if (questionIncorrectCount > 0) incorrectCount++;
               }
             } else {
-              // Multiple choice grading
               if (parseInt(userAnswer) === question.correctOption) {
                 correctCount++;
+                totalWeightedScore += 4;
               } else {
                 incorrectCount++;
+                totalWeightedScore -= 1;
               }
             }
           }
         }
         const unansweredCount = totalQuestions - correctCount - incorrectCount;
-        const score = (correctCount * 4) - incorrectCount;
+        const score = totalWeightedScore;
         const maxScore = totalQuestions * 4;
         const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
         result.stats = {
@@ -341,32 +364,48 @@ exports.createQuestion = async (req, res) => {
       if (!numberOfOptions || !correctOption) {
         return res.status(400).json({ message: 'برای سوالات چند گزینه‌ای، تعداد گزینه‌ها و گزینه صحیح اجباری است.' });
       }
-    } else if (questionType === 'numeric') {
+    } else if (questionType === 'numeric' || questionType === 'multi_boolean') {
       // correctNumericAnswer should be an array or convertible to one.
       if (correctNumericAnswer === undefined || correctNumericAnswer === null) {
-        return res.status(400).json({ message: 'برای سوالات عددی، پاسخ صحیح اجباری است.' });
+        return res.status(400).json({ message: `برای سوالات ${questionType === 'numeric' ? 'عددی' : 'چند گزاره‌ای'}، پاسخ صحیح اجباری است.` });
       }
-      // Parse numeric answer to array
+      // Parse numeric/boolean answer to array
       if (typeof correctNumericAnswer === 'string') {
-        if (correctNumericAnswer.includes(',')) {
-          // Split by comma and filter empty strings, then map to float
-          req.body.correctNumericAnswer = correctNumericAnswer.split(',').map(s => s.trim()).filter(s => s !== '').map(s => parseFloat(s));
-        } else {
-          // Try check if it is a JSON string
-          try {
-            const parsed = JSON.parse(correctNumericAnswer);
-            if (Array.isArray(parsed)) req.body.correctNumericAnswer = parsed;
-            else req.body.correctNumericAnswer = [parseFloat(correctNumericAnswer)];
-          } catch (e) {
-            req.body.correctNumericAnswer = [parseFloat(correctNumericAnswer)];
+        try {
+          const parsed = JSON.parse(correctNumericAnswer);
+          if (Array.isArray(parsed)) {
+            req.body.correctNumericAnswer = parsed;
+          } else {
+            req.body.correctNumericAnswer = [questionType === 'numeric' ? parseFloat(correctNumericAnswer) : !!correctNumericAnswer];
+          }
+        } catch (e) {
+          if (questionType === 'numeric') {
+            if (correctNumericAnswer.includes(',')) {
+              req.body.correctNumericAnswer = correctNumericAnswer.split(',').map(s => s.trim()).filter(s => s !== '').map(s => parseFloat(s));
+            } else {
+              req.body.correctNumericAnswer = [parseFloat(correctNumericAnswer)];
+            }
+          } else {
+            // For multi_boolean, we expect array, if not it's invalid unless it's a simple toggle
+            req.body.correctNumericAnswer = [!!correctNumericAnswer];
           }
         }
-      } else if (typeof correctNumericAnswer === 'number') {
+      } else if (Array.isArray(correctNumericAnswer)) {
+        req.body.correctNumericAnswer = correctNumericAnswer;
+      } else {
         req.body.correctNumericAnswer = [correctNumericAnswer];
       }
-      // Check if we have valid numbers
-      if (!Array.isArray(req.body.correctNumericAnswer) || req.body.correctNumericAnswer.some(isNaN)) {
-        return res.status(400).json({ message: 'پاسخ صحیح باید شامل اعداد معتبر باشد.' });
+
+      // Validation for multi_boolean: must be exactly 5
+      if (questionType === 'multi_boolean') {
+        if (!Array.isArray(req.body.correctNumericAnswer) || req.body.correctNumericAnswer.length !== 5) {
+          return res.status(400).json({ message: 'برای سوالات چند گزاره‌ای باید دقیقا ۵ پاسخ (صحیح/غلط) وارد شود.' });
+        }
+      } else if (questionType === 'numeric') {
+        // Check if we have valid numbers
+        if (!Array.isArray(req.body.correctNumericAnswer) || req.body.correctNumericAnswer.some(isNaN)) {
+          return res.status(400).json({ message: 'پاسخ صحیح باید شامل اعداد معتبر باشد.' });
+        }
       }
     }
 
@@ -382,8 +421,7 @@ exports.createQuestion = async (req, res) => {
       correctOption: questionType === 'multiple_choice' ? correctOption : null,
       ExamId: examId,
       type: questionType,
-      type: questionType,
-      correctNumericAnswer: questionType === 'numeric' ? req.body.correctNumericAnswer : null
+      correctNumericAnswer: (questionType === 'numeric' || questionType === 'multi_boolean') ? req.body.correctNumericAnswer : null
     });
     res.status(201).json({ message: 'سوال با موفقیت ایجاد شد', question });
   } catch (error) {
@@ -461,6 +499,24 @@ exports.updateQuestion = async (req, res) => {
         }
       }
       updateData.numberOfOptions = null; // Reset MC fields if switching to Numeric
+      updateData.correctOption = null;
+    } else if (questionType === 'multi_boolean') {
+      if (correctNumericAnswer !== undefined) {
+        let parsedAnswer = correctNumericAnswer;
+        if (typeof correctNumericAnswer === 'string') {
+          try {
+            parsedAnswer = JSON.parse(correctNumericAnswer);
+          } catch (e) {
+            return res.status(400).json({ message: 'فرمت پاسخ وارد شده نامعتبر است.' });
+          }
+        }
+        if (Array.isArray(parsedAnswer) && parsedAnswer.length === 5) {
+          updateData.correctNumericAnswer = parsedAnswer;
+        } else {
+          return res.status(400).json({ message: 'برای سوالات چند گزاره‌ای باید دقیقا ۵ پاسخ وارد شود.' });
+        }
+      }
+      updateData.numberOfOptions = null;
       updateData.correctOption = null;
     }
 
@@ -613,7 +669,7 @@ exports.publishReportCard = async (req, res) => {
       return res.status(400).json({ message: 'نمی‌توان برای آزمون بدون سوال، کارنامه منتشر کرد.' });
     }
     const correctAnswers = questions.reduce((acc, q) => {
-      if (q.type === 'numeric') {
+      if (q.type === 'numeric' || q.type === 'multi_boolean') {
         acc[q.id] = q.correctNumericAnswer;
       } else {
         acc[q.id] = q.correctOption;
