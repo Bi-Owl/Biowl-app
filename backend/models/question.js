@@ -19,13 +19,24 @@ const Question = sequelize.define('Question', {
   },
   numberOfOptions: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true, // Nullable for numeric questions
     comment: 'The total number of options for this question (e.g., 4).',
   },
   correctOption: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true, // Nullable for numeric questions
     comment: 'The number of the correct option (e.g., 1, 2, 3, etc.).',
+  },
+  type: {
+    type: DataTypes.ENUM('multiple_choice', 'numeric'),
+    defaultValue: 'multiple_choice',
+    allowNull: false,
+    comment: 'Type of the question: multiple_choice or numeric',
+  },
+  correctNumericAnswer: {
+    type: DataTypes.JSON, // Changed to JSON to support multiple correct answers
+    allowNull: true,
+    comment: 'The correct answer(s) for numeric questions. Stored as an array of numbers.',
   },
 });
 

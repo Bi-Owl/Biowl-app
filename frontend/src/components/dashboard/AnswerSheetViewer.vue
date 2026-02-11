@@ -20,16 +20,16 @@
     </div>
 
     <div v-else class="max-w-4xl mx-auto space-y-6">
-      <div v-for="item in sortedItems" :key="item.type + '-' + item.id">
+      <div v-for="item in sortedItems" :key="item.itemType + '-' + item.id">
         <QuestionCard
-          v-if="item.type === 'question'"
+          v-if="item.itemType === 'question'"
           :question="item"
-          :selected-answer="userAnswers[item.id]"
+          :selectedAnswer="userAnswers[item.id]"
           :is-readonly="true"
           view-mode="answer-sheet"
         />
         <ExplanationCard
-          v-else-if="item.type === 'explanation'"
+          v-else-if="item.itemType === 'explanation'"
           :explanation="item"
         />
       </div>
@@ -65,8 +65,8 @@ const explanations = ref([]); // New ref for explanations
 const userAnswers = ref({});
 
 const sortedItems = computed(() => {
-  const mappedQuestions = questions.value.map(q => ({ ...q, type: 'question', sortKey: q.position }));
-  const mappedExplanations = (explanations.value || []).map(e => ({ ...e, type: 'explanation', sortKey: e.displayOrder - 0.5 }));
+  const mappedQuestions = questions.value.map(q => ({ ...q, itemType: 'question', sortKey: q.position }));
+  const mappedExplanations = (explanations.value || []).map(e => ({ ...e, itemType: 'explanation', sortKey: e.displayOrder - 0.5 }));
   
   const combined = [...mappedQuestions, ...mappedExplanations];
   

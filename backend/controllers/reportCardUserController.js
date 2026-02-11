@@ -22,21 +22,53 @@ const calculateScore = (userAnswers, correctAnswers, questions) => {
     const correctAnswer = correctAnswers[questionId];
 
     if (userAnswer) { // If the user answered the question
-      if (userAnswer === correctAnswer) {
-        correctCount++;
+      if (question.type === 'numeric') {
+        // Numeric question grading
+        // correctAnswer might be an array or string from ReportCard snapshot
+        let correctAnswersList = [];
+        if (Array.isArray(correctAnswer)) {
+          correctAnswersList = correctAnswer;
+        } else if (typeof correctAnswer === 'string') {
+          try {
+            correctAnswersList = JSON.parse(correctAnswer);
+          } catch (e) {
+            if (correctAnswer.includes(',')) {
+              correctAnswersList = correctAnswer.split(',').map(s => parseFloat(s.trim()));
+            } else {
+              correctAnswersList = [parseFloat(correctAnswer)];
+            }
+          }
+        } else if (typeof correctAnswer === 'number') {
+          correctAnswersList = [correctAnswer];
+        }
+
+        const userFloat = parseFloat(userAnswer);
+        // Check if user answer matches any of the correct answers
+        if (correctAnswersList.some(ans => Math.abs(parseFloat(ans) - userFloat) < 0.0001)) {
+          correctCount++;
+        } else {
+          // No negative marking for numeric questions
+          // incorrectCount++; 
+        }
+
       } else {
-        incorrectCount++;
+        // Multiple choice grading
+        if (parseInt(userAnswer) === parseInt(correctAnswer)) {
+          correctCount++;
+        } else {
+          incorrectCount++;
+        }
       }
     }
   }
 
   const unansweredCount = totalQuestions - correctCount - incorrectCount;
-  
+
   // Negative marking logic
   const scoreRaw = (correctCount * 4) - incorrectCount;
   const maxScore = totalQuestions * 4;
   const percentageWithNegative = maxScore > 0 ? (scoreRaw / maxScore) * 100 : 0;
-  
+
   const percentageWithoutNegative = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
 
   return {

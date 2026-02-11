@@ -238,8 +238,8 @@ exports.getExamAttempts = async (req, res) => {
       include: { model: User, attributes: ['id', 'firstName', 'lastName', 'email'] },
       order: [['createdAt', 'DESC']]
     });
-    const questions = await Question.findAll({ where: { ExamId: examId }, attributes: ['id', 'correctOption'] });
-    const correctAnswersMap = new Map(questions.map(q => [q.id, q.correctOption]));
+    const questions = await Question.findAll({ where: { ExamId: examId }, attributes: ['id', 'correctOption', 'type', 'correctNumericAnswer'] });
+    const correctAnswersMap = new Map(questions.map(q => [q.id, q]));
     const totalQuestions = questions.length;
     const results = attempts.map(attempt => {
       const user = attempt.User;
@@ -255,12 +255,51 @@ exports.getExamAttempts = async (req, res) => {
         const userAnswers = attempt.answers || {};
         for (const question of questions) {
           const userAnswer = userAnswers[question.id];
-          const correctAnswer = correctAnswersMap.get(question.id);
+          const questionData = correctAnswersMap.get(question.id); // Get full question data
+          // const correctAnswer = questionData.correctOption; // Not used directly anymore, accessed from questionData
           if (userAnswer) {
-            if (userAnswer === correctAnswer) {
-              correctCount++;
+            if (question.type === 'numeric') {
+              // For numeric questions, compare the user's answer with ANY of the correct numeric answers
+              // Assuming answer comes as string from frontend input, convert to float
+              const userFloat = parseFloat(userAnswer);
+              let isCorrect = false;
+
+              let correctAnswers = [];
+              if (Array.isArray(question.correctNumericAnswer)) {
+                correctAnswers = question.correctNumericAnswer;
+              } else if (typeof question.correctNumericAnswer === 'string') {
+                try {
+                  correctAnswers = JSON.parse(question.correctNumericAnswer);
+                } catch (e) {
+                  // Fallback for single value or comma separated string if not standard JSON
+                  if (question.correctNumericAnswer.includes(',')) {
+                    correctAnswers = question.correctNumericAnswer.split(',').map(s => parseFloat(s.trim()));
+                  } else {
+                    correctAnswers = [parseFloat(question.correctNumericAnswer)];
+                  }
+                }
+              } else if (typeof question.correctNumericAnswer === 'number') {
+                correctAnswers = [question.correctNumericAnswer];
+              }
+
+              // Check if user answer matches any of the correct answers
+              if (correctAnswers.some(ans => Math.abs(parseFloat(ans) - userFloat) < 0.0001)) { // Use epsilon for float comparison
+                isCorrect = true;
+              }
+
+              if (isCorrect) {
+                correctCount++;
+              } else {
+                // Per user request: Numeric questions do NOT have negative marking.
+                // So we do NOT increment incorrectCount.
+              }
             } else {
-              incorrectCount++;
+              // Multiple choice grading
+              if (parseInt(userAnswer) === question.correctOption) {
+                correctCount++;
+              } else {
+                incorrectCount++;
+              }
             }
           }
         }
@@ -289,15 +328,63 @@ exports.getExamAttempts = async (req, res) => {
 exports.createQuestion = async (req, res) => {
   try {
     const { examId } = req.params;
-    const { numberOfOptions, correctOption, position } = req.body;
-    if (!numberOfOptions || !correctOption || !position) {
-      return res.status(400).json({ message: 'داده‌های ارسالی برای سوال ناقص است.' });
+    const { numberOfOptions, correctOption, position, type, correctNumericAnswer } = req.body;
+
+    // Validation
+    if (!position) {
+      return res.status(400).json({ message: 'ترتیب سوال اجباری است.' });
     }
+
+    const questionType = type || 'multiple_choice';
+
+    if (questionType === 'multiple_choice') {
+      if (!numberOfOptions || !correctOption) {
+        return res.status(400).json({ message: 'برای سوالات چند گزینه‌ای، تعداد گزینه‌ها و گزینه صحیح اجباری است.' });
+      }
+    } else if (questionType === 'numeric') {
+      // correctNumericAnswer should be an array or convertible to one.
+      if (correctNumericAnswer === undefined || correctNumericAnswer === null) {
+        return res.status(400).json({ message: 'برای سوالات عددی، پاسخ صحیح اجباری است.' });
+      }
+      // Parse numeric answer to array
+      if (typeof correctNumericAnswer === 'string') {
+        if (correctNumericAnswer.includes(',')) {
+          // Split by comma and filter empty strings, then map to float
+          req.body.correctNumericAnswer = correctNumericAnswer.split(',').map(s => s.trim()).filter(s => s !== '').map(s => parseFloat(s));
+        } else {
+          // Try check if it is a JSON string
+          try {
+            const parsed = JSON.parse(correctNumericAnswer);
+            if (Array.isArray(parsed)) req.body.correctNumericAnswer = parsed;
+            else req.body.correctNumericAnswer = [parseFloat(correctNumericAnswer)];
+          } catch (e) {
+            req.body.correctNumericAnswer = [parseFloat(correctNumericAnswer)];
+          }
+        }
+      } else if (typeof correctNumericAnswer === 'number') {
+        req.body.correctNumericAnswer = [correctNumericAnswer];
+      }
+      // Check if we have valid numbers
+      if (!Array.isArray(req.body.correctNumericAnswer) || req.body.correctNumericAnswer.some(isNaN)) {
+        return res.status(400).json({ message: 'پاسخ صحیح باید شامل اعداد معتبر باشد.' });
+      }
+    }
+
     if (!req.file) {
       return res.status(400).json({ message: 'لطفا یک تصویر برای سوال آپلود کنید.' });
     }
     const imageUrl = `/uploads/${req.file.filename}`;
-    const question = await Question.create({ position, imageUrl, numberOfOptions, correctOption, ExamId: examId });
+
+    const question = await Question.create({
+      position,
+      imageUrl,
+      numberOfOptions: questionType === 'multiple_choice' ? numberOfOptions : null,
+      correctOption: questionType === 'multiple_choice' ? correctOption : null,
+      ExamId: examId,
+      type: questionType,
+      type: questionType,
+      correctNumericAnswer: questionType === 'numeric' ? req.body.correctNumericAnswer : null
+    });
     res.status(201).json({ message: 'سوال با موفقیت ایجاد شد', question });
   } catch (error) {
     console.error("Error creating question:", error);
@@ -324,7 +411,7 @@ exports.getQuestionsForExam = async (req, res) => {
 exports.updateQuestion = async (req, res) => {
   try {
     const { questionId } = req.params;
-    const { numberOfOptions, correctOption, position } = req.body;
+    const { numberOfOptions, correctOption, position, type, correctNumericAnswer } = req.body;
     const question = await Question.findByPk(questionId);
     if (!question) {
       return res.status(404).json({ message: 'سوال یافت نشد' });
@@ -337,7 +424,47 @@ exports.updateQuestion = async (req, res) => {
       }
       imageUrl = `/uploads/${req.file.filename}`;
     }
-    await question.update({ position, numberOfOptions, correctOption, imageUrl });
+
+    const questionType = type || question.type || 'multiple_choice';
+
+    // Prepare update object
+    const updateData = { position, imageUrl, type: questionType };
+
+    if (questionType === 'multiple_choice') {
+      if (numberOfOptions) updateData.numberOfOptions = numberOfOptions;
+      if (correctOption) updateData.correctOption = correctOption;
+      updateData.correctNumericAnswer = null; // Reset numeric answer if switching to MC
+    } else if (questionType === 'numeric') {
+      if (correctNumericAnswer !== undefined) {
+        let parsedAnswer = correctNumericAnswer;
+        if (typeof correctNumericAnswer === 'string') {
+          if (correctNumericAnswer.includes(',')) {
+            parsedAnswer = correctNumericAnswer.split(',').map(s => s.trim()).filter(s => s !== '').map(s => parseFloat(s));
+          } else {
+            try {
+              const parsed = JSON.parse(correctNumericAnswer);
+              if (Array.isArray(parsed)) parsedAnswer = parsed;
+              else parsedAnswer = [parseFloat(correctNumericAnswer)];
+            } catch (e) {
+              parsedAnswer = [parseFloat(correctNumericAnswer)];
+            }
+          }
+        } else if (typeof correctNumericAnswer === 'number') {
+          parsedAnswer = [correctNumericAnswer];
+        }
+        if (Array.isArray(parsedAnswer) && !parsedAnswer.some(isNaN)) {
+          updateData.correctNumericAnswer = parsedAnswer;
+        } else {
+          // If invalid, we might want to throw error or just not update.
+          // Let's throw error to inform user
+          return res.status(400).json({ message: 'پاسخ صحیح باید شامل اعداد معتبر باشد.' });
+        }
+      }
+      updateData.numberOfOptions = null; // Reset MC fields if switching to Numeric
+      updateData.correctOption = null;
+    }
+
+    await question.update(updateData);
     res.json({ message: 'سوال با موفقیت به روز شد' });
   } catch (error) {
     console.error("Error updating question:", error);
@@ -478,7 +605,7 @@ exports.publishReportCard = async (req, res) => {
     }
     const questions = await Question.findAll({
       where: { ExamId: examId },
-      attributes: ['id', 'correctOption'],
+      attributes: ['id', 'correctOption', 'type', 'correctNumericAnswer'],
       transaction: t,
     });
     if (questions.length === 0) {
@@ -486,7 +613,11 @@ exports.publishReportCard = async (req, res) => {
       return res.status(400).json({ message: 'نمی‌توان برای آزمون بدون سوال، کارنامه منتشر کرد.' });
     }
     const correctAnswers = questions.reduce((acc, q) => {
-      acc[q.id] = q.correctOption;
+      if (q.type === 'numeric') {
+        acc[q.id] = q.correctNumericAnswer;
+      } else {
+        acc[q.id] = q.correctOption;
+      }
       return acc;
     }, {});
     const [reportCard, isNew] = await ReportCard.findOrCreate({
@@ -531,44 +662,44 @@ exports.publishReportCard = async (req, res) => {
 };
 
 exports.getExamsWithReportCardStatus = async (req, res) => {
-    try {
-      const exams = await Exam.findAll({
-        attributes: ['id', 'name'],
-        include: [{
-          model: ReportCard,
-          attributes: ['id', 'isHidden', 'createdAt', 'updatedAt', 'description', 'answerKeyPdfUrl'],
-          required: false,
-        }],
-        order: [['createdAt', 'DESC']],
-      });
-      res.json(exams);
-    } catch (error) {
-      console.error('Error fetching exams with report card status:', error);
-      res.status(500).json({ message: 'خطای سرور' });
-    }
+  try {
+    const exams = await Exam.findAll({
+      attributes: ['id', 'name'],
+      include: [{
+        model: ReportCard,
+        attributes: ['id', 'isHidden', 'createdAt', 'updatedAt', 'description', 'answerKeyPdfUrl'],
+        required: false,
+      }],
+      order: [['createdAt', 'DESC']],
+    });
+    res.json(exams);
+  } catch (error) {
+    console.error('Error fetching exams with report card status:', error);
+    res.status(500).json({ message: 'خطای سرور' });
+  }
 };
 
 exports.updateReportCard = async (req, res) => {
-    const { examId } = req.params;
-    const { description, isHidden } = req.body;
-    try {
-        const reportCard = await ReportCard.findOne({ where: { ExamId: examId } });
-        if (!reportCard) {
-            return res.status(404).json({ message: 'کارنامه‌ای برای این آزمون یافت نشد. ابتدا آن را منتشر کنید.' });
-        }
-        reportCard.description = description;
-        reportCard.isHidden = isHidden === 'true' || isHidden === true;
-        if (req.file) {
-            if (reportCard.answerKeyPdfUrl) {
-                const oldPdfPath = path.join(__dirname, '..', reportCard.answerKeyPdfUrl);
-                if (fs.existsSync(oldPdfPath)) fs.unlinkSync(oldPdfPath);
-            }
-            reportCard.answerKeyPdfUrl = `/uploads/${req.file.filename}`;
-        }
-        await reportCard.save();
-        res.json({ message: 'کارنامه با موفقیت به‌روزرسانی شد.', reportCard });
-    } catch (error) {
-        console.error('Error updating report card:', error);
-        res.status(500).json({ message: 'خطای سرور هنگام به‌روزرسانی کارنامه.' });
+  const { examId } = req.params;
+  const { description, isHidden } = req.body;
+  try {
+    const reportCard = await ReportCard.findOne({ where: { ExamId: examId } });
+    if (!reportCard) {
+      return res.status(404).json({ message: 'کارنامه‌ای برای این آزمون یافت نشد. ابتدا آن را منتشر کنید.' });
     }
+    reportCard.description = description;
+    reportCard.isHidden = isHidden === 'true' || isHidden === true;
+    if (req.file) {
+      if (reportCard.answerKeyPdfUrl) {
+        const oldPdfPath = path.join(__dirname, '..', reportCard.answerKeyPdfUrl);
+        if (fs.existsSync(oldPdfPath)) fs.unlinkSync(oldPdfPath);
+      }
+      reportCard.answerKeyPdfUrl = `/uploads/${req.file.filename}`;
+    }
+    await reportCard.save();
+    res.json({ message: 'کارنامه با موفقیت به‌روزرسانی شد.', reportCard });
+  } catch (error) {
+    console.error('Error updating report card:', error);
+    res.status(500).json({ message: 'خطای سرور هنگام به‌روزرسانی کارنامه.' });
+  }
 };

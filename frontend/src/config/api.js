@@ -1,5 +1,5 @@
-const API_BASE_URL = '/api';
-export const STATIC_BASE_URL = '';
+const API_BASE_URL = 'http://localhost:3000/api';
+export const STATIC_BASE_URL = 'http://localhost:3000';
 
 export const AUTH_API = {
   REGISTER: `${API_BASE_URL}/auth/register`,

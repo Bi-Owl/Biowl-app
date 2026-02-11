@@ -19,7 +19,21 @@
         <fieldset :disabled="loading" class="flex flex-col h-full">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 flex-grow">
             
-            <div>
+            <div class="md:col-span-2">
+              <label class="block mb-2 text-sm font-medium text-emerald-700">نوع سوال</label>
+              <div class="flex items-center gap-4">
+                <label class="flex items-center cursor-pointer">
+                  <input type="radio" value="multiple_choice" v-model="questionData.type" name="questionType" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                  <span class="ml-2 text-sm text-gray-700">چند گزینه‌ای</span>
+                </label>
+                <label class="flex items-center cursor-pointer">
+                  <input type="radio" value="numeric" v-model="questionData.type" name="questionType" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                  <span class="ml-2 text-sm text-gray-700">پاسخ عددی</span>
+                </label>
+              </div>
+            </div>
+
+            <div v-if="questionData.type === 'multiple_choice'">
               <label for="numberOfOptions" class="block mb-2 text-sm font-medium text-emerald-700">تعداد گزینه‌ها</label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -29,7 +43,7 @@
               </div>
             </div>
 
-            <div class="md:col-span-2">
+            <div v-if="questionData.type === 'multiple_choice'" class="md:col-span-2">
               <label class="block mb-2 text-sm font-medium text-emerald-700">گزینه صحیح</label>
               <div class="flex items-center flex-wrap gap-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg">
                 <div class="flex items-center flex-wrap gap-4">
@@ -39,6 +53,12 @@
                   </label>
                 </div>
               </div>
+            </div>
+
+            <div v-if="questionData.type === 'numeric'" class="md:col-span-2">
+              <label for="correctNumericAnswer" class="block mb-2 text-sm font-medium text-emerald-700">پاسخ صحیح (عدد)</label>
+              <input :value="questionData.correctNumericAnswer" @input="event => questionData.correctNumericAnswer = cleanNumericInput(event.target.value, true)" type="text" id="correctNumericAnswer" class="bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm rounded-lg focus:ring-2 focus:ring-emerald-300 block w-full p-2.5 dir-ltr" required placeholder="مثلا: 12.5 یا 10, 10.5 (برای چند پاسخ صحیح با کاما جدا کنید)">
+              <p class="mt-1 text-xs text-gray-500">برای چندین پاسخ صحیح، اعداد را با کاما جدا کنید (مثلا: "10, 10.5"). کاربر با وارد کردن هر کدام امتیاز کامل می‌گیرد.</p>
             </div>
 
             <div class="md:col-span-2">
@@ -74,6 +94,7 @@
 import { ref, computed, watch } from 'vue';
 import { VueFinalModal } from 'vue-final-modal';
 import { useToast } from 'vue-toastification';
+import { cleanNumericInput } from '@/utils/helpers';
 
 const props = defineProps({
   question: {
@@ -103,6 +124,8 @@ watch(() => props.question, (newVal) => {
     questionData.value = {
       numberOfOptions: 4,
       correctOption: null,
+      type: 'multiple_choice',
+      correctNumericAnswer: null,
     };
   }
   questionImageFile.value = null;
@@ -116,14 +139,22 @@ const handleFileChange = (event) => {
 };
 
 const submit = () => {
-  if (!questionData.value.numberOfOptions || questionData.value.numberOfOptions < 2) {
-    toast.error('تعداد گزینه‌ها باید حداقل ۲ باشد.');
-    return;
+  if (questionData.value.type === 'multiple_choice') {
+    if (!questionData.value.numberOfOptions || questionData.value.numberOfOptions < 2) {
+      toast.error('تعداد گزینه‌ها باید حداقل ۲ باشد.');
+      return;
+    }
+    if (!questionData.value.correctOption) {
+      toast.error('لطفا گزینه صحیح را انتخاب کنید.');
+      return;
+    }
+  } else if (questionData.value.type === 'numeric') {
+    if (questionData.value.correctNumericAnswer === undefined || questionData.value.correctNumericAnswer === null || String(questionData.value.correctNumericAnswer).trim() === '') {
+      toast.error('لطفا پاسخ صحیح را وارد کنید.');
+      return;
+    }
   }
-  if (!questionData.value.correctOption) {
-    toast.error('لطفا گزینه صحیح را انتخاب کنید.');
-    return;
-  }
+  
   if (!isEditing.value && !questionImageFile.value) {
     toast.error('لطفا یک تصویر برای سوال آپلود کنید.');
     return;
@@ -139,7 +170,13 @@ const submit = () => {
 
   Object.keys(questionData.value).forEach(key => {
     if (key !== 'imageUrl' && key !== 'position' && questionData.value[key] !== null) {
-      formData.append(key, questionData.value[key]);
+      if (key === 'correctNumericAnswer' && questionData.value.type === 'numeric') {
+         // Should we format it? Backend handles comma separated string.
+         // Let's just send it as is.
+         formData.append(key, questionData.value[key]);
+      } else {
+         formData.append(key, questionData.value[key]);
+      }
     }
   });
 
