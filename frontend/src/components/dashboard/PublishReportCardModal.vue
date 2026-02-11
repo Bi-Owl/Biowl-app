@@ -33,6 +33,41 @@
             </label> 
           </div>
 
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-emerald-700 mb-2">نمایش رتبه شرکت‌کنندگان</label>
+              <TwoStateToggle 
+                v-model="reportCardData.showRank" 
+                right-label="نمایان" 
+                left-label="پنهان"
+                :right-value="true"
+                :left-value="false"
+                right-bg-class="bg-blue-50"
+                right-color-class="text-blue-600"
+                right-border-class="border-blue-200"
+                left-bg-class="bg-amber-50"
+                left-color-class="text-amber-600"
+                left-border-class="border-amber-200"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-emerald-700 mb-2">وضعیت نمایش کارنامه</label>
+              <TwoStateToggle 
+                v-model="reportCardData.isHidden" 
+                right-label="نمایان" 
+                left-label="پنهان"
+                :right-value="false"
+                :left-value="true"
+                right-bg-class="bg-blue-50"
+                right-color-class="text-blue-600"
+                right-border-class="border-blue-200"
+                left-bg-class="bg-amber-50"
+                left-color-class="text-amber-600"
+                left-border-class="border-amber-200"
+              />
+            </div>
+          </div>
+
           <div class="flex items-center justify-end pt-6 space-x-4 space-x-reverse border-t border-gray-200 rounded-b mt-6">
             <button type="submit" class="btn-hover text-white bg-emerald-600 hover:bg-emerald-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
               <span v-if="loading">در حال انتشار...</span>
@@ -51,6 +86,7 @@
 <script setup>
 import { ref } from 'vue';
 import { VueFinalModal } from 'vue-final-modal';
+import TwoStateToggle from '@/components/ui/TwoStateToggle.vue';
 
 const props = defineProps({
   examName: String,
@@ -60,6 +96,8 @@ const emit = defineEmits(['confirm', 'close']);
 const loading = ref(false);
 const reportCardData = ref({
   description: '',
+  showRank: false,
+  isHidden: true,
   answerKeyPdf: null,
 });
 
@@ -70,7 +108,8 @@ const handleFileUpload = (event) => {
 const confirm = () => {
   const formData = new FormData();
   formData.append('description', reportCardData.value.description);
-  // The 'showRank' field is removed as per user request
+  formData.append('showRank', reportCardData.value.showRank);
+  formData.append('isHidden', reportCardData.value.isHidden);
   
   if (reportCardData.value.answerKeyPdf) {
     formData.append('answerKeyPdf', reportCardData.value.answerKeyPdf);

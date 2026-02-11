@@ -79,9 +79,19 @@
                 </div>
                 <div>
                   <label class="block mb-2 text-sm font-medium text-emerald-700">وضعیت کاربر</label>
-                  <div class="flex items-center">
-                    <BaseToggle v-model="editableUser.isActive" :label="editableUser.isActive ? 'فعال' : 'غیرفعال'" />
-                  </div>
+                  <TwoStateToggle 
+                    v-model="editableUser.isActive" 
+                    right-label="فعال" 
+                    left-label="غیرفعال"
+                    :right-value="true"
+                    :left-value="false"
+                    right-bg-class="bg-emerald-50"
+                    right-color-class="text-emerald-600"
+                    right-border-class="border-emerald-200"
+                    left-bg-class="bg-red-50"
+                    left-color-class="text-red-600"
+                    left-border-class="border-red-200"
+                  />
                 </div>
               </div>
             </div>
@@ -104,7 +114,7 @@
 import { ref, watchEffect } from 'vue';
 import { VueFinalModal } from 'vue-final-modal';
 import { getUserById } from '@/api/admin';
-import BaseToggle from '@/components/ui/BaseToggle.vue';
+import TwoStateToggle from '@/components/ui/TwoStateToggle.vue';
 
 const props = defineProps({
   userId: Number,

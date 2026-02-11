@@ -4,7 +4,12 @@
       <h3 class="text-xl font-bold mb-2">آخرین کارنامه</h3>
       <template v-if="lastReportCard">
         <p class="text-lg font-semibold">{{ lastReportCard.examName }}</p>
-        <p class="text-3xl font-extrabold mt-2">{{ lastReportCard.percentage }}%</p>
+        <div class="flex items-end gap-4 mt-2">
+          <p class="text-3xl font-extrabold">{{ lastReportCard.percentage }}%</p>
+          <p v-if="lastReportCard.rankInfo" class="text-lg font-bold opacity-90 pb-0.5">
+            رتبه: {{ lastReportCard.rankInfo.rank }} <span class="text-sm font-normal opacity-70">از {{ lastReportCard.rankInfo.totalParticipants }}</span>
+          </p>
+        </div>
       </template>
       <p v-else class="text-lg opacity-90">کارنامه‌ای یافت نشد.</p>
     </div>

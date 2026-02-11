@@ -21,19 +21,31 @@
             
             <div class="md:col-span-2">
               <label class="block mb-2 text-sm font-medium text-emerald-700">نوع سوال</label>
-              <div class="flex items-center gap-4">
-                <label class="flex items-center cursor-pointer">
-                  <input type="radio" value="multiple_choice" v-model="questionData.type" name="questionType" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
-                  <span class="ml-2 text-sm text-gray-700">چند گزینه‌ای</span>
-                </label>
-                <label class="flex items-center cursor-pointer">
-                  <input type="radio" value="numeric" v-model="questionData.type" name="questionType" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
-                  <span class="ml-2 text-sm text-gray-700">پاسخ عددی</span>
-                </label>
-                <label class="flex items-center cursor-pointer">
-                  <input type="radio" value="multi_boolean" v-model="questionData.type" name="questionType" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-gray-300">
-                  <span class="ml-2 text-sm text-gray-700">چند گزاره‌ای (۵تایی)</span>
-                </label>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <BaseRadioButton 
+                  v-model="questionData.type" 
+                  value="multiple_choice" 
+                  label="چند گزینه‌ای" 
+                  name="questionType"
+                  :disabled="isEditing"
+                  description="سوال با چهار یا چند گزینه"
+                />
+                <BaseRadioButton 
+                  v-model="questionData.type" 
+                  value="numeric" 
+                  label="پاسخ عددی" 
+                  name="questionType"
+                  :disabled="isEditing"
+                  description="وارد کردن عدد توسط کاربر"
+                />
+                <BaseRadioButton 
+                  v-model="questionData.type" 
+                  value="multi_boolean" 
+                  label="چند گزاره‌ای" 
+                  name="questionType"
+                  :disabled="isEditing"
+                  description="۵ گزاره صحیح/غلط"
+                />
               </div>
             </div>
 
@@ -49,13 +61,15 @@
 
             <div v-if="questionData.type === 'multiple_choice'" class="md:col-span-2">
               <label class="block mb-2 text-sm font-medium text-emerald-700">گزینه صحیح</label>
-              <div class="flex items-center flex-wrap gap-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg">
-                <div class="flex items-center flex-wrap gap-4">
-                  <label v-for="i in Number(questionData.numberOfOptions || 0)" :key="i" class="flex items-center cursor-pointer p-2 rounded-lg hover:bg-emerald-100 transition-colors">
-                    <input type="radio" :value="i" v-model.number="questionData.correctOption" name="correctOption" class="w-5 h-5 text-emerald-600 focus:ring-emerald-500 focus:ring-2 border-gray-300">
-                    <span class="ml-2 text-sm font-medium text-gray-700">{{ i }}</span>
-                  </label>
-                </div>
+              <div class="grid grid-cols-4 md:grid-cols-6 gap-3">
+                  <BaseRadioButton 
+                    v-for="i in Number(questionData.numberOfOptions || 0)" 
+                    :key="i"
+                    v-model.number="questionData.correctOption" 
+                    :value="i" 
+                    :label="String(i)"
+                    name="correctOption"
+                  />
               </div>
             </div>
             <div v-if="questionData.type === 'numeric'" class="md:col-span-2">
@@ -71,17 +85,24 @@
 
             <div v-if="questionData.type === 'multi_boolean'" class="md:col-span-2 space-y-3">
               <label class="block mb-2 text-sm font-medium text-emerald-700">تعیین درستی/نادرستی گزاره‌ها</label>
-              <div v-for="i in 5" :key="i" class="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-                <span class="text-sm font-bold text-emerald-900">گزاره {{ i }}</span>
-                <div class="flex items-center gap-4">
-                  <label class="flex items-center cursor-pointer">
-                    <input type="radio" :name="'stmt-' + i" :value="true" v-model="questionData.multiBooleanAnswers[i-1]" class="w-4 h-4 text-green-600 focus:ring-green-500 border-gray-300">
-                    <span class="mr-2 text-sm text-green-700 font-bold">صحیح</span>
-                  </label>
-                  <label class="flex items-center cursor-pointer">
-                    <input type="radio" :name="'stmt-' + i" :value="false" v-model="questionData.multiBooleanAnswers[i-1]" class="w-4 h-4 text-red-600 focus:ring-red-500 border-gray-300">
-                    <span class="mr-2 text-sm text-red-700 font-bold">غلط</span>
-                  </label>
+              <div v-for="i in 5" :key="i" class="flex items-center justify-between p-3 bg-white border-2 border-gray-100 rounded-2xl shadow-sm">
+                <span class="text-sm font-extrabold text-emerald-900 mr-2">گزاره شماره {{ i }}</span>
+                <div class="flex items-center gap-3">
+                   <BaseRadioButton 
+                     v-model="questionData.multiBooleanAnswers[i-1]" 
+                     :value="true" 
+                     label="صحیح" 
+                     :name="'stmt-' + i"
+                     class="!p-2 !rounded-lg"
+                   />
+                   <BaseRadioButton 
+                     v-model="questionData.multiBooleanAnswers[i-1]" 
+                     :value="false" 
+                     label="غلط" 
+                     active-color="red"
+                     :name="'stmt-' + i"
+                     class="!p-2 !rounded-lg"
+                   />
                 </div>
               </div>
             </div>
@@ -120,6 +141,7 @@ import { ref, computed, watch } from 'vue';
 import { VueFinalModal } from 'vue-final-modal';
 import { useToast } from 'vue-toastification';
 import { cleanNumericInput } from '@/utils/helpers';
+import BaseRadioButton from '@/components/ui/BaseRadioButton.vue';
 
 const props = defineProps({
   question: {
@@ -136,19 +158,34 @@ const emit = defineEmits(['confirm', 'cancel']);
 const toast = useToast();
 
 const loading = ref(false);
-const questionData = ref({});
+const questionData = ref({
+  type: 'multiple_choice',
+  numberOfOptions: 5,
+  correctOption: null,
+  correctNumericAnswer: null,
+  multiBooleanAnswers: [null, null, null, null, null]
+});
 const questionImageFile = ref(null);
 
-const isEditing = computed(() => !!props.question);
+const isEditing = computed(() => !!props.question && Object.keys(props.question).length > 0);
 const formTitle = computed(() => isEditing.value ? `ویرایش سوال ${props.question.position}` : 'افزودن سوال جدید');
 
 watch(() => props.question, (newVal) => {
-  if (isEditing.value) {
-    questionData.value = { 
+  if (newVal && Object.keys(newVal).length > 0) {
+    // Editing existing question
+    // QuestionsTable.vue maps the variety to modelType
+    const questionVariety = newVal.modelType || newVal.type || 'multiple_choice';
+    questionData.value = {
       ...newVal,
-      multiBooleanAnswers: newVal.type === 'multi_boolean' ? (Array.isArray(newVal.correctNumericAnswer) ? [...newVal.correctNumericAnswer] : JSON.parse(newVal.correctNumericAnswer || '[null,null,null,null,null]')) : [null, null, null, null, null]
+      type: questionVariety, 
+      multiBooleanAnswers: questionVariety === 'multi_boolean' 
+        ? (Array.isArray(newVal.correctNumericAnswer) 
+            ? [...newVal.correctNumericAnswer] 
+            : JSON.parse(newVal.correctNumericAnswer || '[null,null,null,null,null]')) 
+        : [null, null, null, null, null]
     };
   } else {
+    // Creating new question
     questionData.value = {
       numberOfOptions: 5,
       correctOption: null,

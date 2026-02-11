@@ -87,15 +87,38 @@
                 </div>
               </div>
 
-              <!-- Toggles -->
-              <div class="md:col-span-2 flex items-center space-x-6 space-x-reverse pt-6">
-                <div>
+              <div class="md:col-span-2 flex items-center gap-6 pt-6">
+                <div class="flex-1">
                   <label class="block mb-2 text-sm font-medium text-emerald-700">وضعیت نمایش</label>
-                  <BaseToggle v-model="editableExam.isHidden" :label="editableExam.isHidden ? 'پنهان' : 'نمایان'" />
+                  <TwoStateToggle 
+                    v-model="editableExam.isHidden" 
+                    right-label="نمایان" 
+                    left-label="پنهان"
+                    :right-value="false"
+                    :left-value="true"
+                    right-bg-class="bg-blue-50"
+                    right-color-class="text-blue-600"
+                    right-border-class="border-blue-200"
+                    left-bg-class="bg-amber-50"
+                    left-color-class="text-amber-600"
+                    left-border-class="border-amber-200"
+                  />
                 </div>
-                <div>
+                <div class="flex-1">
                   <label class="block mb-2 text-sm font-medium text-emerald-700">قابلیت خرید</label>
-                  <BaseToggle v-model="editableExam.isPurchasable" :label="editableExam.isPurchasable ? 'فعال' : 'غیرفعال'" />
+                  <TwoStateToggle 
+                    v-model="editableExam.isPurchasable" 
+                    right-label="فعال" 
+                    left-label="غیرفعال"
+                    :right-value="true"
+                    :left-value="false"
+                    right-bg-class="bg-emerald-50"
+                    right-color-class="text-emerald-600"
+                    right-border-class="border-emerald-200"
+                    left-bg-class="bg-red-50"
+                    left-color-class="text-red-600"
+                    left-border-class="border-red-200"
+                  />
                 </div>
               </div>
             </div>
@@ -119,7 +142,7 @@
 import { ref, watch } from 'vue';
 import { VueFinalModal } from 'vue-final-modal';
 import { getExamById } from '@/api/admin';
-import BaseToggle from '@/components/ui/BaseToggle.vue';
+import TwoStateToggle from '@/components/ui/TwoStateToggle.vue';
 
 const props = defineProps({
   examId: Number,

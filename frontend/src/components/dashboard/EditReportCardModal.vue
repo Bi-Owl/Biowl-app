@@ -33,9 +33,39 @@
             <p v-if="currentPdfFileName && !reportCardData.answerKeyPdf" class="mt-1 text-sm text-gray-500">فایل فعلی: <a :href="`/uploads/${currentPdfFileName}`" target="_blank" class="font-semibold text-blue-700 hover:underline">{{ currentPdfFileName }}</a>. برای جایگزینی، یک فایل جدید انتخاب کنید.</p>
             <p v-else-if="!currentPdfFileName" class="mt-1 text-sm text-gray-500">یک فایل جدید برای جایگزینی انتخاب کنید. در غیر اینصورت، فایل فعلی باقی می‌ماند.</p>
           </div>
-          <div>
-              <label class="block text-sm font-medium text-blue-700">وضعیت نمایش کارنامه</label>
-              <BaseToggle v-model="reportCardData.isHidden" :label="reportCardData.isHidden ? 'پنهان' : 'نمایان'" class="mt-2" />
+          <div class="grid grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-blue-700 mb-2">وضعیت نمایش کارنامه</label>
+                <TwoStateToggle 
+                  v-model="reportCardData.isHidden" 
+                  right-label="نمایان" 
+                  left-label="پنهان"
+                  :right-value="false"
+                  :left-value="true"
+                  right-bg-class="bg-blue-50"
+                  right-color-class="text-blue-600"
+                  right-border-class="border-blue-200"
+                  left-bg-class="bg-amber-50"
+                  left-color-class="text-amber-600"
+                  left-border-class="border-amber-200"
+                />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-blue-700 mb-2">نمایش رتبه شرکت‌کنندگان</label>
+                <TwoStateToggle 
+                  v-model="reportCardData.showRank" 
+                  right-label="نمایان" 
+                  left-label="پنهان"
+                  :right-value="true"
+                  :left-value="false"
+                  right-bg-class="bg-blue-50"
+                  right-color-class="text-blue-600"
+                  right-border-class="border-blue-200"
+                  left-bg-class="bg-amber-50"
+                  left-color-class="text-amber-600"
+                  left-border-class="border-amber-200"
+                />
+            </div>
           </div>
           <div class="flex items-center justify-end pt-6 space-x-4 space-x-reverse border-t border-gray-200 rounded-b mt-6">
             <button @click.prevent="republish" type="button" class="btn-hover text-white bg-amber-500 hover:bg-amber-600 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
@@ -59,7 +89,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { VueFinalModal } from 'vue-final-modal';
-import BaseToggle from '@/components/ui/BaseToggle.vue';
+import TwoStateToggle from '@/components/ui/TwoStateToggle.vue';
 
 const props = defineProps({
   examName: String,
@@ -74,6 +104,7 @@ const loading = ref(false);
 const reportCardData = ref({
   description: '',
   isHidden: true,
+  showRank: false,
   answerKeyPdf: null,
 });
 const currentPdfFileName = ref(null); // To display the existing PDF filename
@@ -82,6 +113,7 @@ watch(() => props.initialData, (newVal) => {
   if (newVal) {
     reportCardData.value.description = newVal.description || '';
     reportCardData.value.isHidden = newVal.isHidden === true;
+    reportCardData.value.showRank = newVal.showRank === true;
     
     // Set current PDF filename if it exists
     if (newVal.answerKeyPdfUrl) {
@@ -108,11 +140,7 @@ const getFormData = (forRepublish = false) => {
   const formData = new FormData();
   formData.append('description', reportCardData.value.description);
   formData.append('isHidden', reportCardData.value.isHidden);
-
-  // For republish, we also send showRank, even if it's not editable, to match the publish endpoint signature
-  if (forRepublish) {
-    formData.append('showRank', props.initialData.showRank || false);
-  }
+  formData.append('showRank', reportCardData.value.showRank);
 
   if (reportCardData.value.answerKeyPdf) {
     formData.append('answerKeyPdf', reportCardData.value.answerKeyPdf);

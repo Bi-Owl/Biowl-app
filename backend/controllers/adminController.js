@@ -723,7 +723,7 @@ exports.getExamsWithReportCardStatus = async (req, res) => {
       attributes: ['id', 'name'],
       include: [{
         model: ReportCard,
-        attributes: ['id', 'isHidden', 'createdAt', 'updatedAt', 'description', 'answerKeyPdfUrl'],
+        attributes: ['id', 'isHidden', 'showRank', 'createdAt', 'updatedAt', 'description', 'answerKeyPdfUrl'],
         required: false,
       }],
       order: [['createdAt', 'DESC']],
@@ -737,7 +737,7 @@ exports.getExamsWithReportCardStatus = async (req, res) => {
 
 exports.updateReportCard = async (req, res) => {
   const { examId } = req.params;
-  const { description, isHidden } = req.body;
+  const { description, isHidden, showRank } = req.body;
   try {
     const reportCard = await ReportCard.findOne({ where: { ExamId: examId } });
     if (!reportCard) {
@@ -745,6 +745,7 @@ exports.updateReportCard = async (req, res) => {
     }
     reportCard.description = description;
     reportCard.isHidden = isHidden === 'true' || isHidden === true;
+    reportCard.showRank = showRank === 'true' || showRank === true;
     if (req.file) {
       if (reportCard.answerKeyPdfUrl) {
         const oldPdfPath = path.join(__dirname, '..', reportCard.answerKeyPdfUrl);

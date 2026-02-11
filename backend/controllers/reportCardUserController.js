@@ -146,6 +146,53 @@ exports.getAvailableReportCards = async (req, res) => {
 };
 
 /**
+ * Calculates the rank of a user among all participants for a specific exam.
+ * @param {number} examId - The ID of the exam.
+ * @param {number} userId - The current user's ID.
+ * @param {object} correctAnswers - The correct answers for the exam.
+ * @param {Array} questions - Array of all questions in the exam.
+ * @returns {object} - { rank, totalParticipants }
+ */
+const getRankForUser = async (examId, userId, correctAnswers, questions) => {
+  const attempts = await UserExamAttempt.findAll({
+    where: { ExamId: examId, status: 'completed' },
+    attributes: ['UserId', 'answers']
+  });
+
+  const participantScores = attempts.map(attempt => {
+    const score = calculateScore(attempt.answers, correctAnswers, questions);
+    return {
+      userId: attempt.UserId,
+      percentage: score.percentageWithNegative
+    };
+  });
+
+  // Sort scores in descending order
+  participantScores.sort((a, b) => b.percentage - a.percentage);
+
+  // Find user's score
+  const userScoreObj = participantScores.find(p => p.userId === userId);
+  if (!userScoreObj) return { rank: null, totalParticipants: participantScores.length };
+
+  const userPercentage = userScoreObj.percentage;
+
+  // Calculate rank (standard competition ranking: 1, 2, 2, 4...)
+  let rank = 1;
+  for (const p of participantScores) {
+    if (p.percentage > userPercentage) {
+      rank++;
+    } else {
+      break; // Since it's sorted, we can stop
+    }
+  }
+
+  return {
+    rank,
+    totalParticipants: participantScores.length
+  };
+};
+
+/**
  * @desc    Get the detailed result for a specific report card
  * @route   GET /api/report-cards/:examId
  * @access  Private
@@ -182,13 +229,20 @@ exports.getReportCardDetails = async (req, res) => {
     // 4. Calculate score
     const score = calculateScore(attempt.answers, reportCard.correctAnswers, questions);
 
-    // 5. Send all data back
+    // 5. Calculate rank if showRank is enabled
+    let ranking = { rank: null, totalParticipants: 0 };
+    if (reportCard.showRank) {
+      ranking = await getRankForUser(examId, userId, reportCard.correctAnswers, questions);
+    }
+
+    // 6. Send all data back
     res.json({
       reportCard,
       attempt,
       questions,
-      explanations, // Include explanations here
+      explanations,
       score,
+      ranking,
     });
 
   } catch (error) {
@@ -206,7 +260,6 @@ exports.getLatestReportCardSummary = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Find the latest exam the user has completed an attempt for and has a visible report card
     const latestExamWithReportCard = await Exam.findOne({
       include: [{
         model: ReportCard,
@@ -216,16 +269,15 @@ exports.getLatestReportCardSummary = async (req, res) => {
         model: UserExamAttempt,
         where: { UserId: userId, status: 'completed' },
         required: true,
-        attributes: [], // We only need it for the join condition
+        attributes: [],
       }],
-      order: [['id', 'DESC']], // Order by exam id to get latest published
+      order: [['id', 'DESC']],
     });
 
     if (!latestExamWithReportCard) {
       return res.status(404).json({ message: 'کارنامه تکمیل شده‌ای یافت نشد.' });
     }
 
-    // Now fetch details for this specific latest report card
     const reportCard = await ReportCard.findOne({
       where: { ExamId: latestExamWithReportCard.id, isHidden: false },
     });
@@ -236,11 +288,18 @@ exports.getLatestReportCardSummary = async (req, res) => {
 
     const score = calculateScore(attempt.answers, reportCard.correctAnswers, questions);
 
+    // Get rank if needed
+    let rankInfo = null;
+    if (reportCard.showRank) {
+      const { rank, totalParticipants } = await getRankForUser(latestExamWithReportCard.id, userId, reportCard.correctAnswers, questions);
+      rankInfo = { rank, totalParticipants };
+    }
+
     res.json({
       examName: latestExamWithReportCard.name,
       reportCardId: reportCard.id,
       percentage: score.percentageWithNegative,
-      // Add more fields if needed
+      rankInfo,
     });
 
   } catch (error) {

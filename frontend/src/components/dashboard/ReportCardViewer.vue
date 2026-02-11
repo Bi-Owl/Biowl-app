@@ -23,7 +23,7 @@
       <!-- Score Summary Section -->
       <div class="bg-white rounded-xl shadow-md p-6 mb-8">
         <h3 class="text-xl font-bold text-gray-800 mb-4">خلاصه عملکرد شما</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div :class="['grid grid-cols-2 gap-4 text-center', ranking && ranking.rank ? 'md:grid-cols-5' : 'md:grid-cols-4']">
           <div class="p-4 bg-green-50 rounded-lg">
             <p class="text-2xl font-bold text-green-600">{{ score.correctCount }}</p>
             <p class="text-sm text-gray-600">صحیح</p>
@@ -39,6 +39,10 @@
           <div class="p-4 bg-blue-50 rounded-lg">
             <p class="text-2xl font-bold" :class="getPercentageClass(score.percentageWithNegative)">{{ score.percentageWithNegative }}%</p>
             <p class="text-sm text-gray-600">درصد (با نمره منفی)</p>
+          </div>
+          <div v-if="ranking && ranking.rank" class="p-4 bg-purple-50 rounded-lg">
+            <p class="text-2xl font-bold text-purple-600">{{ ranking.rank }} <span class="text-sm font-normal text-purple-400">از {{ ranking.totalParticipants }}</span></p>
+            <p class="text-sm text-gray-600">رتبه شما</p>
           </div>
         </div>
       </div>
@@ -89,6 +93,7 @@ const explanations = ref([]); // New ref for explanations
 const userAnswers = ref({});
 const correctAnswers = ref({});
 const score = ref({});
+const ranking = ref(null);
 
 const getPercentageClass = (percentage) => {
   if (percentage >= 70) return 'text-green-600';
@@ -123,6 +128,7 @@ onMounted(async () => {
     userAnswers.value = data.attempt.answers || {};
     correctAnswers.value = data.reportCard.correctAnswers || {};
     score.value = data.score;
+    ranking.value = data.ranking;
   } catch (err) {
     toast.error(err.message);
     error.value = 'خطا در بارگذاری کارنامه.';
