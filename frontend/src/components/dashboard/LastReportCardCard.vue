@@ -19,17 +19,16 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
-import { getLatestReportCardSummary } from '@/api/user'; // Assuming this API function
-// Import router or emit event to view details if needed
-// import { useRouter } from 'vue-router';
+import { getLatestReportCardSummary } from '@/api/user';
+import { navigateTo } from '@/dashboardState';
 
 const toast = useToast();
-// const router = useRouter();
 const lastReportCard = ref(null);
 
 const viewReportCard = () => {
-  // router.push({ name: 'ReportCardDetail', params: { id: lastReportCard.value.reportCardId } });
-  toast.info('قابلیت مشاهده جزئیات کارنامه هنوز پیاده‌سازی نشده است.');
+  if (lastReportCard.value && lastReportCard.value.reportCardId) {
+    navigateTo('report-cards', { id: lastReportCard.value.reportCardId });
+  }
 };
 
 onMounted(async () => {

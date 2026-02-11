@@ -21,6 +21,12 @@ export const EXAM_API = {
 export const REPORT_CARD_API = {
   GET_AVAILABLE: `${API_BASE_URL}/report-cards`,
   GET_DETAILS: (examId) => `${API_BASE_URL}/report-cards/${examId}`,
+  GET_LATEST_SUMMARY: `${API_BASE_URL}/report-cards/latest-summary`,
+};
+
+export const USER_API = {
+  COMPLETED_COUNT: `${API_BASE_URL}/auth/me/completed-exams-count`,
+  TOTAL_EXAMS: `${API_BASE_URL}/exams/total`,
 };
 
 export const ADMIN_API = {

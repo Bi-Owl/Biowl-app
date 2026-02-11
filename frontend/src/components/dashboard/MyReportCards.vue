@@ -3,7 +3,7 @@
     <ReportCardViewer
       v-if="selectedReportCard"
       :exam-id="selectedReportCard.id"
-      @back="selectedReportCard = null"
+      @back="handleBack"
     />
     <div v-else>
       <h2 class="text-2xl font-bold mb-6 text-gray-800">کارنامه های من</h2>
@@ -27,9 +27,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useToast } from 'vue-toastification';
 import { fetchAvailableReportCards } from '@/api/exams';
+import { dashboardState } from '@/dashboardState';
 import ReportCardCard from '@/components/dashboard/ReportCardCard.vue';
 import ReportCardViewer from '@/components/dashboard/ReportCardViewer.vue';
 
@@ -37,6 +38,12 @@ const toast = useToast();
 const reportCards = ref([]);
 const loading = ref(true);
 const selectedReportCard = ref(null);
+
+watch(() => dashboardState.selectedReportCardId, (newVal) => {
+  if (newVal) {
+    selectedReportCard.value = newVal;
+  }
+}, { immediate: true });
 
 onMounted(async () => {
   loading.value = true;
@@ -51,5 +58,10 @@ onMounted(async () => {
 
 const handleViewReportCard = (reportCard) => {
   selectedReportCard.value = reportCard;
+};
+
+const handleBack = () => {
+  selectedReportCard.value = null;
+  dashboardState.selectedReportCardId = null;
 };
 </script>
