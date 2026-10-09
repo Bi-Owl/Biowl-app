@@ -20,17 +20,15 @@
             <textarea v-model="reportCardData.description" id="description" rows="4" class="bg-blue-50 border border-blue-200 text-blue-800 text-sm rounded-lg focus:ring-2 focus:ring-blue-300 block w-full p-2.5" placeholder="توضیحات مربوط به این کارنامه..."></textarea>
           </div>
           <div>
-            <label for="answerKeyPdf" class="block mb-2 text-sm font-medium text-blue-700">فایل پاسخنامه تشریحی (اختیاری)</label>
-            <label for="answerKeyPdf" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors">
-                <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                    <svg class="w-10 h-10 mb-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4V6a4 4 0 014-4h6a4 4 0 014 4v6a4 4 0 01-4 4H7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 16v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2"></path></svg>
-                    <p v-if="!reportCardData.answerKeyPdf" class="mb-2 text-sm text-blue-600"><span class="font-semibold">برای آپلود کلیک کنید</span> یا فایل را بکشید</p>
-                    <p v-else class="mb-2 text-sm text-blue-800 font-semibold">{{ reportCardData.answerKeyPdf.name }}</p>
-                    <p class="text-xs text-gray-500">PDF (حداکثر 10MB)</p>
-                </div>
-                <input id="answerKeyPdf" type="file" class="hidden" @change="handleFileUpload" accept=".pdf" />
-            </label> 
-            <p v-if="currentPdfFileName && !reportCardData.answerKeyPdf" class="mt-1 text-sm text-gray-500">فایل فعلی: <a :href="`/uploads/${currentPdfFileName}`" target="_blank" class="font-semibold text-blue-700 hover:underline">{{ currentPdfFileName }}</a>. برای جایگزینی، یک فایل جدید انتخاب کنید.</p>
+            <BaseFileUpload
+              v-model="reportCardData.answerKeyPdf"
+              id="answerKeyPdf"
+              label="فایل پاسخنامه تشریحی (اختیاری)"
+              accept=".pdf"
+              hint="PDF (حداکثر 10MB)"
+              @change="handleFileUpload"
+            />
+            <p v-if="currentPdfFileName && !reportCardData.answerKeyPdf" class="mt-1 text-sm text-gray-500">فایل فعلی: <a :href="`/uploads/${currentPdfFileName}`" target="_blank" class="font-semibold text-emerald-700 hover:underline">{{ currentPdfFileName }}</a>. برای جایگزینی، یک فایل جدید انتخاب کنید.</p>
             <p v-else-if="!currentPdfFileName" class="mt-1 text-sm text-gray-500">یک فایل جدید برای جایگزینی انتخاب کنید. در غیر اینصورت، فایل فعلی باقی می‌ماند.</p>
           </div>
           <div class="grid grid-cols-2 gap-6">
@@ -90,6 +88,7 @@
 import { ref, watch } from 'vue';
 import { VueFinalModal } from 'vue-final-modal';
 import TwoStateToggle from '@/components/ui/TwoStateToggle.vue';
+import BaseFileUpload from '@/components/ui/BaseFileUpload.vue';
 
 const props = defineProps({
   examName: String,

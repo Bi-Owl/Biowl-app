@@ -128,17 +128,15 @@
             </div>
 
             <div class="md:col-span-2">
-                <label for="questionImage" class="block mb-2 text-sm font-medium text-emerald-700">تصویر سوال</label>
-                <label for="questionImage" class="flex flex-col items-center justify-center w-full h-32 border-2 border-emerald-300 border-dashed rounded-lg cursor-pointer bg-emerald-50 hover:bg-emerald-100 transition-colors">
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        <svg class="w-10 h-10 mb-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4V6a4 4 0 014-4h6a4 4 0 014 4v6a4 4 0 01-4 4H7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 16v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2"></path></svg>
-                        <p v-if="!questionImageFile" class="mb-2 text-sm text-emerald-600"><span class="font-semibold">برای آپلود کلیک کنید</span> یا فایل را بکشید</p>
-                        <p v-else class="mb-2 text-sm text-emerald-800 font-semibold">{{ questionImageFile.name }}</p>
-                        <p class="text-xs text-gray-500">PNG, JPG, GIF (حداکثر 5MB)</p>
-                    </div>
-                    <input id="questionImage" type="file" class="hidden" @change="handleFileChange" accept="image/*" />
-                </label> 
-                <p v-if="isEditing && questionData.imageUrl && !questionImageFile" class="mt-1 text-sm text-gray-500">یک تصویر جدید برای جایگزینی انتخاب کنید. در غیر اینصورت، تصویر فعلی باقی می‌ماند.</p>
+              <BaseFileUpload
+                v-model="questionImageFile"
+                id="questionImage"
+                label="تصویر سوال"
+                accept="image/*"
+                hint="PNG, JPG, GIF (حداکثر 5MB)"
+                @change="handleFileChange"
+              />
+              <p v-if="isEditing && questionData.imageUrl && !questionImageFile" class="mt-1 text-sm text-gray-500">یک تصویر جدید برای جایگزینی انتخاب کنید. در غیر اینصورت، تصویر فعلی باقی می‌ماند.</p>
             </div>
 
           </div>
@@ -163,6 +161,7 @@ import { useToast } from 'vue-toastification';
 import { cleanNumericInput } from '@/utils/helpers';
 import BaseRadioButton from '@/components/ui/BaseRadioButton.vue';
 import TwoStateToggle from '@/components/ui/TwoStateToggle.vue';
+import BaseFileUpload from '@/components/ui/BaseFileUpload.vue';
 
 const props = defineProps({
   question: {

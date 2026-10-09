@@ -31,17 +31,15 @@
             </div>
 
             <div class="md:col-span-2">
-                <label for="explanationImage" class="block mb-2 text-sm font-medium text-blue-700">تصویر توضیحات</label>
-                <label for="explanationImage" class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors">
-                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        <svg class="w-10 h-10 mb-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l-1-1a2 2 0 01-2.828 0L8 12"></path></svg>
-                        <p v-if="!explanationImageFile" class="mb-2 text-sm text-blue-600"><span class="font-semibold">برای آپلود کلیک کنید</span> یا فایل را بکشید</p>
-                        <p v-else class="mb-2 text-sm text-blue-800 font-semibold">{{ explanationImageFile.name }}</p>
-                        <p class="text-xs text-gray-500">PNG, JPG, GIF (حداکثر 5MB)</p>
-                    </div>
-                    <input id="explanationImage" type="file" class="hidden" @change="handleFileChange" accept="image/*" />
-                </label> 
-                <p v-if="isEditing && explanationData.imageUrl && !explanationImageFile" class="mt-1 text-sm text-gray-500">یک تصویر جدید برای جایگزینی انتخاب کنید. در غیر اینصورت، تصویر فعلی باقی می‌ماند.</p>
+              <BaseFileUpload
+                v-model="explanationImageFile"
+                id="explanationImage"
+                label="تصویر توضیحات"
+                accept="image/*"
+                hint="PNG, JPG, GIF (حداکثر 5MB)"
+                @change="handleFileChange"
+              />
+              <p v-if="isEditing && explanationData.imageUrl && !explanationImageFile" class="mt-1 text-sm text-gray-500">یک تصویر جدید برای جایگزینی انتخاب کنید. در غیر اینصورت، تصویر فعلی باقی می‌ماند.</p>
             </div>
 
           </div>
@@ -63,6 +61,7 @@
 import { ref, computed, watch } from 'vue';
 import { VueFinalModal } from 'vue-final-modal';
 import { useToast } from 'vue-toastification';
+import BaseFileUpload from '@/components/ui/BaseFileUpload.vue';
 
 const props = defineProps({
   explanation: {
