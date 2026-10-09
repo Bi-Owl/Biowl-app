@@ -418,6 +418,26 @@ exports.createQuestion = async (req, res) => {
     }
     const imageUrl = `/uploads/${req.file.filename}`;
 
+    let finalCorrectNumericAnswer = null;
+    if (questionType === 'numeric') {
+      finalCorrectNumericAnswer = req.body.correctNumericAnswer;
+    } else if (questionType === 'multi_boolean') {
+      let val = req.body.correctNumericAnswer;
+      if (typeof val === 'string') {
+        try { val = JSON.parse(val); } catch (e) {}
+      } else if (Array.isArray(val) && val.length !== 5) {
+        const jsonItem = val.find(item => typeof item === 'string' && item.trim().startsWith('['));
+        if (jsonItem) {
+          try { val = JSON.parse(jsonItem); } catch (e) {}
+        }
+      }
+      if (Array.isArray(val) && val.length === 5) {
+        finalCorrectNumericAnswer = val.map(item => item === true || item === 'true' || item === 1 || item === '1');
+      } else {
+        return res.status(400).json({ message: 'برای سوالات چند گزاره‌ای باید دقیقا ۵ پاسخ وارد شود.' });
+      }
+    }
+
     const question = await Question.create({
       position,
       imageUrl,
@@ -425,7 +445,7 @@ exports.createQuestion = async (req, res) => {
       correctOption: questionType === 'multiple_choice' ? correctOption : null,
       ExamId: examId,
       type: questionType,
-      correctNumericAnswer: (questionType === 'numeric' || questionType === 'multi_boolean') ? req.body.correctNumericAnswer : null,
+      correctNumericAnswer: finalCorrectNumericAnswer,
       isExcludedFromScoring: isExcludedFromScoring === 'true' || isExcludedFromScoring === true,
     });
     res.status(201).json({ message: 'سوال با موفقیت ایجاد شد', question });
@@ -517,9 +537,16 @@ exports.updateQuestion = async (req, res) => {
           } catch (e) {
             return res.status(400).json({ message: 'فرمت پاسخ وارد شده نامعتبر است.' });
           }
+        } else if (Array.isArray(correctNumericAnswer) && correctNumericAnswer.length !== 5) {
+          const jsonItem = correctNumericAnswer.find(item => typeof item === 'string' && item.trim().startsWith('['));
+          if (jsonItem) {
+            try {
+              parsedAnswer = JSON.parse(jsonItem);
+            } catch (e) {}
+          }
         }
         if (Array.isArray(parsedAnswer) && parsedAnswer.length === 5) {
-          updateData.correctNumericAnswer = parsedAnswer;
+          updateData.correctNumericAnswer = parsedAnswer.map(item => item === true || item === 'true' || item === 1 || item === '1');
         } else {
           return res.status(400).json({ message: 'برای سوالات چند گزاره‌ای باید دقیقا ۵ پاسخ وارد شود.' });
         }

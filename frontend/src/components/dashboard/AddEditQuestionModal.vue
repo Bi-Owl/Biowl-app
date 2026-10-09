@@ -192,6 +192,28 @@ const questionImageFile = ref(null);
 const isEditing = computed(() => !!props.question && Object.keys(props.question).length > 0);
 const formTitle = computed(() => isEditing.value ? `ویرایش سوال ${props.question.position}` : 'افزودن سوال جدید');
 
+const parseMultiBooleanArray = (val) => {
+  let arr = [];
+  if (Array.isArray(val)) {
+    arr = val;
+  } else if (typeof val === 'string') {
+    try {
+      arr = JSON.parse(val);
+    } catch (e) {
+      if (val.includes(',')) {
+        arr = val.split(',').map(s => s.trim());
+      }
+    }
+  }
+  if (!Array.isArray(arr)) return [null, null, null, null, null];
+  return [0, 1, 2, 3, 4].map(idx => {
+    const item = arr[idx];
+    if (item === true || item === 'true' || item === 1 || item === '1') return true;
+    if (item === false || item === 'false' || item === 0 || item === '0') return false;
+    return null;
+  });
+};
+
 watch(() => props.question, (newVal) => {
   if (newVal && Object.keys(newVal).length > 0) {
     // Editing existing question
@@ -202,9 +224,7 @@ watch(() => props.question, (newVal) => {
       type: questionVariety,
       isExcludedFromScoring: newVal.isExcludedFromScoring === true || newVal.isExcludedFromScoring === 'true',
       multiBooleanAnswers: questionVariety === 'multi_boolean'
-        ? (Array.isArray(newVal.correctNumericAnswer)
-            ? [...newVal.correctNumericAnswer]
-            : JSON.parse(newVal.correctNumericAnswer || '[null,null,null,null,null]'))
+        ? parseMultiBooleanArray(newVal.correctNumericAnswer)
         : [null, null, null, null, null]
     };
   } else {
@@ -249,38 +269,49 @@ const submit = () => {
       return;
     }
   }
-  
+
   if (!isEditing.value && !questionImageFile.value) {
     toast.error('لطفا یک تصویر برای سوال آپلود کنید.');
     return;
   }
 
   const formData = new FormData();
-  
+
   if (isEditing.value) {
     formData.append('position', questionData.value.position);
   } else {
     formData.append('position', props.nextPosition);
   }
 
+  const excludedKeys = [
+    'imageUrl',
+    'position',
+    'multiBooleanAnswers',
+    'correctNumericAnswer',
+    'modelType',
+    'sortKey',
+    'id',
+    'ExamId',
+    'createdAt',
+    'updatedAt'
+  ];
+
   Object.keys(questionData.value).forEach(key => {
-    if (key !== 'imageUrl' && key !== 'position' && key !== 'multiBooleanAnswers' && questionData.value[key] !== null) {
-      if (key === 'correctNumericAnswer' && questionData.value.type === 'numeric') {
-         formData.append(key, questionData.value[key]);
-      } else {
-         formData.append(key, questionData.value[key]);
-      }
+    if (!excludedKeys.includes(key) && questionData.value[key] !== null && questionData.value[key] !== undefined) {
+      formData.append(key, questionData.value[key]);
     }
   });
 
-  if (questionData.value.type === 'multi_boolean') {
+  if (questionData.value.type === 'numeric') {
+    formData.append('correctNumericAnswer', questionData.value.correctNumericAnswer);
+  } else if (questionData.value.type === 'multi_boolean') {
     formData.append('correctNumericAnswer', JSON.stringify(questionData.value.multiBooleanAnswers));
   }
 
   if (questionImageFile.value) {
     formData.append('image', questionImageFile.value);
   }
-  
+
   emit('confirm', formData);
 };
 </script>
