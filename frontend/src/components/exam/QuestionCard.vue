@@ -1,9 +1,15 @@
 <template>
   <div class="bg-white rounded-3xl shadow-lg border border-gray-100/80 p-6 transition-all duration-300 ease-in-out hover:shadow-2xl hover:border-gray-200">
-    <h3 class="flex items-center text-lg font-bold text-emerald-800 mb-6">
-      <span class="bg-emerald-100 text-emerald-700 rounded-full w-8 h-8 flex items-center justify-center me-3 font-mono">{{ question.position }}</span>
-      سوال
-    </h3>
+    <div class="flex items-center justify-between mb-6">
+      <h3 class="flex items-center text-lg font-bold text-emerald-800">
+        <span class="bg-emerald-100 text-emerald-700 rounded-full w-8 h-8 flex items-center justify-center me-3 font-mono">{{ question.position }}</span>
+        سوال
+      </h3>
+      <span v-if="question.isExcludedFromScoring" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200">
+        <svg class="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+        حذف از بارم‌بندی
+      </span>
+    </div>
     <div class="mb-6">
       <img
         v-if="question.imageUrl"
@@ -15,11 +21,16 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <!-- Report Card Mode -->
       <template v-if="viewMode === 'report-card'">
+        <div v-if="question.isExcludedFromScoring" class="col-span-1 sm:col-span-2 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm font-medium flex items-center mb-1">
+          <svg class="w-5 h-5 ml-2.5 flex-shrink-0 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          این سوال با تصمیم طراحان از بارم‌بندی حذف شده و نمره مثبت یا منفی برای آن محاسبه نشده است.
+        </div>
+
         <template v-if="question.type === 'numeric'">
             <div class="col-span-1 sm:col-span-2 p-4 rounded-lg bg-gray-50 border border-gray-200">
                 <div class="mb-2">
                     <span class="font-bold text-gray-700">پاسخ شما: </span>
-                    <span :class="{'text-green-600': isNumericAnswerCorrect, 'text-red-600': !isNumericAnswerCorrect && wasAnswered, 'text-gray-500': !wasAnswered}" class="text-lg font-mono dir-ltr inline-block">
+                    <span :class="{'text-gray-700': question.isExcludedFromScoring, 'text-green-600': !question.isExcludedFromScoring && isNumericAnswerCorrect, 'text-red-600': !question.isExcludedFromScoring && !isNumericAnswerCorrect && wasAnswered, 'text-gray-500': !wasAnswered}" class="text-lg font-mono dir-ltr inline-block">
                         {{ wasAnswered ? selectedAnswer : 'پاسخ ندادید' }}
                     </span>
                 </div>
@@ -30,7 +41,10 @@
                     </span>
                 </div>
                 <div v-if="wasAnswered" class="mt-2 text-sm font-medium">
-                     <span v-if="isNumericAnswerCorrect" class="text-green-600 flex items-center">
+                     <span v-if="question.isExcludedFromScoring" class="text-rose-600 font-bold flex items-center">
+                        حذف شده از بارم‌بندی (بی‌اثر)
+                     </span>
+                     <span v-else-if="isNumericAnswerCorrect" class="text-green-600 flex items-center">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         صحیح
                      </span>
@@ -43,14 +57,14 @@
         </template>
         <template v-else-if="question.type === 'multi_boolean'">
             <div class="col-span-1 sm:col-span-2 space-y-2">
-                <div v-for="i in 5" :key="i" class="p-4 rounded-2xl border-2 flex items-center justify-between cursor-default transition-all duration-300" 
+                <div v-for="i in 5" :key="i" class="p-4 rounded-2xl border-2 flex items-center justify-between cursor-default transition-all duration-300"
                      :class="getMultiBooleanRowClass(i-1)">
                     <span class="text-sm font-bold text-gray-800">گزاره {{ i }}</span>
                     <div class="flex items-center gap-6">
                         <div class="flex flex-col items-center">
                             <span class="text-[10px] text-gray-500 mb-1">پاسخ شما</span>
-                            <span v-if="getUserMultiBooleanAnswer(i-1) !== null" 
-                                  :class="getUserMultiBooleanAnswer(i-1) ? 'text-green-600' : 'text-red-600'" 
+                            <span v-if="getUserMultiBooleanAnswer(i-1) !== null"
+                                  :class="getUserMultiBooleanAnswer(i-1) ? 'text-green-600' : 'text-red-600'"
                                   class="text-sm font-bold">
                                 {{ getUserMultiBooleanAnswer(i-1) ? 'صحیح' : 'غلط' }}
                             </span>
@@ -58,7 +72,7 @@
                         </div>
                         <div class="flex flex-col items-center border-r pr-4 border-gray-200">
                              <span class="text-[10px] text-emerald-600 mb-1 font-bold">پاسخ صحیح</span>
-                             <span :class="getCorrectMultiBooleanAnswer(i-1) ? 'text-green-600' : 'text-red-600'" 
+                             <span :class="getCorrectMultiBooleanAnswer(i-1) ? 'text-green-600' : 'text-red-600'"
                                    class="text-sm font-bold">
                                 {{ getCorrectMultiBooleanAnswer(i-1) ? 'صحیح' : 'غلط' }}
                              </span>
@@ -74,6 +88,7 @@
             :option-number="optionNum"
             :user-answer="selectedAnswer"
             :correct-answer="correctAnswer"
+            :is-excluded-from-scoring="question.isExcludedFromScoring"
             />
         </template>
       </template>
@@ -320,7 +335,8 @@ const isBooleanOptionSelected = (index) => {
 
 const getMultiBooleanRowClass = (index) => {
     if (props.viewMode !== 'report-card') return 'bg-gray-50 border-gray-200';
-    
+    if (props.question.isExcludedFromScoring) return 'bg-gray-50 border-gray-200';
+
     const user = getUserMultiBooleanAnswer(index);
     const correct = getCorrectMultiBooleanAnswer(index);
     

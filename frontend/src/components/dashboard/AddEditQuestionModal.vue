@@ -108,6 +108,26 @@
             </div>
 
             <div class="md:col-span-2">
+              <label class="block mb-2 text-sm font-medium text-emerald-700">وضعیت در بارم‌بندی و نمره</label>
+              <TwoStateToggle
+                v-model="questionData.isExcludedFromScoring"
+                right-label="محاسبه در بارم"
+                left-label="حذف از بارم (ابطال)"
+                :right-value="false"
+                :left-value="true"
+                right-bg-class="bg-emerald-50"
+                right-color-class="text-emerald-600"
+                right-border-class="border-emerald-200"
+                left-bg-class="bg-rose-50"
+                left-color-class="text-rose-600"
+                left-border-class="border-rose-200"
+              />
+              <p class="mt-1 text-xs text-gray-500">
+                در صورت انتخاب «حذف از بارم»، این سوال در تصحیح و نمره‌دهی تمام داوطلبان نادیده گرفته شده و تاثیری در درصد و رتبه نخواهد داشت.
+              </p>
+            </div>
+
+            <div class="md:col-span-2">
                 <label for="questionImage" class="block mb-2 text-sm font-medium text-emerald-700">تصویر سوال</label>
                 <label for="questionImage" class="flex flex-col items-center justify-center w-full h-32 border-2 border-emerald-300 border-dashed rounded-lg cursor-pointer bg-emerald-50 hover:bg-emerald-100 transition-colors">
                     <div class="flex flex-col items-center justify-center pt-5 pb-6">
@@ -142,6 +162,7 @@ import { VueFinalModal } from 'vue-final-modal';
 import { useToast } from 'vue-toastification';
 import { cleanNumericInput } from '@/utils/helpers';
 import BaseRadioButton from '@/components/ui/BaseRadioButton.vue';
+import TwoStateToggle from '@/components/ui/TwoStateToggle.vue';
 
 const props = defineProps({
   question: {
@@ -163,7 +184,8 @@ const questionData = ref({
   numberOfOptions: 5,
   correctOption: null,
   correctNumericAnswer: null,
-  multiBooleanAnswers: [null, null, null, null, null]
+  multiBooleanAnswers: [null, null, null, null, null],
+  isExcludedFromScoring: false
 });
 const questionImageFile = ref(null);
 
@@ -177,11 +199,12 @@ watch(() => props.question, (newVal) => {
     const questionVariety = newVal.modelType || newVal.type || 'multiple_choice';
     questionData.value = {
       ...newVal,
-      type: questionVariety, 
-      multiBooleanAnswers: questionVariety === 'multi_boolean' 
-        ? (Array.isArray(newVal.correctNumericAnswer) 
-            ? [...newVal.correctNumericAnswer] 
-            : JSON.parse(newVal.correctNumericAnswer || '[null,null,null,null,null]')) 
+      type: questionVariety,
+      isExcludedFromScoring: newVal.isExcludedFromScoring === true || newVal.isExcludedFromScoring === 'true',
+      multiBooleanAnswers: questionVariety === 'multi_boolean'
+        ? (Array.isArray(newVal.correctNumericAnswer)
+            ? [...newVal.correctNumericAnswer]
+            : JSON.parse(newVal.correctNumericAnswer || '[null,null,null,null,null]'))
         : [null, null, null, null, null]
     };
   } else {
@@ -191,7 +214,8 @@ watch(() => props.question, (newVal) => {
       correctOption: null,
       type: 'multiple_choice',
       correctNumericAnswer: null,
-      multiBooleanAnswers: [null, null, null, null, null]
+      multiBooleanAnswers: [null, null, null, null, null],
+      isExcludedFromScoring: false
     };
   }
   questionImageFile.value = null;

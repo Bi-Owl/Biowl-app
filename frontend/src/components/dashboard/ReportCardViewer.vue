@@ -23,7 +23,7 @@
       <!-- Score Summary Section -->
       <div class="bg-white rounded-xl shadow-md p-6 mb-8">
         <h3 class="text-xl font-bold text-gray-800 mb-4">خلاصه عملکرد شما</h3>
-        <div :class="['grid grid-cols-2 gap-4 text-center', ranking && ranking.rank ? 'md:grid-cols-5' : 'md:grid-cols-4']">
+        <div :class="['grid grid-cols-2 gap-4 text-center', ranking && ranking.rank ? (score.excludedCount > 0 ? 'md:grid-cols-6' : 'md:grid-cols-5') : (score.excludedCount > 0 ? 'md:grid-cols-5' : 'md:grid-cols-4')]">
           <div class="p-4 bg-green-50 rounded-lg">
             <p class="text-2xl font-bold text-green-600">{{ score.correctCount }}</p>
             <p class="text-sm text-gray-600">صحیح</p>
@@ -36,6 +36,10 @@
             <p class="text-2xl font-bold text-gray-700">{{ score.unansweredCount }}</p>
             <p class="text-sm text-gray-600">نزده</p>
           </div>
+          <div v-if="score.excludedCount > 0" class="p-4 bg-rose-50 rounded-lg border border-rose-100">
+            <p class="text-2xl font-bold text-rose-600">{{ score.excludedCount }}</p>
+            <p class="text-sm text-rose-800">حذف از بارم</p>
+          </div>
           <div class="p-4 bg-blue-50 rounded-lg">
             <p class="text-2xl font-bold" :class="getPercentageClass(score.percentageWithNegative)">{{ score.percentageWithNegative }}%</p>
             <p class="text-sm text-gray-600">درصد (با نمره منفی)</p>
@@ -44,6 +48,10 @@
             <p class="text-2xl font-bold text-purple-600">{{ ranking.rank }} <span class="text-sm font-normal text-purple-400">از {{ ranking.totalParticipants }}</span></p>
             <p class="text-sm text-gray-600">رتبه شما</p>
           </div>
+        </div>
+        <div v-if="score.excludedCount > 0" class="mt-4 text-xs text-rose-700 bg-rose-50/70 p-3 rounded-lg border border-rose-200/60 flex items-center">
+          <svg class="w-4 h-4 ml-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          تعداد {{ score.excludedCount }} سوال از بارم‌بندی این آزمون حذف شده و درصدها بر مبنای {{ score.totalQuestions }} سوال محاسبه شده‌اند.
         </div>
       </div>
 

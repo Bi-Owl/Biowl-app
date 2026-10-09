@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { DataTypes } = require('sequelize');
 const sequelize = require('./config/database');
 const User = require('./models/user');
 const Exam = require('./models/exam');
@@ -54,6 +55,22 @@ app.get('/', (req, res) => {
 // Sync database and start server
 sequelize.sync().then(async () => { // Make the function async
   console.log('Database synced');
+
+  // Ensure isExcludedFromScoring column exists on Questions table
+  try {
+    const queryInterface = sequelize.getQueryInterface();
+    const tableDesc = await queryInterface.describeTable('Questions').catch(() => null);
+    if (tableDesc && !tableDesc.isExcludedFromScoring) {
+      await queryInterface.addColumn('Questions', 'isExcludedFromScoring', {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: false
+      });
+      console.log('Added isExcludedFromScoring column to Questions table');
+    }
+  } catch (err) {
+    console.error('Error verifying Questions table schema:', err.message);
+  }
 
   // Create default admin if it doesn't exist
   const adminUsername = process.env.ADMIN_USERNAME || 'admin';

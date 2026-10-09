@@ -11,7 +11,11 @@
     </div>
 
     <!-- Search Bar -->
-    <div class="mb-6">
+    <div class="mb-6 space-y-4">
+      <div v-if="hasExcludedQuestions" class="p-3.5 bg-rose-50 border border-rose-200 text-rose-800 text-sm rounded-lg flex items-center">
+        <svg class="w-5 h-5 ml-2.5 flex-shrink-0 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        توجه: این آزمون دارای سوال حذف‌شده از بارم است و نمرات و درصدها بر مبنای سوالات مؤثر محاسبه شده‌اند.
+      </div>
       <input type="text" v-model="searchTerm" placeholder="جستجوی کاربر (نام، ایمیل...)" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
     </div>
 
@@ -25,6 +29,7 @@
             <th class="py-3 px-6 text-center">صحیح</th>
             <th class="py-3 px-6 text-center">غلط</th>
             <th class="py-3 px-6 text-center">نزده</th>
+            <th v-if="hasExcludedQuestions" class="py-3 px-6 text-center text-rose-700">حذف از بارم</th>
           </tr>
         </thead>
         <tbody class="text-gray-600 text-sm font-light">
@@ -54,7 +59,8 @@
             <td v-if="item.stats" class="py-3 px-6 text-center font-mono text-green-600">{{ item.stats.correct }}</td>
             <td v-if="item.stats" class="py-3 px-6 text-center font-mono text-red-600">{{ item.stats.incorrect }}</td>
             <td v-if="item.stats" class="py-3 px-6 text-center font-mono text-gray-500">{{ item.stats.unanswered }}</td>
-            <td v-if="!item.stats" colspan="4" class="py-3 px-6 text-center text-gray-400">-</td>
+            <td v-if="hasExcludedQuestions && item.stats" class="py-3 px-6 text-center font-mono text-rose-600 font-bold">{{ item.stats.excludedCount || 0 }}</td>
+            <td v-if="!item.stats" :colspan="hasExcludedQuestions ? 5 : 4" class="py-3 px-6 text-center text-gray-400">-</td>
           </tr>
         </tbody>
       </table>
@@ -80,6 +86,10 @@ const attempts = ref([]);
 const loading = ref(true);
 const toast = useToast();
 const searchTerm = ref('');
+
+const hasExcludedQuestions = computed(() => {
+  return attempts.value.some(a => a.stats && a.stats.excludedCount > 0);
+});
 
 const fetchAttempts = async () => {
   loading.value = true;

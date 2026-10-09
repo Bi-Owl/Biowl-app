@@ -40,6 +40,10 @@ const props = defineProps({
   correctAnswer: {
     type: [Number, String, null],
     required: true
+  },
+  isExcludedFromScoring: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -48,6 +52,16 @@ const isCorrect = computed(() => props.correctAnswer === props.optionNumber);
 const wasAnswered = computed(() => props.userAnswer !== null && props.userAnswer !== undefined);
 
 const computedClasses = computed(() => {
+  if (props.isExcludedFromScoring) {
+    if (isSelected.value) {
+      return 'bg-amber-50 border-amber-400';
+    }
+    if (isCorrect.value) {
+      return 'bg-gray-100 border-gray-300';
+    }
+    return 'bg-gray-50 border-gray-200 opacity-60';
+  }
+
   // Correctly selected
   if (isCorrect.value && isSelected.value) {
     return 'bg-green-100 border-green-500';
@@ -72,6 +86,16 @@ const computedClasses = computed(() => {
 });
 
 const computedCircleClasses = computed(() => {
+  if (props.isExcludedFromScoring) {
+    if (isSelected.value) {
+      return 'bg-amber-500 text-white';
+    }
+    if (isCorrect.value) {
+      return 'bg-gray-400 text-white';
+    }
+    return 'bg-gray-200 text-gray-500';
+  }
+
   // Correctly selected
   if (isCorrect.value && isSelected.value) {
     return 'bg-green-500 text-white';
@@ -96,6 +120,19 @@ const computedCircleClasses = computed(() => {
 });
 
 const label = computed(() => {
+  if (props.isExcludedFromScoring) {
+    if (isSelected.value && isCorrect.value) {
+      return { text: 'انتخاب شما و کلید (حذف از بارم)', bgColor: 'bg-amber-600' };
+    }
+    if (isSelected.value) {
+      return { text: 'انتخاب شما (حذف از بارم)', bgColor: 'bg-amber-600' };
+    }
+    if (isCorrect.value) {
+      return { text: 'کلید طراح (حذف از بارم)', bgColor: 'bg-gray-500' };
+    }
+    return null;
+  }
+
   // Correctly selected
   if (isCorrect.value && isSelected.value) {
     return { text: 'پاسخ صحیح - انتخاب شما', bgColor: 'bg-green-500' };

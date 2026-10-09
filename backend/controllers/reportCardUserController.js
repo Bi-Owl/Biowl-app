@@ -16,8 +16,11 @@ const calculateScore = (userAnswers, correctAnswers, questions) => {
   let incorrectCount = 0;
   let totalWeightedScore = 0;
   const totalQuestions = questions.length;
+  const effectiveQuestions = questions.filter(q => !q.isExcludedFromScoring);
+  const effectiveTotalQuestions = effectiveQuestions.length;
+  const excludedCount = totalQuestions - effectiveTotalQuestions;
 
-  for (const question of questions) {
+  for (const question of effectiveQuestions) {
     const questionId = question.id.toString();
     const userAnswer = userAnswers[questionId];
     const correctAnswer = correctAnswers[questionId];
@@ -96,16 +99,18 @@ const calculateScore = (userAnswers, correctAnswers, questions) => {
     }
   }
 
-  const unansweredCount = (totalQuestions - correctCount - incorrectCount) < 0 ? 0 : (totalQuestions - correctCount - incorrectCount);
-  const maxScore = totalQuestions * 4;
+  const unansweredCount = (effectiveTotalQuestions - correctCount - incorrectCount) < 0 ? 0 : (effectiveTotalQuestions - correctCount - incorrectCount);
+  const maxScore = effectiveTotalQuestions * 4;
   const percentageWithNegative = maxScore > 0 ? (totalWeightedScore / maxScore) * 100 : 0;
-  const percentageWithoutNegative = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+  const percentageWithoutNegative = effectiveTotalQuestions > 0 ? (correctCount / effectiveTotalQuestions) * 100 : 0;
 
   return {
     correctCount,
     incorrectCount,
     unansweredCount,
-    totalQuestions,
+    totalQuestions: effectiveTotalQuestions,
+    originalTotalQuestions: totalQuestions,
+    excludedCount,
     percentageWithNegative: parseFloat((percentageWithNegative > 100 ? 100 : percentageWithNegative).toFixed(2)),
     percentageWithoutNegative: parseFloat(percentageWithoutNegative.toFixed(2)),
   };

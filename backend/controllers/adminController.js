@@ -238,9 +238,11 @@ exports.getExamAttempts = async (req, res) => {
       include: { model: User, attributes: ['id', 'firstName', 'lastName', 'email'] },
       order: [['createdAt', 'DESC']]
     });
-    const questions = await Question.findAll({ where: { ExamId: examId }, attributes: ['id', 'correctOption', 'type', 'correctNumericAnswer'] });
+    const questions = await Question.findAll({ where: { ExamId: examId }, attributes: ['id', 'correctOption', 'type', 'correctNumericAnswer', 'isExcludedFromScoring'] });
     const correctAnswersMap = new Map(questions.map(q => [q.id, q]));
     const totalQuestions = questions.length;
+    const effectiveQuestions = questions.filter(q => !q.isExcludedFromScoring);
+    const effectiveTotal = effectiveQuestions.length;
     const results = attempts.map(attempt => {
       const user = attempt.User;
       const result = {
@@ -254,7 +256,7 @@ exports.getExamAttempts = async (req, res) => {
         let incorrectCount = 0;
         const userAnswers = attempt.answers || {};
         let totalWeightedScore = 0;
-        for (const question of questions) {
+        for (const question of effectiveQuestions) {
           const userAnswer = userAnswers[question.id];
           if (userAnswer) {
             if (question.type === 'numeric') {
@@ -326,15 +328,17 @@ exports.getExamAttempts = async (req, res) => {
             }
           }
         }
-        const unansweredCount = totalQuestions - correctCount - incorrectCount;
+        const unansweredCount = (effectiveTotal - correctCount - incorrectCount) < 0 ? 0 : (effectiveTotal - correctCount - incorrectCount);
         const score = totalWeightedScore;
-        const maxScore = totalQuestions * 4;
+        const maxScore = effectiveTotal * 4;
         const percentage = maxScore > 0 ? (score / maxScore) * 100 : 0;
         result.stats = {
           correct: correctCount,
           incorrect: incorrectCount,
           unanswered: unansweredCount,
-          total: totalQuestions,
+          total: effectiveTotal,
+          originalTotal: totalQuestions,
+          excludedCount: totalQuestions - effectiveTotal,
           percentage: Math.round(percentage * 100) / 100
         };
       }
@@ -351,7 +355,7 @@ exports.getExamAttempts = async (req, res) => {
 exports.createQuestion = async (req, res) => {
   try {
     const { examId } = req.params;
-    const { numberOfOptions, correctOption, position, type, correctNumericAnswer } = req.body;
+    const { numberOfOptions, correctOption, position, type, correctNumericAnswer, isExcludedFromScoring } = req.body;
 
     // Validation
     if (!position) {
@@ -421,7 +425,8 @@ exports.createQuestion = async (req, res) => {
       correctOption: questionType === 'multiple_choice' ? correctOption : null,
       ExamId: examId,
       type: questionType,
-      correctNumericAnswer: (questionType === 'numeric' || questionType === 'multi_boolean') ? req.body.correctNumericAnswer : null
+      correctNumericAnswer: (questionType === 'numeric' || questionType === 'multi_boolean') ? req.body.correctNumericAnswer : null,
+      isExcludedFromScoring: isExcludedFromScoring === 'true' || isExcludedFromScoring === true,
     });
     res.status(201).json({ message: 'سوال با موفقیت ایجاد شد', question });
   } catch (error) {
@@ -449,7 +454,7 @@ exports.getQuestionsForExam = async (req, res) => {
 exports.updateQuestion = async (req, res) => {
   try {
     const { questionId } = req.params;
-    const { numberOfOptions, correctOption, position, type, correctNumericAnswer } = req.body;
+    const { numberOfOptions, correctOption, position, type, correctNumericAnswer, isExcludedFromScoring } = req.body;
     const question = await Question.findByPk(questionId);
     if (!question) {
       return res.status(404).json({ message: 'سوال یافت نشد' });
@@ -467,6 +472,9 @@ exports.updateQuestion = async (req, res) => {
 
     // Prepare update object
     const updateData = { position, imageUrl, type: questionType };
+    if (isExcludedFromScoring !== undefined) {
+      updateData.isExcludedFromScoring = isExcludedFromScoring === 'true' || isExcludedFromScoring === true;
+    }
 
     if (questionType === 'multiple_choice') {
       if (numberOfOptions) updateData.numberOfOptions = numberOfOptions;

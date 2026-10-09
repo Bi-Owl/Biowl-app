@@ -38,6 +38,9 @@
                 <span :class="{'bg-purple-100 text-purple-800': item.type === 'numeric', 'bg-orange-100 text-orange-800': item.type === 'multi_boolean', 'bg-emerald-100 text-emerald-800': item.type === 'multiple_choice'}" class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
                   {{ (item.type === 'numeric') ? 'سوال عددی' : (item.type === 'multi_boolean' ? 'چند گزاره‌ای' : 'سوال تستی') }}
                 </span>
+                <span v-if="item.isExcludedFromScoring" class="bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold mr-1 px-2.5 py-0.5 rounded-full inline-block">
+                  حذف از بارم
+                </span>
               </td>
               <td class="py-3 px-6 font-semibold drag-handle cursor-move">{{ item.position }}</td>
               <td class="py-3 px-6">
@@ -81,10 +84,15 @@
         <tbody v-else class="text-gray-600 text-sm font-light">
           <tr v-for="item in sortedItems" :key="item.type + item.id" class="border-b border-gray-200 hover:bg-gray-50" :class="{'!bg-blue-50 hover:!bg-blue-100': item.type === 'explanation'}">
             <td class="py-3 px-6">
-              <span v-if="item.type === 'question'" :class="{'bg-purple-100 text-purple-800': item.modelType === 'numeric', 'bg-orange-100 text-orange-800': item.modelType === 'multi_boolean', 'bg-emerald-100 text-emerald-800': item.modelType === 'multiple_choice'}" class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
-                {{ item.modelType === 'numeric' ? 'عددی' : (item.modelType === 'multi_boolean' ? 'چند گزاره‌ای' : 'تستی') }}
-              </span>
-               <span v-else class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">توضیح</span>
+              <template v-if="item.type === 'question'">
+                <span :class="{'bg-purple-100 text-purple-800': item.modelType === 'numeric', 'bg-orange-100 text-orange-800': item.modelType === 'multi_boolean', 'bg-emerald-100 text-emerald-800': item.modelType === 'multiple_choice'}" class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">
+                  {{ item.modelType === 'numeric' ? 'عددی' : (item.modelType === 'multi_boolean' ? 'چند گزاره‌ای' : 'تستی') }}
+                </span>
+                <span v-if="item.isExcludedFromScoring" class="bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold mr-1 px-2.5 py-0.5 rounded-full inline-block">
+                  حذف از بارم
+                </span>
+              </template>
+              <span v-else class="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full">توضیح</span>
             </td>
             <td class="py-3 px-6 font-semibold">
                 {{ item.type === 'question' ? item.position : item.displayOrder }}

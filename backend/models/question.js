@@ -38,6 +38,12 @@ const Question = sequelize.define('Question', {
     allowNull: true,
     comment: 'The correct answer(s) for numeric questions. Stored as an array of numbers.',
   },
+  isExcludedFromScoring: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+    comment: 'Whether this question is omitted from exam grading and score calculation',
+  },
 });
 
 module.exports = Question;
