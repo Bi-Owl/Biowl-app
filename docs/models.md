@@ -73,6 +73,7 @@ Represents an exam available in the system.
 **Relationships:**
 - `belongsToMany(User, { through: UserExam })`: An exam can be purchased by many users (via `UserExam` join table).
 - `hasMany(Question)`: An exam can have many questions.
+- `hasMany(Explanation)`: An exam can have many explanations / reading passages.
 - `hasMany(UserExamAttempt)`: An exam can have many attempts from users.
 - `hasOne(ReportCard)`: An exam has one report card.
 
@@ -80,18 +81,21 @@ Represents an exam available in the system.
 
 ## 4. Question Model
 
-Represents a question within an exam. Each question is associated with an image.
+Represents a question within an exam. Each question is associated with an image and supports three question types: multiple choice, numeric, and multi-boolean.
 
 **File:** `backend/models/question.js`
 
-| Field         | Type        | Description                                  | Constraints       |
-| :------------ | :---------- | :------------------------------------------- | :---------------- |
-| `id`          | `INTEGER`   | Primary Key, Auto-increment                  | `PRIMARY KEY`     |
-| `position`    | `INTEGER`   | Order of the question within the exam        | `NOT NULL`        |
-| `imageUrl`    | `STRING`    | URL to the image containing the question and options | `NOT NULL`        |
-| `numberOfOptions` | `INTEGER` | Total number of options for the question     | `NOT NULL`        |
-| `correctOption` | `INTEGER` | The number of the correct option (e.g., 1, 2, 3) | `NOT NULL`        |
-| `ExamId`      | `INTEGER`   | Foreign Key to the Exam model                | `NOT NULL`        |
+| Field                  | Type                                                        | Description                                                                             | Constraints                   |
+| :--------------------- | :---------------------------------------------------------- | :-------------------------------------------------------------------------------------- | :---------------------------- |
+| `id`                   | `INTEGER`                                                   | Primary Key, Auto-increment                                                             | `PRIMARY KEY`                 |
+| `position`             | `INTEGER`                                                   | Order of the question within the exam                                                   | `NOT NULL`                    |
+| `imageUrl`             | `STRING`                                                    | URL to the image containing the question and options                                    | `NOT NULL`                    |
+| `type`                 | `ENUM('multiple_choice', 'numeric', 'multi_boolean')`       | Question format/type                                                                    | `NOT NULL`, `DEFAULT: 'multiple_choice'` |
+| `numberOfOptions`      | `INTEGER`                                                   | Total number of options for multiple choice questions                                   | `ALLOW NULL` (required for multiple choice) |
+| `correctOption`        | `INTEGER`                                                   | Correct option number for multiple choice questions (1-based)                           | `ALLOW NULL` (required for multiple choice) |
+| `correctNumericAnswer` | `JSON`                                                      | Accepted numeric values (array of numbers) or boolean key (array of 5 booleans)        | `ALLOW NULL` (required for numeric & multi-boolean) |
+| `isExcludedFromScoring`| `BOOLEAN`                                                   | Whether the question is excluded/omitted from score calculations and total question count | `NOT NULL`, `DEFAULT: false`  |
+| `ExamId`               | `INTEGER`                                                   | Foreign Key to the Exam model                                                           | `NOT NULL`                    |
 
 **Relationships:**
 - `belongsTo(Exam)`: A question belongs to an exam.
@@ -157,5 +161,23 @@ Stores the published results and answer key for an exam.
 
 **Relationships:**
 - `belongsTo(Exam)`: A report card belongs to one exam.
+
+---
+
+## 8. Explanation Model
+
+Represents instructional explanations, reading passages, or descriptive materials shown before/between exam questions.
+
+**File:** `backend/models/explanation.js`
+
+| Field          | Type        | Description                                                                              | Constraints       |
+| :------------- | :---------- | :--------------------------------------------------------------------------------------- | :---------------- |
+| `id`           | `INTEGER`   | Primary Key, Auto-increment                                                              | `PRIMARY KEY`     |
+| `displayOrder` | `INTEGER`   | Position of the explanation within the exam (rendered before the question with this number) | `NOT NULL`        |
+| `imageUrl`     | `STRING`    | URL to the image containing the explanation text/diagrams                                | `NOT NULL`        |
+| `ExamId`       | `INTEGER`   | Foreign Key to the Exam model                                                            | `NOT NULL`        |
+
+**Relationships:**
+- `belongsTo(Exam)`: An explanation belongs to an exam.
 
 ---

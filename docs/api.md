@@ -262,7 +262,10 @@ Initiates or resumes an exam attempt for the authenticated user.
         "answers": {}
       },
       "questions": [
-        // Array of question objects (without correctOption)
+        // Array of question objects (without correctOption/correctNumericAnswer)
+      ],
+      "explanations": [
+        // Array of explanation objects associated with the exam
       ],
       "remainingTime": 3600000, // in milliseconds
       "examToken": "SHORT_LIVED_JWT_TOKEN"
@@ -277,6 +280,42 @@ Initiates or resumes an exam attempt for the authenticated user.
     -   `404 Not Found`: "آزمون یافت نشد."
     -   `500 Internal Server Error`: "خطای سرور"
 
+### 2.6 GET /api/exams/total
+
+Retrieves the total count of public exams available on the platform.
+
+-   **Access:** Private (User)
+-   **Method:** `GET`
+-   **URL:** `/api/exams/total`
+-   **Headers:** `Authorization: Bearer <JWT_TOKEN>`
+-   **Success Response (200 OK):**
+    ```json
+    {
+      "totalExams": 12
+    }
+    ```
+-   **Error Responses:**
+    -   `401 Unauthorized`: "توکن نامعتبر است"
+    -   `500 Internal Server Error`: "خطای سرور"
+
+### 2.7 GET /api/exams/me/completed-exams-count
+
+Retrieves the count of exams that the authenticated user has completed.
+
+-   **Access:** Private (User)
+-   **Method:** `GET`
+-   **URL:** `/api/exams/me/completed-exams-count`
+-   **Headers:** `Authorization: Bearer <JWT_TOKEN>`
+-   **Success Response (200 OK):**
+    ```json
+    {
+      "completedExamsCount": 4
+    }
+    ```
+-   **Error Responses:**
+    -   `401 Unauthorized`: "توکن نامعتبر است"
+    -   `500 Internal Server Error`: "خطای سرور"
+
 ---
 
 ## 3. Exam Attempt Endpoints (`/api/attempts`)
@@ -285,7 +324,7 @@ Initiates or resumes an exam attempt for the authenticated user.
 
 ### 3.1 PUT /api/attempts/:attemptId/answer
 
-Updates a user's answer for a specific question within an active exam attempt.
+Updates a user's answer for a specific question within an active exam attempt. Supports multiple choice options, numeric values, and multi-boolean arrays.
 
 -   **Access:** Private (User, requires `examToken`)
 -   **Method:** `PUT`
@@ -298,11 +337,15 @@ Updates a user's answer for a specific question within an active exam attempt.
       "answer": 2
     }
     ```
+    *Note on `answer` formats:*
+    - **Multiple Choice:** Number (e.g., `2` for Option 2) or `null` to unselect.
+    - **Numeric:** String or Number representing the calculated float/integer (e.g., `"14.5"` or `14.5`).
+    - **Multi-Boolean:** Array of 5 booleans or nulls (e.g., `[true, false, true, null, false]`).
 -   **Success Response (200 OK):**
     ```json
     {
       "message": "پاسخ شما ذخیره شد.",
-      "answers": { "1": 2, "2": 3 } // Updated answers object
+      "answers": { "1": 2, "2": "14.5" } // Updated answers object
     }
     ```
 -   **Error Responses:**
@@ -655,19 +698,83 @@ Deletes a specific exam.
     -   `409 Conflict`: "نمی‌توان آزمونی که دارای سوال است را حذف کرد. ابتدا سوالات را حذف کنید."
     -   `500 Internal Server Error`: "خطا در سرور هنگام حذف آزمون رخ داد."
 
-### 4.11 POST /api/admin/exams/:examId/questions
+### 4.11 GET /api/admin/exams/status-overview
 
-Creates a new question for a specific exam. Requires an image file upload.
+Retrieves an overview of all exams alongside their attempt count.
+
+-   **Access:** Private (Admin)
+-   **Method:** `GET`
+-   **URL:** `/api/admin/exams/status-overview`
+-   **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`
+-   **Success Response (200 OK):**
+    ```json
+    [
+      {
+        "id": 1,
+        "name": "آزمون مرحله اول المپیاد زیست",
+        "attemptCount": 15,
+        "createdAt": "2023-01-01T10:00:00.000Z"
+      }
+    ]
+    ```
+-   **Error Responses:**
+    -   `401 Unauthorized`: "توکن نامعتبر است"
+    -   `403 Forbidden`: "اجازه دسترسی ندارید"
+    -   `500 Internal Server Error`: "خطای سرور"
+
+### 4.12 GET /api/admin/exams/:examId/attempts
+
+Retrieves all participant attempts and calculated performance stats for a specific exam.
+
+-   **Access:** Private (Admin)
+-   **Method:** `GET`
+-   **URL:** `/api/admin/exams/{examId}/attempts`
+-   **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`
+-   **Success Response (200 OK):**
+    ```json
+    [
+      {
+        "attemptId": 12,
+        "status": "completed",
+        "user": {
+          "id": 5,
+          "firstName": "علی",
+          "lastName": "محمدی",
+          "email": "ali@example.com"
+        },
+        "stats": {
+          "correct": 18,
+          "incorrect": 2,
+          "unanswered": 0,
+          "total": 20,
+          "originalTotal": 21,
+          "excludedCount": 1,
+          "percentage": 87.5
+        }
+      }
+    ]
+    ```
+-   **Error Responses:**
+    -   `401 Unauthorized`: "توکن نامعتبر است"
+    -   `403 Forbidden`: "اجازه دسترسی ندارید"
+    -   `500 Internal Server Error`: "خطای سرور"
+
+### 4.13 POST /api/admin/exams/:examId/questions
+
+Creates a new question for a specific exam. Supports multiple-choice, numeric, and multi-boolean questions with an option to exclude from scoring. Requires an image file upload.
 
 -   **Access:** Private (Admin)
 -   **Method:** `POST`
 -   **URL:** `/api/admin/exams/{examId}/questions`
 -   **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`, `Content-Type: multipart/form-data`
 -   **Request Body (multipart/form-data):**
-    -   `image`: File (image of the question)
-    -   `position`: Number
-    -   `numberOfOptions`: Number
-    -   `correctOption`: Number
+    -   `image`: File (image of the question, required)
+    -   `position`: Number (required)
+    -   `type`: String (`'multiple_choice'`, `'numeric'`, or `'multi_boolean'`. Default: `'multiple_choice'`)
+    -   `numberOfOptions`: Number (required for `multiple_choice`, e.g., 4)
+    -   `correctOption`: Number (required for `multiple_choice`, 1-based)
+    -   `correctNumericAnswer`: String/JSON (required for `numeric` [array or comma-separated numbers] and `multi_boolean` [array of 5 booleans])
+    -   `isExcludedFromScoring`: Boolean (optional, `true` to omit from scoring calculations)
 -   **Success Response (201 Created):**
     ```json
     {
@@ -676,8 +783,11 @@ Creates a new question for a specific exam. Requires an image file upload.
         "id": 1,
         "position": 1,
         "imageUrl": "/uploads/image-123.png",
+        "type": "multiple_choice",
         "numberOfOptions": 4,
         "correctOption": 1,
+        "correctNumericAnswer": null,
+        "isExcludedFromScoring": false,
         "ExamId": 1
       }
     }
@@ -691,7 +801,7 @@ Creates a new question for a specific exam. Requires an image file upload.
     -   `400 Bad Request`: "خطای اعتبارسنجی: {message}"
     -   `500 Internal Server Error`: "خطا در سرور هنگام ایجاد سوال رخ داد."
 
-### 4.12 GET /api/admin/exams/:examId/questions
+### 4.14 GET /api/admin/exams/:examId/questions
 
 Retrieves a list of all questions for a specific exam.
 
@@ -706,8 +816,11 @@ Retrieves a list of all questions for a specific exam.
         "id": 1,
         "position": 1,
         "imageUrl": "/uploads/image-123.png",
+        "type": "multiple_choice",
         "numberOfOptions": 4,
         "correctOption": 1,
+        "correctNumericAnswer": null,
+        "isExcludedFromScoring": false,
         "ExamId": 1,
         "createdAt": "2023-01-01T10:00:00.000Z",
         "updatedAt": "2023-01-01T10:00:00.000Z"
@@ -719,19 +832,22 @@ Retrieves a list of all questions for a specific exam.
     -   `403 Forbidden`: "اجازه دسترسی ندارید"
     -   `500 Internal Server Error`: "خطای سرور"
 
-### 4.13 PUT /api/admin/questions/:questionId
+### 4.15 PUT /api/admin/questions/:questionId
 
-Updates details for a specific question. Can also upload a new image.
+Updates details for a specific question. Can also upload a new image or change scoring status.
 
 -   **Access:** Private (Admin)
 -   **Method:** `PUT`
 -   **URL:** `/api/admin/questions/{questionId}`
 -   **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`, `Content-Type: multipart/form-data` (if image is uploaded)
 -   **Request Body (multipart/form-data or application/json):**
-    -   `image`: File (new image of the question, optional)
+    -   `image`: File (optional new image)
     -   `position`: Number (optional)
+    -   `type`: String (optional: `'multiple_choice'`, `'numeric'`, or `'multi_boolean'`)
     -   `numberOfOptions`: Number (optional)
     -   `correctOption`: Number (optional)
+    -   `correctNumericAnswer`: String/JSON (optional)
+    -   `isExcludedFromScoring`: Boolean (optional, `true`/`false`)
 -   **Success Response (200 OK):**
     ```json
     {
@@ -746,7 +862,7 @@ Updates details for a specific question. Can also upload a new image.
     -   `400 Bad Request`: "خطای اعتبارسنجی: {message}"
     -   `500 Internal Server Error`: "خطا در سرور هنگام ویرایش سوال رخ داد."
 
-### 4.14 DELETE /api/admin/questions/:questionId
+### 4.16 DELETE /api/admin/questions/:questionId
 
 Deletes a specific question. Also deletes the associated image file.
 
@@ -766,7 +882,7 @@ Deletes a specific question. Also deletes the associated image file.
     -   `404 Not Found`: "سوال یافت نشد"
     -   `500 Internal Server Error`: "خطای سرور"
 
-### 4.15 POST /api/admin/questions/reorder
+### 4.17 POST /api/admin/questions/reorder
 
 Reorders questions within an exam.
 
@@ -793,13 +909,94 @@ Reorders questions within an exam.
     -   `401 Unauthorized`: "توکن نامعتبر است"
     -   `403 Forbidden`: "اجازه دسترسی ندارید"
     -   `400 Bad Request`: "اطلاعات ارسالی برای آپدیت نامعتبر است."
-        -   `500 Internal Server Error`: "خطا در سرور هنگام مرتب‌سازی سوالات رخ داد."
-    
-    ---
-    
-    ### 4.16 Report Card Management Endpoints (`/api/admin/report-cards`)
-    
-    #### GET /api/admin/report-cards/exams
+    -   `500 Internal Server Error`: "خطا در سرور هنگام مرتب‌سازی سوالات رخ داد."
+
+---
+
+### 4.18 Explanation Management Endpoints
+
+#### GET /api/admin/exams/:examId/explanations
+
+Retrieves all explanations for an exam ordered by displayOrder.
+
+-   **Access:** Private (Admin)
+-   **Method:** `GET`
+-   **URL:** `/api/admin/exams/{examId}/explanations`
+-   **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`
+-   **Success Response (200 OK):**
+    ```json
+    [
+      {
+        "id": 1,
+        "displayOrder": 2,
+        "imageUrl": "/uploads/explanation-123.png",
+        "ExamId": 1
+      }
+    ]
+    ```
+
+#### POST /api/admin/exams/:examId/explanations
+
+Creates a new explanation/reading passage for an exam.
+
+-   **Access:** Private (Admin)
+-   **Method:** `POST`
+-   **URL:** `/api/admin/exams/{examId}/explanations`
+-   **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`, `Content-Type: multipart/form-data`
+-   **Request Body (multipart/form-data):**
+    -   `image`: File (image of the explanation, required)
+    -   `displayOrder`: Number (required, order number before which this explanation is shown)
+-   **Success Response (201 Created):**
+    ```json
+    {
+      "message": "توضیحات با موفقیت ایجاد شد",
+      "explanation": {
+        "id": 1,
+        "displayOrder": 2,
+        "imageUrl": "/uploads/explanation-123.png",
+        "ExamId": 1
+      }
+    }
+    ```
+
+#### PUT /api/admin/explanations/:explanationId
+
+Updates an existing explanation.
+
+-   **Access:** Private (Admin)
+-   **Method:** `PUT`
+-   **URL:** `/api/admin/explanations/{explanationId}`
+-   **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`, `Content-Type: multipart/form-data`
+-   **Request Body (multipart/form-data or json):**
+    -   `image`: File (optional new image)
+    -   `displayOrder`: Number (optional)
+-   **Success Response (200 OK):**
+    ```json
+    {
+      "message": "توضیحات با موفقیت به روز شد"
+    }
+    ```
+
+#### DELETE /api/admin/explanations/:explanationId
+
+Deletes an explanation and removes its uploaded image.
+
+-   **Access:** Private (Admin)
+-   **Method:** `DELETE`
+-   **URL:** `/api/admin/explanations/{explanationId}`
+-   **Headers:** `Authorization: Bearer <ADMIN_JWT_TOKEN>`
+-   **Success Response (200 OK):**
+    ```json
+    {
+      "message": "توضیحات با موفقیت حذف شد"
+    }
+    ```
+
+---
+
+### 4.19 Admin Report Card Management Endpoints (`/api/admin/report-cards`)
+
+#### GET /api/admin/report-cards/exams
     
     Retrieves a list of all exams and includes their associated report card status.
     
@@ -874,4 +1071,150 @@ Reorders questions within an exam.
         ```
     
     ---
+
+## 5. User Report Card Endpoints (`/api/report-cards`)
+
+**File:** `backend/routes/reportCardUserRoutes.js`, `backend/controllers/reportCardUserController.js`
+
+### 5.1 GET /api/report-cards
+
+Retrieves all available and published report cards for exams that the logged-in user has attempted.
+
+-   **Access:** Private (User)
+-   **Method:** `GET`
+-   **URL:** `/api/report-cards`
+-   **Headers:** `Authorization: Bearer <JWT_TOKEN>`
+-   **Success Response (200 OK):**
+    ```json
+    [
+      {
+        "id": 1,
+        "name": "آزمون مرحله اول المپیاد زیست شناسی",
+        "ReportCard": {
+          "id": 1,
+          "isHidden": false,
+          "createdAt": "2023-12-01T10:00:00.000Z"
+        },
+        "UserExamAttempts": [
+          {
+            "status": "completed"
+          }
+        ]
+      }
+    ]
+    ```
+-   **Error Responses:**
+    -   `401 Unauthorized`: "توکن نامعتبر است"
+    -   `500 Internal Server Error`: "خطا در دریافت لیست کارنامه‌ها."
+
+### 5.2 GET /api/report-cards/latest-summary
+
+Retrieves a quick summary of the user's latest completed report card (used on dashboard cards).
+
+-   **Access:** Private (User)
+-   **Method:** `GET`
+-   **URL:** `/api/report-cards/latest-summary`
+-   **Headers:** `Authorization: Bearer <JWT_TOKEN>`
+-   **Success Response (200 OK):**
+    ```json
+    {
+      "exam": {
+        "id": 1,
+        "name": "آزمون جامع زیست شناسی"
+      },
+      "reportCard": {
+        "id": 1,
+        "createdAt": "2023-12-01T10:00:00.000Z"
+      },
+      "score": {
+        "correctCount": 18,
+        "incorrectCount": 2,
+        "unansweredCount": 0,
+        "totalQuestions": 20,
+        "originalTotalQuestions": 21,
+        "excludedCount": 1,
+        "percentageWithNegative": 87.5,
+        "percentageWithoutNegative": 90.0
+      },
+      "ranking": {
+        "rank": 3,
+        "totalParticipants": 45
+      }
+    }
+    ```
+-   **Error Responses:**
+    -   `401 Unauthorized`: "توکن نامعتبر است"
+    -   `404 Not Found`: "کارنامه تکمیل شده‌ای یافت نشد."
+    -   `500 Internal Server Error`: "خطای سرور"
+
+### 5.3 GET /api/report-cards/:examId
+
+Retrieves the detailed report card for a specific exam, including full question review, user choices, answer keys, explanations, and score breakdown.
+
+-   **Access:** Private (User)
+-   **Method:** `GET`
+-   **URL:** `/api/report-cards/{examId}`
+-   **Headers:** `Authorization: Bearer <JWT_TOKEN>`
+-   **Success Response (200 OK):**
+    ```json
+    {
+      "reportCard": {
+        "id": 1,
+        "name": "آزمون مرحله اول",
+        "description": "تحلیل سوالات...",
+        "answerKeyPdfUrl": "/uploads/key.pdf",
+        "showRank": true,
+        "correctAnswers": {
+          "1": 2,
+          "2": [14.5],
+          "3": [true, false, true, true, false]
+        }
+      },
+      "attempt": {
+        "id": 5,
+        "status": "completed",
+        "answers": {
+          "1": 2,
+          "2": "14.5"
+        }
+      },
+      "questions": [
+        {
+          "id": 1,
+          "position": 1,
+          "imageUrl": "/uploads/q1.png",
+          "type": "multiple_choice",
+          "numberOfOptions": 4,
+          "isExcludedFromScoring": false
+        }
+      ],
+      "explanations": [
+        {
+          "id": 1,
+          "displayOrder": 2,
+          "imageUrl": "/uploads/exp1.png"
+        }
+      ],
+      "score": {
+        "correctCount": 18,
+        "incorrectCount": 2,
+        "unansweredCount": 0,
+        "totalQuestions": 20,
+        "originalTotalQuestions": 21,
+        "excludedCount": 1,
+        "percentageWithNegative": 87.5,
+        "percentageWithoutNegative": 90.0
+      },
+      "ranking": {
+        "rank": 3,
+        "totalParticipants": 45
+      }
+    }
+    ```
+-   **Error Responses:**
+    -   `401 Unauthorized`: "توکن نامعتبر است"
+    -   `403 Forbidden`: "شما این آزمون را به پایان نرسانده‌اید و نمی‌توانید کارنامه را مشاهده کنید."
+    -   `404 Not Found`: "کارنامه یافت نشد یا هنوز منتشر نشده است."
+    -   `500 Internal Server Error`: "خطا در دریافت جزئیات کارنامه."
+
     

@@ -72,7 +72,15 @@ sudo mv Biowl-app /var/www/biowl-app
     npm install
     ```
 
-2.  **بیلد کردن پروژه:**
+2.  **تنظیم آدرس API (در صورت نیاز):**
+    اگر از دامنه واقعی استفاده می‌کنید، یک کپی از `.env.example` بسازید و آدرس دامنه خود را در آن قرار دهید:
+    ```bash
+    cp .env.example .env
+    nano .env
+    # مقادیر VITE_API_BASE_URL=https://biowl.ir/api و VITE_STATIC_BASE_URL=https://biowl.ir را تنظیم کنید
+    ```
+
+3.  **بیلد کردن پروژه:**
     دستور زیر فایل‌های استاتیک و بهینه شده برای محیط پروداکشن را در پوشه `frontend/dist` می‌سازد.
     ```bash
     npm run build
