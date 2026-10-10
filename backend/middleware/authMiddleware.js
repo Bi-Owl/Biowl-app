@@ -15,11 +15,20 @@ const protect = async (req, res, next) => {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+      // Verify role is user
+      if (decoded.role && decoded.role !== 'user') {
+        return res.status(403).json({ message: 'خطای دسترسی: نوع دسترسی نامعتبر است' });
+      }
+
       // Get user from the token
       req.user = await User.findByPk(decoded.id);
 
       if (!req.user) {
         return res.status(401).json({ message: 'خطای دسترسی: کاربر یافت نشد' });
+      }
+
+      if (!req.user.isActive) {
+        return res.status(403).json({ message: 'حساب کاربری شما فعال نیست. لطفا با پشتیبانی تماس بگیرید.' });
       }
 
       next();

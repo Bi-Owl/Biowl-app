@@ -76,7 +76,8 @@ const register = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         wallet: user.wallet,
-        token: generateToken(user.id),
+        isActive: user.isActive,
+        ...(user.isActive ? { token: generateToken(user.id) } : {}),
       });
     } else {
       res.status(400).json({ message: 'اطلاعات کاربری نامعتبر است' });
@@ -99,7 +100,7 @@ const register = async (req, res) => {
 
 // Generate JWT
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
+  return jwt.sign({ id, role: 'user' }, process.env.JWT_SECRET, {
     expiresIn: '30d',
   });
 };
