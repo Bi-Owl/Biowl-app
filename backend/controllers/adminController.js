@@ -11,6 +11,19 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 
+const deleteUploadedFile = (fileUrl) => {
+  if (!fileUrl) return;
+  const fileName = path.basename(fileUrl);
+  const filePath = path.join(__dirname, '..', 'uploads', fileName);
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+    } catch (err) {
+      console.error(`Error deleting file ${filePath}:`, err);
+    }
+  }
+};
+
 exports.login = async (req, res) => {
   const { username, password } = req.body;
   try {
@@ -175,24 +188,17 @@ exports.deleteExam = async (req, res) => {
       const examId = exam.id;
       const questions = await Question.findAll({ where: { ExamId: examId }, transaction: t });
       for (const question of questions) {
-        if (question.imageUrl) {
-          const imagePath = path.join(__dirname, '..', question.imageUrl);
-          if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
-        }
+        deleteUploadedFile(question.imageUrl);
       }
       await Question.destroy({ where: { ExamId: examId }, transaction: t });
       const explanations = await Explanation.findAll({ where: { ExamId: examId }, transaction: t });
       for (const explanation of explanations) {
-        if (explanation.imageUrl) {
-          const imagePath = path.join(__dirname, '..', explanation.imageUrl);
-          if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
-        }
+        deleteUploadedFile(explanation.imageUrl);
       }
       await Explanation.destroy({ where: { ExamId: examId }, transaction: t });
       const reportCard = await ReportCard.findOne({ where: { ExamId: examId }, transaction: t });
       if (reportCard && reportCard.answerKeyPdfUrl) {
-        const pdfPath = path.join(__dirname, '..', reportCard.answerKeyPdfUrl);
-        if (fs.existsSync(pdfPath)) fs.unlinkSync(pdfPath);
+        deleteUploadedFile(reportCard.answerKeyPdfUrl);
       }
       await ReportCard.destroy({ where: { ExamId: examId }, transaction: t });
       await UserExam.destroy({ where: { ExamId: examId }, transaction: t });
@@ -481,10 +487,7 @@ exports.updateQuestion = async (req, res) => {
     }
     let imageUrl = question.imageUrl;
     if (req.file) {
-      if (question.imageUrl) {
-        const oldImagePath = path.join(__dirname, '..', question.imageUrl);
-        if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
-      }
+      deleteUploadedFile(question.imageUrl);
       imageUrl = `/uploads/${req.file.filename}`;
     }
 
@@ -574,10 +577,7 @@ exports.deleteQuestion = async (req, res) => {
     const { questionId } = req.params;
     const question = await Question.findByPk(questionId);
     if (question) {
-      if (question.imageUrl) {
-        const imagePath = path.join(__dirname, '..', question.imageUrl);
-        if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
-      }
+      deleteUploadedFile(question.imageUrl);
       await question.destroy();
       res.json({ message: 'سوال با موفقیت حذف شد' });
     } else {
@@ -664,10 +664,7 @@ exports.updateExplanation = async (req, res) => {
     }
     let imageUrl = explanation.imageUrl;
     if (req.file) {
-      if (explanation.imageUrl) {
-        const oldImagePath = path.join(__dirname, '..', explanation.imageUrl);
-        if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
-      }
+      deleteUploadedFile(explanation.imageUrl);
       imageUrl = `/uploads/${req.file.filename}`;
     }
     await explanation.update({ displayOrder, imageUrl });
@@ -686,10 +683,7 @@ exports.deleteExplanation = async (req, res) => {
     const { explanationId } = req.params;
     const explanation = await Explanation.findByPk(explanationId);
     if (explanation) {
-      if (explanation.imageUrl) {
-        const imagePath = path.join(__dirname, '..', explanation.imageUrl);
-        if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
-      }
+      deleteUploadedFile(explanation.imageUrl);
       await explanation.destroy();
       res.json({ message: 'توضیحات با موفقیت حذف شد' });
     } else {
@@ -799,10 +793,7 @@ exports.updateReportCard = async (req, res) => {
     reportCard.isHidden = isHidden === 'true' || isHidden === true;
     reportCard.showRank = showRank === 'true' || showRank === true;
     if (req.file) {
-      if (reportCard.answerKeyPdfUrl) {
-        const oldPdfPath = path.join(__dirname, '..', reportCard.answerKeyPdfUrl);
-        if (fs.existsSync(oldPdfPath)) fs.unlinkSync(oldPdfPath);
-      }
+      deleteUploadedFile(reportCard.answerKeyPdfUrl);
       reportCard.answerKeyPdfUrl = `/uploads/${req.file.filename}`;
     }
     await reportCard.save();
