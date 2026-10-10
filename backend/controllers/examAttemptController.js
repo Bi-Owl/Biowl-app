@@ -69,9 +69,9 @@ const startAttempt = async (req, res) => {
     );
 
     // 7. Fetch questions without answers
-    const questions = await Question.findAll({ 
+    const questions = await Question.findAll({
         where: { ExamId: examId },
-        attributes: { exclude: ['correctOption'] }
+        attributes: { exclude: ['correctOption', 'correctNumericAnswer'] }
     });
 
     const explanations = await Explanation.findAll({
@@ -214,9 +214,9 @@ const reviewAttempt = async (req, res) => {
       return res.status(403).json({ message: 'این آزمون هنوز به پایان نرسیده است.' });
     }
 
-    const questions = await Question.findAll({ 
+    const questions = await Question.findAll({
         where: { ExamId: attempt.ExamId },
-        attributes: { exclude: ['correctOption'] }
+        attributes: { exclude: ['correctOption', 'correctNumericAnswer'] }
     });
 
     const explanations = await Explanation.findAll({
