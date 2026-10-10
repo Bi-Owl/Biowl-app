@@ -22,7 +22,7 @@ exports.login = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: 'نام کاربری یا رمز عبور اشتباه است' });
     }
-    const token = jwt.sign({ id: admin.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: admin.id, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ message: 'شما با موفقیت به پنل مدیریت وارد شدید.', token });
   } catch (error) {
     res.status(500).json({ message: 'خطای سرور' });

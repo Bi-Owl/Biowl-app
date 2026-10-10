@@ -16,6 +16,11 @@ module.exports = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded.role || decoded.role !== 'admin') {
+      return res.status(403).json({ message: 'دسترسی غیرمجاز: نیاز به دسترسی مدیر است' });
+    }
+
     const admin = await Admin.findByPk(decoded.id);
 
     if (!admin) {
