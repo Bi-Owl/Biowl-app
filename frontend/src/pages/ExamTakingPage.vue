@@ -20,7 +20,7 @@
               v-if="item.itemType === 'question'"
               :question="item"
               :selectedAnswer="userAnswers[item.id]"
-              :pending-update="pendingUpdate"
+              :pending-update="pendingUpdates[item.id] || null"
               @update-answer="handleUpdateAnswer"
             />
             <ExplanationCard
@@ -69,7 +69,8 @@ const userAnswers = ref({});
 const remainingTime = ref(0);
 const examToken = ref(null);
 const attemptId = ref(null);
-const pendingUpdate = ref(null); // { questionId, answer }
+const pendingUpdates = ref({}); // { [questionId]: { questionId, answer, index } }
+const updateQueues = new Map(); // questionId -> Promise
 
 const showFinishModal = ref(false);
 const isFinishing = ref(false);
@@ -77,9 +78,9 @@ const isFinishing = ref(false);
 const sortedItems = computed(() => {
   const mappedQuestions = questions.value.map(q => ({ ...q, itemType: 'question', sortKey: q.position }));
   const mappedExplanations = (explanations.value || []).map(e => ({ ...e, itemType: 'explanation', sortKey: e.displayOrder - 0.5 }));
-  
+
   const combined = [...mappedQuestions, ...mappedExplanations];
-  
+
   return combined.sort((a, b) => a.sortKey - b.sortKey);
 });
 
@@ -87,6 +88,12 @@ const handleFinishExam = async (options = {}) => {
   const { silent = false } = options;
   isFinishing.value = true;
   try {
+    // Wait for any pending answer updates to settle before submitting
+    const activePromises = Array.from(updateQueues.values());
+    if (activePromises.length > 0) {
+      await Promise.allSettled(activePromises);
+    }
+
     const data = await finishExamAttempt(attemptId.value);
     if (!silent) toast.success(data.message);
   } catch (error) {
@@ -148,27 +155,46 @@ onMounted(() => {
   attemptId.value = attempt.id;
 });
 
-const handleUpdateAnswer = async (payload) => {
+const handleUpdateAnswer = (payload) => {
   const { questionId, answer, index = null } = payload;
-  
-  if (pendingUpdate.value) return; // Don't allow multiple updates at once
 
-  pendingUpdate.value = { questionId, answer, index };
-
+  // 1. Optimistic UI update
+  userAnswers.value[questionId] = answer;
   try {
-    await updateAnswer(attemptId.value, questionId, answer, examToken.value);
-    userAnswers.value[questionId] = answer;
-    
     const currentData = JSON.parse(sessionStorage.getItem('examAttemptData'));
     if (currentData) {
-      currentData.attempt.answers = userAnswers.value;
+      currentData.attempt.answers = { ...userAnswers.value };
       sessionStorage.setItem('examAttemptData', JSON.stringify(currentData));
     }
-  } catch (error) {
-    toast.error(error.message);
-  } finally {
-    pendingUpdate.value = null;
+  } catch (e) {
+    console.error('SessionStorage update failed:', e);
   }
+
+  // 2. Set pending indicator for this specific question
+  pendingUpdates.value = {
+    ...pendingUpdates.value,
+    [questionId]: { questionId, answer, index }
+  };
+
+  // 3. Queue request per question to guarantee sequential execution without dropping clicks
+  const currentQueue = updateQueues.get(questionId) || Promise.resolve();
+  const nextQueue = currentQueue
+    .then(async () => {
+      await updateAnswer(attemptId.value, questionId, userAnswers.value[questionId], examToken.value);
+    })
+    .catch((error) => {
+      toast.error(error.message || 'خطا در ثبت پاسخ');
+    })
+    .finally(() => {
+      // Clear pending indicator if no subsequent update is waiting for this answer
+      if (pendingUpdates.value[questionId]?.answer === answer) {
+        const updated = { ...pendingUpdates.value };
+        delete updated[questionId];
+        pendingUpdates.value = updated;
+      }
+    });
+
+  updateQueues.set(questionId, nextQueue);
 };
 </script>
 
