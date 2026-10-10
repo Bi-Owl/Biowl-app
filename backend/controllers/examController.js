@@ -56,11 +56,11 @@ const purchaseExam = async (req, res) => {
     const { examId } = req.params;
     const userId = req.user.id;
 
-    // Get user and exam within the transaction
-    const user = await User.findByPk(userId, { transaction: t });
-    const exam = await Exam.findOne({ 
+    // Get user with row lock to prevent concurrent double-spending, and exam within the transaction
+    const user = await User.findByPk(userId, { transaction: t, lock: t.LOCK.UPDATE });
+    const exam = await Exam.findOne({
       where: { id: examId, isHidden: false, isPurchasable: true },
-      transaction: t 
+      transaction: t
     });
 
     if (!exam) {
