@@ -52,6 +52,33 @@ app.get('/', (req, res) => {
   res.send('Backend server is running!');
 });
 
+// Centralized Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled Application Error:', err);
+
+  if (err.name === 'MulterError') {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ message: 'حجم فایل ارسالی بیش از حد مجاز است.' });
+    }
+    return res.status(400).json({ message: `خطای آپلود فایل: ${err.message}` });
+  }
+
+  if (err.type === 'entity.parse.failed') {
+    return res.status(400).json({ message: 'فرمت داده‌های JSON ارسال شده نامعتبر است.' });
+  }
+
+  const statusCode = err.statusCode || err.status || 500;
+  res.status(statusCode).json({
+    message: err.message || 'خطای داخلی سرور رخ داده است.',
+    ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {})
+  });
+});
+
+// 404 Route Handler
+app.use((req, res) => {
+  res.status(404).json({ message: 'مسیر مورد نظر یافت نشد' });
+});
+
 // Sync database and start server
 sequelize.sync().then(async () => { // Make the function async
   console.log('Database synced');
