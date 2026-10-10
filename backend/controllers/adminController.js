@@ -590,15 +590,32 @@ exports.deleteQuestion = async (req, res) => {
 
 exports.reorderQuestions = async (req, res) => {
   const { updates } = req.body;
-  if (!updates || !Array.isArray(updates)) {
+  if (!updates || !Array.isArray(updates) || updates.length === 0) {
     return res.status(400).json({ message: 'اطلاعات ارسالی برای آپدیت نامعتبر است.' });
   }
+
+  const t = await sequelize.transaction();
   try {
+    // Phase 1: Set temporary negative positions to prevent unique constraint conflicts
     for (const update of updates) {
-      await Question.update({ position: update.position }, { where: { id: update.id } });
+      await Question.update(
+        { position: -Math.abs(Number(update.position) || 1) },
+        { where: { id: update.id }, transaction: t }
+      );
     }
+
+    // Phase 2: Set target positive positions atomically
+    for (const update of updates) {
+      await Question.update(
+        { position: Math.abs(Number(update.position) || 1) },
+        { where: { id: update.id }, transaction: t }
+      );
+    }
+
+    await t.commit();
     res.status(200).json({ message: 'ترتیب سوالات با موفقیت به‌روزرسانی شد.' });
   } catch (error) {
+    await t.rollback();
     console.error("Error reordering questions:", error);
     res.status(500).json({ message: 'خطا در سرور هنگام مرتب‌سازی سوالات رخ داد.' });
   }
