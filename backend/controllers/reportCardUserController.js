@@ -151,14 +151,37 @@ exports.getAvailableReportCards = async (req, res) => {
 };
 
 /**
- * Calculates the rank of a user among all participants for a specific exam.
+ * In-memory cache for exam participant rankings
+ * Key: examId -> { cacheKey, rankMap, totalParticipants, cachedAt }
+ */
+const rankCache = new Map();
+
+/**
+ * Calculates the rank of a user among all participants for a specific exam with smart caching.
  * @param {number} examId - The ID of the exam.
  * @param {number} userId - The current user's ID.
  * @param {object} correctAnswers - The correct answers for the exam.
  * @param {Array} questions - Array of all questions in the exam.
+ * @param {Date|string} reportCardUpdatedAt - Timestamp of report card to invalidate stale caches.
  * @returns {object} - { rank, totalParticipants }
  */
-const getRankForUser = async (examId, userId, correctAnswers, questions) => {
+const getRankForUser = async (examId, userId, correctAnswers, questions, reportCardUpdatedAt) => {
+  const completedAttemptsCount = await UserExamAttempt.count({
+    where: { ExamId: examId, status: 'completed' }
+  });
+
+  const cacheKey = `${examId}_${reportCardUpdatedAt ? new Date(reportCardUpdatedAt).getTime() : 0}_${completedAttemptsCount}`;
+  const cached = rankCache.get(examId);
+
+  // Return from cache if key matches and cache is less than 5 minutes old
+  if (cached && cached.cacheKey === cacheKey && (Date.now() - cached.cachedAt < 5 * 60 * 1000)) {
+    return {
+      rank: cached.rankMap[userId] || null,
+      totalParticipants: cached.totalParticipants
+    };
+  }
+
+  // Otherwise calculate and build rank map once
   const attempts = await UserExamAttempt.findAll({
     where: { ExamId: examId, status: 'completed' },
     attributes: ['UserId', 'answers']
@@ -175,24 +198,25 @@ const getRankForUser = async (examId, userId, correctAnswers, questions) => {
   // Sort scores in descending order
   participantScores.sort((a, b) => b.percentage - a.percentage);
 
-  // Find user's score
-  const userScoreObj = participantScores.find(p => p.userId === userId);
-  if (!userScoreObj) return { rank: null, totalParticipants: participantScores.length };
-
-  const userPercentage = userScoreObj.percentage;
-
-  // Calculate rank (standard competition ranking: 1, 2, 2, 4...)
-  let rank = 1;
-  for (const p of participantScores) {
-    if (p.percentage > userPercentage) {
-      rank++;
-    } else {
-      break; // Since it's sorted, we can stop
+  // Build rank map using standard competition ranking (1, 2, 2, 4...)
+  const rankMap = {};
+  let currentRank = 1;
+  for (let i = 0; i < participantScores.length; i++) {
+    if (i > 0 && participantScores[i].percentage < participantScores[i - 1].percentage) {
+      currentRank = i + 1;
     }
+    rankMap[participantScores[i].userId] = currentRank;
   }
 
+  rankCache.set(examId, {
+    cacheKey,
+    rankMap,
+    totalParticipants: participantScores.length,
+    cachedAt: Date.now()
+  });
+
   return {
-    rank,
+    rank: rankMap[userId] || null,
     totalParticipants: participantScores.length
   };
 };
@@ -237,7 +261,7 @@ exports.getReportCardDetails = async (req, res) => {
     // 5. Calculate rank if showRank is enabled
     let ranking = { rank: null, totalParticipants: 0 };
     if (reportCard.showRank) {
-      ranking = await getRankForUser(examId, userId, reportCard.correctAnswers, questions);
+      ranking = await getRankForUser(examId, userId, reportCard.correctAnswers, questions, reportCard.updatedAt);
     }
 
     // 6. Send all data back
@@ -296,7 +320,13 @@ exports.getLatestReportCardSummary = async (req, res) => {
     // Get rank if needed
     let rankInfo = null;
     if (reportCard.showRank) {
-      const { rank, totalParticipants } = await getRankForUser(latestExamWithReportCard.id, userId, reportCard.correctAnswers, questions);
+      const { rank, totalParticipants } = await getRankForUser(
+        latestExamWithReportCard.id,
+        userId,
+        reportCard.correctAnswers,
+        questions,
+        reportCard.updatedAt
+      );
       rankInfo = { rank, totalParticipants };
     }
 
